@@ -1,0 +1,356 @@
+﻿
+@model BatteryShop.DataAccess.ViewModels.ItemViewModel
+@{
+    ViewBag.Title = "ItemListPage";
+}
+<style>
+    .hovernotallowed,
+    .hovernotallowed:hover {
+        cursor: not-allowed !important;
+        pointer-events: auto !important;
+    }
+    .card-style{
+        background-color:#cfcfcf;
+        border-radius: 10px;      
+    }
+    button{
+        margin: 7px;
+        padding: 5px;
+    }
+    #buttonlist button{
+        max-height: 40px;
+        padding: 10px;
+    }
+    body {
+        background-color: #f4f6f9;
+    }
+
+    .card-style {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        overflow: hidden;
+        background: white;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+        color: white;
+        border: none;
+        padding: 20px;
+    }
+
+    .card-header h2 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: 1px;
+    }
+
+    .card-body {
+        padding: 30px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #dcdcdc;
+        padding: 10px 14px;
+        transition: all 0.2s ease;
+        height: auto;
+    }
+
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.15rem rgba(13,110,253,.2);
+    }
+
+    .btn {
+        border-radius: 10px;
+        padding: 8px 18px;
+        font-weight: 600;
+    }
+
+    .btn-primary {
+        background: #0d6efd;
+        border: none;
+    }
+
+    .btn-warning {
+        color: white;
+    }
+
+    .card-footer {
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        padding: 20px;
+    }
+
+    #buttonlist button {
+        margin: 0 3px;
+        border-radius: 8px;
+        min-width: 40px;
+        font-weight: 600;
+    }
+
+    #PageItems {
+        display: block;
+        margin-bottom: 15px;
+        color: #555;
+    }
+
+    table {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .custom-flex-row{
+        display:flex;
+        flex-wrap:wrap;
+        justify-content:center;
+    }
+
+    .custom-flex-row > div{
+        margin-bottom:20px;
+    }
+
+    .m-7{
+        margin:7px;
+    }
+</style>
+
+
+
+
+<div class="card text-center card-style">
+    <div class="card-header">
+        <h2 class="fw-bold">Items List</h2>
+    </div>
+    <div class="card-body">
+        <form method="POST" id="searchForm">
+
+            <div class="row custom-flex-row" >
+
+                @Html.HiddenFor(m => m.PageNumber, new { @class = "form-control", id = "PageNumber" })
+
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                    @Html.LabelFor(m => m.PageSize, "Page Size", new { @class = "form-label" })
+
+                    @Html.DropDownListFor( m => m.PageSize,new SelectList(Model.PageSizeList),"--Select--",new { @class = "form-control w-100", id = "PageSizeList" }
+                )
+                </div>
+
+
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 ">
+                    @Html.LabelFor(m => m.SerialNumber, "Serial Number", new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.SerialNumber, new { @class = "form-control" })
+                </div>
+
+
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 ">
+                    @Html.LabelFor(m => m.BrandId, "Brand", new { @class = "form-label" })
+                    @Html.DropDownListFor(
+                    m => m.BrandId,
+                    new SelectList(Model.BrandList, "BrandId", "BrandName"),
+                    "--Select--",
+                    new { @class = "form-control w-100", id = "BrandSelect" }
+                )
+                </div>
+
+            </div>
+
+
+
+            <div class=" flex-row flex-end">
+                <button type="submit" class="btn btn-primary m-7">Search</button>
+                <button type="reset" class="btn btn-warning m-7" id="resetbutton">Reset</button>
+            </div>
+
+            <div class="text-center ">
+                <div id="resultContainer"></div>
+            </div>
+           
+        </form>
+        <div class="card-footer">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <span id="PageItems" class="fw-bold text-muted"></span>
+                <div>
+                    <button type="button" class="btn btn-outline-secondary m-7" id="prevButton"><<</button>
+                    <span id="buttonlist"></span>
+                    <button type="button" class="btn btn-outline-secondary m-7" id="nextButton">>></button>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+</div>
+
+<script>
+            $(document).ready(function () {
+                let TotalRows = 1;
+                let PageStart = 1;
+                let PageWindow = 5;
+                FetchData();
+
+                function FetchData() {
+                    $.ajax({
+                        url: '@Url.Action("ItemList", "Item")',
+                        type: 'POST',
+                        data: $('#searchForm').serialize(),
+                        success: function (result) {
+                            $('#resultContainer').html(result);
+                            TotalRows = parseInt($('#TotalRows').val());
+                            LoadButton();
+                            $('#PageItems').empty()
+                            let page = Number($('#PageNumber').val());
+                            let size = Number($('#PageSizeList').val());
+                            let start = (page - 1) * size + 1;
+                            let end = (page - 1) * size + size;
+                            if (end > TotalRows || end <= 0) end = TotalRows;
+                            $('#PageItems').append(
+                                `${start} to ${end} out of ${TotalRows}`
+                            );
+                        }
+                    });
+
+
+                }
+
+                function LoadButton() {
+                    let buttonlist = $('#buttonlist');
+                    let page = Number($('#PageNumber').val());
+                    buttonlist.empty();
+                    let PageSize = $('#PageSizeList').val();
+                    if (PageSize <= 0) PageSize = Number.MAX_VALUE;
+                    let TotalPages = Math.ceil(TotalRows / PageSize);
+                    if (page > 1) {
+                        $('#prevButton').prop('disabled', false);
+                        $('#prevButton').removeClass('hovernotallowed');
+                    } else {
+                        $('#prevButton').prop('disabled', true);
+                        $('#prevButton').addClass('hovernotallowed');
+                    }
+                    for (let i = PageStart; i <= TotalPages && i <= PageStart + (PageWindow - 1) ; i++) {
+
+                        if (i == page) {
+                            buttonlist.append(
+                               `<button type="button" class="page-btn btn-success" data-page="${i}">${i}</button>`
+                           );
+                        } else {
+                            buttonlist.append(
+                                `<button type="button" class="page-btn btn-primary" data-page="${i}">${i}</button>`
+                            );
+                        }
+                    }
+                    if (page < TotalPages) {
+                        $('#nextButton').prop('disabled', false);
+                        $('#nextButton').removeClass('hovernotallowed');
+                    } else {
+
+                        $('#nextButton').prop('disabled', true);
+                        $('#nextButton').addClass('hovernotallowed');
+                    }
+
+                }
+
+                $('#searchForm').submit(function (e) {
+                    e.preventDefault();
+                    PageStart = 1;
+                    FetchData();
+                });
+
+                $('#searchForm').on('reset', function () {
+                    setTimeout(function () {
+                        PageStart = 1;
+                        $('#PageNumber').val(1);
+                        FetchData();
+                    },0)
+                });
+
+                $('#BrandSelect').change(function () {
+                    $('#PageNumber').val(1);
+                    PageStart = 1;
+                    FetchData();
+
+                });
+
+                $('#PageSizeList').change(function () {
+                    $('#PageNumber').val(1);
+                    PageStart = 1;
+                    FetchData();
+                });
+
+                $('#buttonlist').on('click', '.page-btn', function () {
+                    let page = $(this).data('page');
+                    $('#PageNumber').val(page);
+
+                    FetchData();
+
+                });
+
+                $('#buttonlist').on('click', '.page-btn', function () {
+                    let page = Number($(this).data('page'));
+                    $('#PageNumber').val(page);
+                    FetchData();
+                });
+
+                $('#prevButton').click(function () {
+
+                    let num = Number($('#PageNumber').val());
+                    if (num % PageWindow == 1) {
+                        PageStart = PageStart - PageWindow;
+                        LoadButton();
+                    }
+                    $('#PageNumber').val(num - 1);
+                    FetchData();
+                })
+
+                $('#nextButton').click(function () {
+                    let num = Number($('#PageNumber').val());
+                    if (num % PageWindow == 0) {
+                        PageStart = PageStart + PageWindow;
+                        LoadButton();
+                    }
+                    $('#PageNumber').val(num + 1);
+                    FetchData();
+                })
+            });
+</script>
+
+
+
+        @*<label for="PageNumber">Page Number:</label>*@
+        @*<input value=@Model.PageNumber id="PageNumber" name="PageNumber" type="number" required />*@
+        @*<label for="PageSize">Page Size:</label>*@
+        @*<input value=@Model.PageSize id="PageSize" name="PageSize" type="number" required />*@
+        @*<label for="SerialNumber">Serial Number:</label>*@
+        @*<input value="@Model.SerialNumber" id="SerialNumber" name="SerialNumber" type="text" />*@
+        @*<select name="BrandId" id="BrandId" >
+                <option value="">--Select--</option>
+                @foreach(var item in Model.BrandList)
+                {
+                    <option value="@item.BrandId">@item.BrandName</option>
+                }
+
+            </select>*@
+
+
+
+        @*//let dropdown = $('#PageNumberList');
+            //dropdown.empty();
+            //dropdown.append('<option value="">--Select--</option>');
+            //for (let i = 1; i <= totalPages; i++) {
+            //    dropdown.append(`<option value="${i}">${i}</option>`);
+            //}
+            //dropdown.val(1);*@
+
+        @*@Html.DropDownListFor(m => m.PageNumber, new SelectList(Model.PageNumberList), new { id = "PageNumberList" })*@
+        @*<select name="PageNumber" id="PageNumberList" >
+                    <option value="">--Select Page Size--</option>
+            </select>*@
+        @*//document.getElementById('BrandId').addEventListener('change', function () {
+            //    document.getElementById('PageNumber').value = 1;
+            //});*@
