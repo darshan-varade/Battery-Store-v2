@@ -1,7 +1,100 @@
 ﻿@{
-    ViewBag.Title = "About";
+    ViewBag.Title = "About - Battery Store";
 }
-<h2>@ViewBag.Title.</h2>
-<h3>@ViewBag.Message</h3>
 
-<p>Use this area to provide additional information.</p>
+<style>
+    .about-header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 3rem 0;
+        margin: -30px -15px 2rem;
+        text-align: center;
+    }
+
+    .about-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .about-section {
+        margin-bottom: 3rem;
+    }
+
+    .about-section h3 {
+        color: #6ee7b7;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        border-left: 4px solid #10b981;
+        padding-left: 1rem;
+    }
+
+    .about-section p, .about-section li {
+        color: #cbd5e1;
+    }
+
+    .about-section ul li {
+        color: #cbd5e1;
+    }
+</style>
+
+<div class="about-header">
+    <h1>About Battery Store</h1>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="about-section">
+                <h3>Our Mission</h3>
+                <p>
+                    Battery Store is dedicated to providing store owners with a comprehensive inventory management and billing solution. 
+                    Our platform simplifies the management of battery stock, customer records, and financial transactions, allowing you 
+                    to focus on growing your business.
+                </p>
+            </div>
+
+            <div class="about-section">
+                <h3>What We Offer</h3>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><span style="color: #10b981; font-weight: bold;">✓</span> <span style="margin-left: 0.5rem;">Complete inventory tracking system</span></li>
+                    <li class="mb-2"><span style="color: #10b981; font-weight: bold;">✓</span> <span style="margin-left: 0.5rem;">Professional billing and invoicing tools</span></li>
+                    <li class="mb-2"><span style="color: #10b981; font-weight: bold;">✓</span> <span style="margin-left: 0.5rem;">User and customer management</span></li>
+                    <li class="mb-2"><span style="color: #10b981; font-weight: bold;">✓</span> <span style="margin-left: 0.5rem;">Balance and transaction tracking</span></li>
+                    <li class="mb-2"><span style="color: #10b981; font-weight: bold;">✓</span> <span style="margin-left: 0.5rem;">Real-time data and reporting</span></li>
+                </ul>
+            </div>
+
+            <div class="about-section">
+                <h3>Why Choose Us?</h3>
+                <p>
+                    Battery Store combines ease of use with powerful features. Whether you're a small independent retailer or a larger operation, 
+                    our system scales with your business needs. With an intuitive interface and robust functionality, managing your inventory 
+                    and billing has never been easier.
+                </p>
+            </div>
+
+            <div class="about-section">
+                <h3>Get Started Today</h3>
+                <p>
+                    Ready to streamline your store operations? @Html.ActionLink("Explore our inventory system", "ItemList", "Item", new { area = "" }, new { @class = "text-decoration-none fw-bold", style = "color: #6ee7b7;" }) 
+                    and see how Battery Store can help you succeed.
+                </p>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card" style="background-color: #1e293b; border-color: #334155;">
+                <div class="card-body">
+                    <h5 class="card-title mb-3" style="color: #6ee7b7;">Key Features</h5>
+                    <div class="d-grid gap-2">
+                        <div class="p-2 rounded" style="background-color: rgba(16, 185, 129, 0.1); color: #cbd5e1;">📦 Smart Inventory</div>
+                        <div class="p-2 rounded" style="background-color: rgba(16, 185, 129, 0.1); color: #cbd5e1;">💰 Easy Billing</div>
+                        <div class="p-2 rounded" style="background-color: rgba(16, 185, 129, 0.1); color: #cbd5e1;">👥 User Management</div>
+                        <div class="p-2 rounded" style="background-color: rgba(16, 185, 129, 0.1); color: #cbd5e1;">📊 Reports & Analytics</div>
+                        <div class="p-2 rounded" style="background-color: rgba(16, 185, 129, 0.1); color: #cbd5e1;">🔒 Secure & Reliable</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
