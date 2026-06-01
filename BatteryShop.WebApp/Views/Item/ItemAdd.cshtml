@@ -1,0 +1,258 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Add Item";
+}
+
+<div class="item-add-container">
+    <div class="item-add-header">
+        <h2>Add New Items</h2>
+        <p class="subtitle">Add items with different brands, types, and serial numbers</p>
+    </div>
+
+    <form id="itemAddForm">
+        <!-- Transaction ID Section -->
+        <div class="form-section">
+            <div class="form-group">
+                <label for="transactionId" class="form-label">Transaction ID *</label>
+                <input type="text" id="transactionId" name="transactionId" class="form-control" placeholder="Enter transaction ID" required />
+            </div>
+        </div>
+
+        <!-- Items Batches Container -->
+        <div id="batchesContainer" class="batches-container">
+            <!-- Batch 1 will be added by JavaScript -->
+        </div>
+
+        <!-- Add Another Batch Button -->
+        <div class="button-group">
+            <button type="button" id="addBatchBtn" class="btn btn-secondary">
+                <i class="bi bi-plus-circle"></i> Add Another Batch (Different Brand/Type)
+            </button>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success btn-lg">
+                <i class="bi bi-check-circle"></i> Submit All Items
+            </button>
+            <a href="@Url.Action("ItemList", "Item")" class="btn btn-secondary btn-lg">
+                <i class="bi bi-x-circle"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function () {
+        let batchCount = 0;
+        let itemsData = {};
+
+        // Sample brand and type data (will be populated dynamically later)
+        const brandTypeData = {
+            1: ["BTZ4L", "BTZ5L", "BTX5", "BTZ7", "BTX7"],
+            2: ["Model2-1", "Model2-2"],
+            3: ["Model3-1"]
+        };
+
+        // Initialize first batch
+        addBatch();
+
+        // Add Batch Button Click
+        $('#addBatchBtn').click(function () {
+            addBatch();
+        });
+
+        // Add Batch Function
+        function addBatch() {
+            batchCount++;
+            const batchId = `batch-${batchCount}`;
+            const batchHTML = `
+                <div class="batch-card" data-batch-id="${batchId}">
+                    <!-- Batch Header with Remove Button -->
+                    <div class="batch-header">
+                        ${batchCount > 1 ? `<button type="button" class="btn-remove-batch" title="Remove this batch"><i class="bi bi-trash"></i></button>` : ''}
+                    </div>
+
+                    <!-- Brand and Type Selection (Horizontal) -->
+                    <div class="batch-filters">
+                        <div class="filter-group">
+                            <label for="brand-${batchId}" class="form-label">Brand *</label>
+                            <select id="brand-${batchId}" class="form-control brand-select" data-batch-id="${batchId}">
+                                <option value="">--Select Brand--</option>
+                                <option value="1">Amaron</option>
+                                <option value="2">Exide</option>
+                                <option value="3">Luminous</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="type-${batchId}" class="form-label">Type *</label>
+                            <select id="type-${batchId}" class="form-control type-select" data-batch-id="${batchId}" disabled>
+                                <option value="">--Select Type--</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Serial Numbers Container -->
+                    <div class="serial-numbers-container" data-batch-id="${batchId}" style="display: none;">
+                        <!-- Header Row -->
+                        <div class="serial-row serial-row-header">
+                            <div class="serial-col">Serial Number</div>
+                            <div class="serial-col-action">Action</div>
+                        </div>
+
+                        <!-- Serial number inputs will be added here -->
+                        <div class="serial-items-list" id="serial-list-${batchId}"></div>
+
+                        <!-- Add Serial Button -->
+                        <button type="button" class="btn btn-sm btn-primary add-serial-btn" data-batch-id="${batchId}">
+                            <i class="bi bi-plus"></i> Add Serial Number
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            $('#batchesContainer').append(batchHTML);
+            itemsData[batchId] = {};
+
+            // Bind Brand Change Event
+            $(`#brand-${batchId}`).change(function () {
+                onBrandChange(batchId);
+            });
+
+            // Bind Type Change Event
+            $(`#type-${batchId}`).change(function () {
+                onTypeChange(batchId);
+            });
+
+            // Note: Add Serial and Remove Batch buttons are handled by document-level delegation below
+
+            // Add first serial input
+            addSerialNumberInput(batchId);
+        }
+
+        function onBrandChange(batchId) {
+            const brandId = $(`#brand-${batchId}`).val();
+            const typeSelect = $(`#type-${batchId}`);
+
+            if (!brandId) {
+                typeSelect.prop('disabled', true).html('<option value="">--Select Type--</option>');
+                $(`.serial-numbers-container[data-batch-id="${batchId}"]`).hide();
+                return;
+            }
+
+            typeSelect.prop('disabled', false);
+            // Populate types based on brand (simulated data)
+            const types = brandTypeData[brandId] || [];
+            typeSelect.html('<option value="">--Select Type--</option>');
+            types.forEach(type => {
+                typeSelect.append(`<option value="${type}">${type}</option>`);
+            });
+
+            $(`.serial-numbers-container[data-batch-id="${batchId}"]`).hide();
+        }
+
+        function onTypeChange(batchId) {
+            const typeValue = $(`#type-${batchId}`).val();
+            if (typeValue) {
+                $(`.serial-numbers-container[data-batch-id="${batchId}"]`).show();
+            } else {
+                $(`.serial-numbers-container[data-batch-id="${batchId}"]`).hide();
+                // Clear serial numbers
+                $(`#serial-list-${batchId}`).html('');
+                addSerialNumberInput(batchId);
+            }
+        }
+
+        function addSerialNumberInput(batchId) {
+            const serialList = $(`#serial-list-${batchId}`);
+            const serialCount = serialList.children().length + 1;
+            const serialInputId = `${batchId}-serial-${serialCount}`;
+
+            const serialHTML = `
+                <div class="serial-row serial-row-data" data-serial-id="${serialInputId}">
+                    <div class="serial-col">
+                        <input type="text" id="${serialInputId}" class="form-control serial-input" placeholder="Enter serial number" />
+                    </div>
+                    <div class="serial-col-action">
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-serial-btn" title="Remove"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
+            `;
+
+            serialList.append(serialHTML);
+        }
+
+        function removeBatch(batchId) {
+            if (confirm('Are you sure you want to remove this batch?')) {
+                $(`.batch-card[data-batch-id="${batchId}"]`).remove();
+                delete itemsData[batchId];
+            }
+        }
+
+        // Form Submit
+        $('#itemAddForm').submit(function (e) {
+            e.preventDefault();
+            collectFormData();
+        });
+
+        function collectFormData() {
+            const formData = {
+                transactionId: $('#transactionId').val(),
+                batches: []
+            };
+
+            $('.batch-card').each(function () {
+                const batchId = $(this).data('batch-id');
+                const brand = $(`#brand-${batchId}`).val();
+                const type = $(`#type-${batchId}`).val();
+                const serials = [];
+
+                $(`#serial-list-${batchId} .serial-input`).each(function () {
+                    const serial = $(this).val().trim();
+                    if (serial) {
+                        serials.push(serial);
+                    }
+                });
+
+                if (brand && type && serials.length > 0) {
+                    formData.batches.push({
+                        brand: brand,
+                        type: type,
+                        serials: serials
+                    });
+                }
+            });
+
+            if (formData.batches.length === 0) {
+                alert('Please add at least one item with brand, type, and serial number.');
+                return;
+            }
+
+            console.log('Form Data:', JSON.stringify(formData, null, 2));
+            alert('Items prepared (see console):\n' + JSON.stringify(formData, null, 2));
+            // TODO: Send data to server via AJAX
+        }
+
+        // Document-level delegation for dynamically added elements
+        $(document).on('click', '.add-serial-btn', function () {
+            const batchId = $(this).data('batch-id');
+            addSerialNumberInput(batchId);
+        });
+
+        $(document).on('click', '.remove-serial-btn', function () {
+            $(this).closest('.serial-row-data').remove();
+        });
+
+        $(document).on('click', '.btn-remove-batch', function () {
+            const batchCard = $(this).closest('.batch-card');
+            const batchId = batchCard.data('batch-id');
+            removeBatch(batchId);
+        });
+    });
+</script>
+
+@section scripts {
+    @Scripts.Render("~/bundles/jquery")
+}

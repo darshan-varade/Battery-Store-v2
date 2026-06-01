@@ -16,6 +16,9 @@ namespace BatteryShop.DataAccess.ViewModels
         public string SerialNumber { get; set; } = "";
         public int? BrandId { get; set; } = null;   
         public List<BrandListViewModel> BrandList { get; set; }
+        public int? TypeId { get; set; } = null;
+        public List<TypeListViewModel> TypeList { get; set; }
+        public int? TransactionId { get; set; } = null;
         public List<ItemModel> ItemList { get; set; }
         public int TotalRows { get; set; } = 1;
     }

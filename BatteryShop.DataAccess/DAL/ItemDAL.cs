@@ -64,7 +64,7 @@ namespace BatteryShop.DataAccess.DAL
             db.AddInParameter(cmd, "@PageNumber", DbType.Int32, ItemVM.PageNumber);
             db.AddInParameter(cmd, "@PageSize", DbType.Int32, ItemVM.PageSize);
             db.AddInParameter(cmd, "@SerialNumber", DbType.String, ItemVM.SerialNumber);
-            db.AddInParameter(cmd, "@BrandId", DbType.Int32, ItemVM.BrandId);
+            db.AddInParameter(cmd, "@BrandId", DbType.Int32, (object)ItemVM.BrandId ?? DBNull.Value);
             db.AddOutParameter(cmd, "@TotalRows", DbType.Int32, 0);
 
             using (IDataReader reader = db.ExecuteReader(cmd))
@@ -91,7 +91,7 @@ namespace BatteryShop.DataAccess.DAL
             return list;
         }
 
-        public List<BrandListViewModel> ItemFetchDistinct()
+        public List<BrandListViewModel> ItemFetchBrand()
         {
 
             List<BrandListViewModel> list = new List<BrandListViewModel>();
@@ -117,6 +117,39 @@ namespace BatteryShop.DataAccess.DAL
             return list;
         }
 
-       
+        public List<TypeListViewModel> ItemFetchType()
+        {
+
+            List<TypeListViewModel> list = new List<TypeListViewModel>();
+
+            DbCommand cmd = db.GetStoredProcCommand("FetchDistinctTypeValues");
+
+            using (IDataReader reader = db.ExecuteReader(cmd))
+            {
+                while (reader.Read())
+                {
+
+                    TypeListViewModel item = new TypeListViewModel
+                    {
+                        TypeId = Convert.ToInt32(reader["TypeId"]),
+                        TypeName = reader["TypeName"].ToString()
+
+                    };
+                    list.Add(item);
+
+                }
+            }
+
+            return list;
+        }
+
+        public void deleteItem(int id)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("batteryDeleteItem");
+            db.AddInParameter(cmd, "@Id", DbType.Int32, id);
+            db.ExecuteNonQuery(cmd);
+        }
+
+
     }
 }

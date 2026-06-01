@@ -21,7 +21,9 @@ namespace BatteryShop.WebApp.Controllers
         {
             ItemViewModel ItemVM = new ItemViewModel();
             ItemDAL item = new ItemDAL();
-            ItemVM.BrandList = item.ItemFetchDistinct();
+            ItemVM.BrandList = item.ItemFetchBrand();
+            ItemVM.TypeList = item.ItemFetchType();
+            
             return View(ItemVM);
         }
 
@@ -35,6 +37,34 @@ namespace BatteryShop.WebApp.Controllers
           
         }
 
+        [HttpPost]
+        public JsonResult ItemDelete(int id)
+        {
+            try
+            {
+                ItemDAL item = new ItemDAL();
+                item.deleteItem(id);
+                return Json(new
+                {
+                    success = true,
+                    message = "Item deleted successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+
+        public ActionResult ItemAdd(ItemViewModel ItemVM)
+        {
+            return View(ItemVM);
+        }
         //public int PageNumberList(int PageSize)
         //{
         //    ItemDAL item = new ItemDAL();
