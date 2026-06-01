@@ -63,14 +63,36 @@ namespace BatteryShop.WebApp.Controllers
 
         public ActionResult ItemAdd(ItemViewModel ItemVM)
         {
+            ItemDAL item = new ItemDAL();
+            ItemVM.BrandList = item.ItemFetchBrand();
+            ItemVM.TypeList = item.ItemFetchType();
             return View(ItemVM);
         }
-        //public int PageNumberList(int PageSize)
-        //{
-        //    ItemDAL item = new ItemDAL();
 
-        //    return item.FindPages(PageSize);
-        //}
+        [HttpPost]
+        public JsonResult ItemAdd(ItemAddViewModel addItemList)
+        {
+            try
+            {
+                ItemDAL itemDal = new ItemDAL();
+
+                itemDal.addItems(addItemList);
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Items added successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
 
     }
 }

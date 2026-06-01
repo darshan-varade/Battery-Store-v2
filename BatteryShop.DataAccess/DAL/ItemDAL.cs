@@ -150,6 +150,20 @@ namespace BatteryShop.DataAccess.DAL
             db.ExecuteNonQuery(cmd);
         }
 
+        public void addItems(ItemAddViewModel addItemList)
+        {
+            foreach (var item in addItemList.Items)
+            {
+                DbCommand cmd = db.GetStoredProcCommand("batteryAddItem");
+
+                db.AddInParameter(cmd, "@TransactionId",DbType.Int32, addItemList.TransactionId);
+                db.AddInParameter(cmd, "@SerialNumber",DbType.String, item.SerialNumber);
+                db.AddInParameter(cmd, "@BrandId",DbType.Int32, item.BrandId);
+                db.AddInParameter(cmd, "@TypeId",DbType.Int32, item.TypeId);
+                db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, 1);
+                db.ExecuteNonQuery(cmd);
+            }
+        }
 
     }
 }

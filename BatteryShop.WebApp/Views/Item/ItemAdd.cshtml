@@ -1,4 +1,4 @@
-﻿
+﻿@model BatteryShop.DataAccess.ViewModels.ItemViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewBag.Title = "Add Item";
@@ -48,12 +48,7 @@
         let batchCount = 0;
         let itemsData = {};
 
-        // Sample brand and type data (will be populated dynamically later)
-        const brandTypeData = {
-            1: ["BTZ4L", "BTZ5L", "BTX5", "BTZ7", "BTX7"],
-            2: ["Model2-1", "Model2-2"],
-            3: ["Model3-1"]
-        };
+        // Types data is loaded dynamically from the ViewModel
 
         // Initialize first batch
         addBatch();
@@ -80,9 +75,13 @@
                             <label for="brand-${batchId}" class="form-label">Brand *</label>
                             <select id="brand-${batchId}" class="form-control brand-select" data-batch-id="${batchId}">
                                 <option value="">--Select Brand--</option>
-                                <option value="1">Amaron</option>
-                                <option value="2">Exide</option>
-                                <option value="3">Luminous</option>
+                                @if (Model != null && Model.BrandList != null)
+                                {
+                                    foreach (var brand in Model.BrandList)
+                                    {
+                                        <option value="@brand.BrandId">@brand.BrandName</option>
+                                    }
+                                }
                             </select>
                         </div>
 
@@ -143,11 +142,12 @@
             }
 
             typeSelect.prop('disabled', false);
-            // Populate types based on brand (simulated data)
-            const types = brandTypeData[brandId] || [];
             typeSelect.html('<option value="">--Select Type--</option>');
+            
+            // Populate types from Model.TypeList
+            const types = @Html.Raw(Json.Encode(Model.TypeList)) || [];
             types.forEach(type => {
-                typeSelect.append(`<option value="${type}">${type}</option>`);
+                typeSelect.append(`<option value="${type.TypeId}">${type.TypeName}</option>`);
             });
 
             $(`.serial-numbers-container[data-batch-id="${batchId}"]`).hide();
@@ -198,11 +198,12 @@
         });
 
         function collectFormData() {
-            const formData = {
+            const batchesData = {
                 transactionId: $('#transactionId').val(),
                 batches: []
             };
 
+            // Step 1: Collect data as batches
             $('.batch-card').each(function () {
                 const batchId = $(this).data('batch-id');
                 const brand = $(`#brand-${batchId}`).val();
@@ -217,7 +218,7 @@
                 });
 
                 if (brand && type && serials.length > 0) {
-                    formData.batches.push({
+                    batchesData.batches.push({
                         brand: brand,
                         type: type,
                         serials: serials
@@ -225,14 +226,88 @@
                 }
             });
 
-            if (formData.batches.length === 0) {
+            // Validation
+            if (batchesData.batches.length === 0) {
                 alert('Please add at least one item with brand, type, and serial number.');
                 return;
             }
 
-            console.log('Form Data:', JSON.stringify(formData, null, 2));
-            alert('Items prepared (see console):\n' + JSON.stringify(formData, null, 2));
-            // TODO: Send data to server via AJAX
+            if (!batchesData.transactionId) {
+                alert('Please enter Transaction ID.');
+                return;
+            }
+
+            // Step 2: Flatten batches into items array
+            const flattenedData = flattenBatches(batchesData);
+
+            if (!flattenedData) {
+                return; // Validation failed
+            }
+
+            // Step 3: Send to backend via AJAX
+            submitItemsToBackend(flattenedData);
+        }
+
+        function flattenBatches(batchesData) {
+            const items = [];
+            const allSerials = new Set();
+
+            // Flatten batches into individual items
+            batchesData.batches.forEach(batch => {
+                batch.serials.forEach(serial => {
+                    // Check for duplicate serial numbers
+                    if (allSerials.has(serial)) {
+                        alert(`Duplicate serial number found: "${serial}". Each serial must be unique.`);
+                        return null;
+                    }
+                    allSerials.add(serial);
+
+                    items.push({
+                        serialNumber: serial,
+                        brandId: parseInt(batch.brand),
+                        typeId: parseInt(batch.type)
+                    });
+                });
+            });
+
+            if (items.length === 0) {
+                alert('No valid items to submit.');
+                return null;
+            }
+
+            return {
+                transactionId: parseInt(batchesData.transactionId),
+                items: items
+            };
+        }
+
+        function submitItemsToBackend(data) {
+            console.log('Submitting flattened data:', JSON.stringify(data, null, 2));
+            console.log(JSON.stringify(data));
+            $.ajax({
+                url: '@Url.Action("ItemAdd", "Item")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (response) {
+                    console.log('Success:', response);
+                    alert('Items added successfully!');
+                    // Redirect to ItemList page
+                    window.location.href = '@Url.Action("ItemList", "Item")';
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                    let errorMessage = 'Error adding items: ' + error;
+                    
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    } else if (xhr.responseText) {
+                        errorMessage = xhr.responseText;
+                    }
+
+                    alert(errorMessage);
+                }
+            });
         }
 
         // Document-level delegation for dynamically added elements
