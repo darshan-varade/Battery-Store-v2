@@ -1,4 +1,4 @@
-﻿@model BatteryShop.DataAccess.ViewModels.ItemViewModel
+@model BatteryShop.DataAccess.ViewModels.ItemViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewBag.Title = "Add Item";
@@ -26,15 +26,15 @@
 
         <!-- Add Another Batch Button -->
         <div class="button-group">
-            <button type="button" id="addBatchBtn" class="btn btn-secondary">
-                <i class="bi bi-plus-circle"></i> Add Another Batch (Different Brand/Type)
+            <button type="button" id="addBatchBtn" class="btn btn-secondary rounded-pill">
+                <i class="bi bi-plus-circle"></i>
             </button>
-        </div>
+        </div>                                                                      
 
         <!-- Form Actions -->
         <div class="form-actions">
             <button type="submit" class="btn btn-success btn-lg">
-                <i class="bi bi-check-circle"></i> Submit All Items
+                <i class="bi bi-check-circle"></i> Submit
             </button>
             <a href="@Url.Action("ItemList", "Item")" class="btn btn-secondary btn-lg">
                 <i class="bi bi-x-circle"></i> Cancel
