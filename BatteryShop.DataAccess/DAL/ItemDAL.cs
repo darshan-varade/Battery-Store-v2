@@ -93,7 +93,6 @@ namespace BatteryShop.DataAccess.DAL
 
         public List<BrandListViewModel> ItemFetchBrand()
         {
-
             List<BrandListViewModel> list = new List<BrandListViewModel>();
 
             DbCommand cmd = db.GetStoredProcCommand("FetchDistinctBrandValues");
@@ -113,7 +112,6 @@ namespace BatteryShop.DataAccess.DAL
 
                 }
             }
-
             return list;
         }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Caching;
 using System.Web.Mvc;
 using BatteryShop.DataAccess.DAL;
 using BatteryShop.DataAccess.ViewModels;
@@ -10,6 +11,30 @@ namespace BatteryShop.WebApp.Controllers
 {
     public class ItemController : Controller
     {
+
+        private List<BrandListViewModel> GetCachedBrands()
+        {
+            string key = "BrandList";
+            var cached = HttpRuntime.Cache[key] as List<BrandListViewModel>;
+            if (cached != null) return cached;
+
+            var dal = new ItemDAL();
+            var list = dal.ItemFetchBrand();
+            HttpRuntime.Cache.Insert(key, list, null, DateTime.Now.AddMinutes(30), Cache.NoSlidingExpiration);
+            return list;
+        }
+        
+        private List<TypeListViewModel> GetCachedTypes()
+        {
+            string key = "TypeList";
+            var cached = HttpRuntime.Cache[key] as List<TypeListViewModel>;
+            if (cached != null) return cached;
+
+            var dal = new ItemDAL();
+            var list = dal.ItemFetchType();
+            HttpRuntime.Cache.Insert(key, list, null, DateTime.Now.AddMinutes(30), Cache.NoSlidingExpiration);
+            return list;
+        }
         // GET: Item
         public ActionResult Index()
         {
@@ -20,9 +45,8 @@ namespace BatteryShop.WebApp.Controllers
         public ActionResult ItemList()
         {
             ItemViewModel ItemVM = new ItemViewModel();
-            ItemDAL item = new ItemDAL();
-            ItemVM.BrandList = item.ItemFetchBrand();
-            ItemVM.TypeList = item.ItemFetchType();
+            ItemVM.BrandList = GetCachedBrands();
+            ItemVM.TypeList = GetCachedTypes();
             
             return View(ItemVM);
         }
@@ -63,9 +87,8 @@ namespace BatteryShop.WebApp.Controllers
 
         public ActionResult ItemAdd(ItemViewModel ItemVM)
         {
-            ItemDAL item = new ItemDAL();
-            ItemVM.BrandList = item.ItemFetchBrand();
-            ItemVM.TypeList = item.ItemFetchType();
+            ItemVM.BrandList = GetCachedBrands();
+            ItemVM.TypeList = GetCachedTypes();
             return View(ItemVM);
         }
 
@@ -75,9 +98,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 ItemDAL itemDal = new ItemDAL();
-
                 itemDal.addItems(addItemList);
-
                 return Json(new
                 {
                     success = true,

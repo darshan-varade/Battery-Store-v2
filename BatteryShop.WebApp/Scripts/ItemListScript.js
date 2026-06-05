@@ -171,4 +171,24 @@
             }
         });
     });
+    $(document).on('click', '.btn-action-update', function () {
+        let itemId = $(this).data('id');
+        //let SerialNumber 
+        //let BrandId   
+        //let TypeId 
+        //let TransactionId 
+        $.ajax({
+            url: '/Item/ItemDelete',
+            type: 'POST',
+            data: { id: itemId },
+            success: function () {
+                alert('Item deleted successfully');
+                FetchData();
+            },
+            error: function (xhr, status, error) {
+                console.log(xhr.responseText);
+                alert('Delete failed');
+            }
+        });
+    });
 });
