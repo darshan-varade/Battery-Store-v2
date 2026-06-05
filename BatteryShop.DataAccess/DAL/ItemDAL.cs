@@ -163,5 +163,44 @@ namespace BatteryShop.DataAccess.DAL
             }
         }
 
+        public ItemUpdateViewModel GetItemForUpdate(int itemId)
+        {
+            ItemUpdateViewModel item = null;
+
+            DbCommand cmd = db.GetStoredProcCommand("GetItemForUpdate");
+
+            db.AddInParameter(cmd,"@ItemId",DbType.Int32,itemId);
+
+            using (IDataReader reader = db.ExecuteReader(cmd))
+            {
+                if (reader.Read())
+                {
+                    item = new ItemUpdateViewModel
+                    {
+                        ItemId = Convert.ToInt32(reader["itemId"]),
+                        SerialNumber = reader["itemSerialNumber"].ToString(),
+                        BrandId = Convert.ToInt32(reader["itemBrand"]),
+                        TypeId = Convert.ToInt32(reader["itemType"]),
+                        TransactionId = Convert.ToInt32(reader["transactionId"])
+                    };
+                }
+            }
+
+            return item;
+        }
+
+
+        public void UpdateItem(ItemUpdateViewModel item)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("batteryUpdateItem");
+
+            db.AddInParameter(cmd, "@ItemId", DbType.Int32, item.ItemId);
+            db.AddInParameter(cmd, "@TransactionId", DbType.Int32, item.TransactionId);
+            db.AddInParameter(cmd, "@SerialNumber", DbType.String, item.SerialNumber);
+            db.AddInParameter(cmd, "@BrandId", DbType.Int32, item.BrandId);
+            db.AddInParameter(cmd, "@TypeId", DbType.Int32, item.TypeId);
+
+            db.ExecuteNonQuery(cmd);
+        }
     }
 }

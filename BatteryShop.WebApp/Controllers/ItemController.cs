@@ -115,5 +115,41 @@ namespace BatteryShop.WebApp.Controllers
             }
         }
 
+        public ActionResult ItemUpdate(int id)
+        {
+            ItemDAL item = new ItemDAL();
+
+            ItemUpdateViewModel vm = item.GetItemForUpdate(id);
+
+            vm.BrandList = GetCachedBrands();
+            vm.TypeList = GetCachedTypes();
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        public JsonResult ItemUpdate(ItemUpdateViewModel vm)
+        {
+            try
+            {
+                ItemDAL item = new ItemDAL();
+
+                item.UpdateItem(vm);
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Item updated successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }

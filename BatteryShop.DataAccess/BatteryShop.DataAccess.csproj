@@ -58,6 +58,7 @@
     <Compile Include="ViewModels\BrandListViewModel.cs" />
     <Compile Include="ViewModels\ItemAddDetailsViewModel.cs" />
     <Compile Include="ViewModels\ItemAddViewModel.cs" />
+    <Compile Include="ViewModels\ItemUpdateViewModel.cs" />
     <Compile Include="ViewModels\ItemViewModel.cs" />
     <Compile Include="ViewModels\TypeListViewModel.cs" />
   </ItemGroup>

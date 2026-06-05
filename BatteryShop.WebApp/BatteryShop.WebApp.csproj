@@ -140,6 +140,7 @@
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\ItemAddScript.js" />
     <Content Include="Scripts\ItemListScript.js" />
+    <Content Include="Scripts\ItemUpdateScript.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
@@ -170,6 +171,7 @@
     <Content Include="Views\Item\ItemList.cshtml" />
     <Content Include="Views\Shared\_ItemListPartial.cshtml" />
     <Content Include="Views\Item\ItemAdd.cshtml" />
+    <Content Include="Views\Item\ItemUpdate.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
