@@ -223,7 +223,9 @@
             success: function (response) {
                 if (response.success) {
                     alert(response.message || 'Items added successfully!');
-                    window.location.href = _urlItemList;
+                    let returnUrl = sessionStorage.getItem('ItemListReturnUrl');
+                    sessionStorage.removeItem('ItemListReturnUrl');
+                    window.location.href = returnUrl || _urlItemList;
                 } else {
                     alert(response.message || 'Failed to add items.');
                 }
@@ -258,5 +260,12 @@
         const batchCard = $(this).closest('.batch-card');
         const batchId = batchCard.data('batch-id');
         removeBatch(batchId);
+    });
+
+    $(document).on('click', '#cancelBtn', function (e) {
+        e.preventDefault();
+        let returnUrl = sessionStorage.getItem('ItemListReturnUrl');
+        sessionStorage.removeItem('ItemListReturnUrl');
+        window.location.href = returnUrl || _urlItemList;
     });
 });

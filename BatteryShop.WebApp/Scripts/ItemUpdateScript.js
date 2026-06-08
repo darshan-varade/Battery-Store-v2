@@ -39,7 +39,9 @@
             success: function (response) {
                 if (response.success) {
                     alert(response.message || 'Item updated successfully.');
-                    window.location.href = _urlItemList;
+                    let returnUrl = sessionStorage.getItem('ItemListReturnUrl');
+                    sessionStorage.removeItem('ItemListReturnUrl');
+                    window.location.href = returnUrl || _urlItemList;
                 }
                 else {
                     alert(response.message || 'Update failed.');
@@ -58,4 +60,10 @@
 
     });
 
+    $('#cancelBtn').click(function (e) {
+        e.preventDefault();
+        let returnUrl = sessionStorage.getItem('ItemListReturnUrl');
+        sessionStorage.removeItem('ItemListReturnUrl');
+        window.location.href = returnUrl || _urlItemList;
+    });
 });
