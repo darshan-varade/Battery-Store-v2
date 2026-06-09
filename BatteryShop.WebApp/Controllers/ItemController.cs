@@ -52,7 +52,8 @@ namespace BatteryShop.WebApp.Controllers
         }
 
         [HttpPost]
-        public ActionResult ItemList(ItemViewModel ItemVM)
+        [ActionName("ItemList")]
+        public ActionResult ItemListPost(ItemViewModel ItemVM)
         {
             
             ItemDAL item = new ItemDAL();
