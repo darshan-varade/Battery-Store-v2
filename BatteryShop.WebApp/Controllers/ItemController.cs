@@ -42,9 +42,9 @@ namespace BatteryShop.WebApp.Controllers
             return View();
         }
 
-        [HttpGet]
-        public ActionResult ItemList(ItemViewModel ItemVM)
+        public ActionResult ItemList()
         {
+            ItemViewModel ItemVM = new ItemViewModel();
             ItemVM.BrandList = GetCachedBrands();
             ItemVM.TypeList = GetCachedTypes();
             

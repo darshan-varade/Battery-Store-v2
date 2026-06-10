@@ -1,14 +1,9 @@
 ﻿$(document).ready(function () {
-    let params = new URLSearchParams(window.location.search);
-    if (params.has('PageNumber')) $('#PageNumber').val(params.get('PageNumber'));
-    if (params.has('PageSize')) $('#PageSizeList').val(params.get('PageSize'));
-    if (params.has('BrandId')) $('#BrandSelect').val(params.get('BrandId'));
-    if (params.has('SerialNumber')) $('#SerialNumber').val(params.get('SerialNumber'));
-
     let TotalRows = 1;
     let PageStart = 1;
     let PageWindow = 5;
 
+    RestoreFilterState();
     FetchData();
 
     function FetchData() {
@@ -41,7 +36,7 @@
                     `${start} to ${end} out of ${TotalRows}`
                 );
 
-                UpdateUrl();
+                SaveFilterState();
             },
             error: function (xhr, status, error) {
                 console.error('AJAX error:', status, error);
@@ -185,26 +180,24 @@
         window.location.href = '/Item/ItemUpdate/' + itemId;
     });
 
-    function UpdateUrl() {
-        let params = new URLSearchParams();
-        let page = Number($('#PageNumber').val());
-        if (page > 1) params.set('PageNumber', page);
-        let brandId = $('#BrandSelect').val();
-        if (brandId) params.set('BrandId', brandId);
-        let serial = $('#SerialNumber').val().trim();
-        if (serial) params.set('SerialNumber', serial);
-        let pageSize = $('#PageSizeList').val();
-        if (pageSize) params.set('PageSize', pageSize);
-        let qs = params.toString();
-        history.replaceState(null, '', '/Item/ItemList' + (qs ? '?' + qs : ''));
+    function SaveFilterState() {
+        let state = {
+            pageNumber: $('#PageNumber').val(),
+            pageSize: $('#PageSizeList').val(),
+            brandId: $('#BrandSelect').val(),
+            serialNumber: $('#SerialNumber').val().trim()
+        };
+        sessionStorage.setItem('ItemListFilters', JSON.stringify(state));
     }
 
-    $(window).on('popstate', function () {
-        let p = new URLSearchParams(window.location.search);
-        if (p.has('PageNumber')) $('#PageNumber').val(p.get('PageNumber'));
-        if (p.has('PageSize')) $('#PageSizeList').val(p.get('PageSize'));
-        if (p.has('BrandId')) $('#BrandSelect').val(p.get('BrandId'));
-        if (p.has('SerialNumber')) $('#SerialNumber').val(p.get('SerialNumber'));
-        FetchData();
-    });
+    function RestoreFilterState() {
+        let saved = sessionStorage.getItem('ItemListFilters');
+        if (saved) {
+            let state = JSON.parse(saved);
+            if (state.pageNumber) $('#PageNumber').val(state.pageNumber);
+            if (state.pageSize) $('#PageSizeList').val(state.pageSize);
+            if (state.brandId) $('#BrandSelect').val(state.brandId);
+            if (state.serialNumber) $('#SerialNumber').val(state.serialNumber);
+        }
+    }
 });
