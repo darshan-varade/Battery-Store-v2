@@ -85,6 +85,20 @@ namespace BatteryShop.WebApp.Controllers
             }
         }
 
+        [HttpGet]
+        public JsonResult ItemGet(int id)
+        {
+            ItemDAL item = new ItemDAL();
+            var vm = item.GetItemForUpdate(id);
+            return Json(new
+            {
+                itemId = vm.ItemId,
+                brandId = vm.BrandId,
+                typeId = vm.TypeId,
+                serialNumber = vm.SerialNumber,
+                transactionId = vm.TransactionId
+            }, JsonRequestBehavior.AllowGet);
+        }
 
         public ActionResult ItemAdd(ItemViewModel ItemVM)
         {

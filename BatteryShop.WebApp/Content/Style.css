@@ -1191,6 +1191,123 @@ footer {
     }
 }
 
+/* ===== Layout Push Effect for Drawer ===== */
+@media (min-width: 1200px) {
+    .drawer-open .main-content {
+        margin-right: 450px;
+        transition: margin-right 0.3s ease-in-out;
+    }
+}
+
+/* ===== Update Offcanvas ===== */
+#updateOffcanvas {
+    background-color: var(--main-bg);
+    color: var(--text-primary);
+}
+
+#updateOffcanvas .offcanvas-header {
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+}
+
+#updateOffcanvas .offcanvas-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+#updateOffcanvas .offcanvas-title i {
+    color: var(--primary);
+    margin-right: 0.5rem;
+}
+
+#updateOffcanvas .offcanvas-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+#updateOffcanvas .batch-card {
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    background-color: var(--card-bg);
+}
+
+#updateOffcanvas .batch-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+#updateOffcanvas .batch-filters:last-of-type {
+    margin-bottom: 0;
+}
+
+#updateOffcanvas .filter-group {
+    flex: 1;
+}
+
+#updateOffcanvas .filter-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.4rem;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#updateOffcanvas .offcanvas-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+#updateOffcanvas .offcanvas-actions .btn {
+    flex: 1;
+    padding: 0.75rem;
+    font-weight: 600;
+}
+
+/* ===== Offcanvas Loading Spinner ===== */
+.offcanvas-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    gap: 1rem;
+    color: var(--text-secondary);
+}
+
+.offcanvas-spinner .spinner-border {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.offcanvas-spinner p {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+@media (max-width: 576px) {
+    #updateOffcanvas {
+        width: 100% !important;
+    }
+
+    #updateOffcanvas .batch-filters {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    #updateOffcanvas .offcanvas-actions {
+        flex-direction: column;
+    }
+}
+
 /* ===== Toast & Modal Stacking ===== */
 #toastContainer {
     z-index: 99999 !important;

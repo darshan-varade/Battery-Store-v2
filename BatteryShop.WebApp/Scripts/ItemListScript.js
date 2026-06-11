@@ -178,8 +178,97 @@
     });
     $(document).on('click', '.btn-action-update', function () {
         let itemId = Number($(this).data('id'));
-        sessionStorage.setItem('ItemListReturnUrl', window.location.href);
-        window.location.href = '/Item/ItemUpdate/' + itemId;
+        let isDesktop = window.innerWidth >= 1200;
+
+        $('#updFormContainer').hide();
+        $('#updSpinner').show();
+
+        var offcanvas = new bootstrap.Offcanvas(document.getElementById('updateOffcanvas'), {
+            backdrop: isDesktop ? false : true,
+            scroll: isDesktop ? true : false
+        });
+        offcanvas.show();
+
+        if (isDesktop) {
+            $('.layout-wrapper').addClass('drawer-open');
+        }
+
+        $.ajax({
+            url: '/Item/ItemGet',
+            type: 'GET',
+            data: { id: itemId },
+            success: function (data) {
+                $('#updSpinner').hide();
+                $('#updFormContainer').show();
+                $('#updItemId').val(data.itemId);
+                $('#updSerialNumber').val(data.serialNumber);
+                $('#updTransactionId').val(data.transactionId);
+                $('#updBrandId').val(data.brandId);
+
+                populateTypeDropdown(data.brandId);
+                $('#updTypeId').val(data.typeId);
+            },
+            error: function () {
+                $('#updSpinner').hide();
+                showToast('Failed to load item data.', 'error');
+                offcanvas.hide();
+            }
+        });
+    });
+
+    $('#updateOffcanvas').on('hidden.bs.offcanvas', function () {
+        $('.layout-wrapper').removeClass('drawer-open');
+    });
+
+    function populateTypeDropdown(brandId) {
+        var $typeSelect = $('#updTypeId');
+        $typeSelect.empty().append('<option value="">--Select Type--</option>');
+        (_modelTypeList || []).forEach(function (type) {
+            $typeSelect.append('<option value="' + type.TypeId + '">' + type.TypeName + '</option>');
+        });
+        $typeSelect.prop('disabled', !brandId);
+    }
+
+    $('#updBrandId').change(function () {
+        populateTypeDropdown($(this).val());
+        if (!$(this).val()) $('#updTypeId').val('');
+    });
+
+    $('#updateForm').submit(function (e) {
+        e.preventDefault();
+
+        var data = {
+            ItemId: parseInt($('#updItemId').val()),
+            SerialNumber: $('#updSerialNumber').val().trim(),
+            BrandId: parseInt($('#updBrandId').val()),
+            TypeId: parseInt($('#updTypeId').val()),
+            TransactionId: parseInt($('#updTransactionId').val())
+        };
+
+        if (!data.SerialNumber) { showToast('Serial Number is required.', 'warning'); return; }
+        if (isNaN(data.BrandId)) { showToast('Please select a Brand.', 'warning'); return; }
+        if (isNaN(data.TypeId)) { showToast('Please select a Type.', 'warning'); return; }
+        if (isNaN(data.TransactionId)) { showToast('Transaction ID must be numeric.', 'warning'); return; }
+
+        $.ajax({
+            url: '/Item/ItemUpdate',
+            type: 'POST',
+            data: data,
+            success: function (response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    bootstrap.Offcanvas.getInstance(document.getElementById('updateOffcanvas')).hide();
+                    FetchData();
+                } else {
+                    showToast(response.message, 'error');
+                }
+            },
+            error: function (xhr) {
+                var msg = 'Update failed.';
+                if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                showToast(msg, 'error');
+            }
+        });
     });
 
     function SaveFilterState() {
