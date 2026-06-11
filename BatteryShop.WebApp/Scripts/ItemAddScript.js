@@ -114,9 +114,11 @@
     }
 
     function removeBatch(batchId) {
-        if (confirm('Are you sure you want to remove this batch?')) {
-            $(`.batch-card[data-batch-id="${batchId}"]`).remove();
-        }
+        showConfirm('Remove Batch', 'Are you sure you want to remove this batch?', 'Remove').then(function (confirmed) {
+            if (confirmed) {
+                $(`.batch-card[data-batch-id="${batchId}"]`).remove();
+            }
+        });
     }
 
     $('#itemAddForm').submit(function (e) {
@@ -153,19 +155,19 @@
         });
 
         if (batchesData.batches.length === 0) {
-            alert('Please add at least one item with brand, type, and serial number.');
+            showToast('Please add at least one item with brand, type, and serial number.', 'warning');
             return;
         }
 
         if (!batchesData.transactionId) {
-            alert('Please enter Transaction ID.');
+            showToast('Please enter Transaction ID.', 'warning');
             return;
         }
 
         const transactionId = parseInt(batchesData.transactionId);
 
         if (isNaN(transactionId)) {
-            alert('Transaction ID must be numeric.');
+            showToast('Transaction ID must be numeric.', 'warning');
             return;
         }
 
@@ -199,12 +201,12 @@
         });
 
         if (duplicateFound) {
-            alert('Duplicate serial number found. Each serial number must be unique.');
+            showToast('Duplicate serial number found. Each serial number must be unique.', 'warning');
             return null;
         }
 
         if (items.length === 0) {
-            alert('No valid items to submit.');
+            showToast('No valid items to submit.', 'warning');
             return null;
         }
 
@@ -222,12 +224,14 @@
             data: JSON.stringify(data),
             success: function (response) {
                 if (response.success) {
-                    alert(response.message || 'Items added successfully!');
-                    let returnUrl = sessionStorage.getItem('ItemListReturnUrl');
-                    sessionStorage.removeItem('ItemListReturnUrl');
-                    window.location.href = returnUrl || _urlItemList;
+                    showToast(response.message || 'Items added successfully!', 'success');
+                    setTimeout(function () {
+                        let returnUrl = sessionStorage.getItem('ItemListReturnUrl');
+                        sessionStorage.removeItem('ItemListReturnUrl');
+                        window.location.href = returnUrl || _urlItemList;
+                    }, 1000);
                 } else {
-                    alert(response.message || 'Failed to add items.');
+                    showToast(response.message || 'Failed to add items.', 'error');
                 }
             },
             error: function (xhr, status, error) {
@@ -237,7 +241,7 @@
                 } else if (xhr.responseText) {
                     errorMessage = xhr.responseText;
                 }
-                alert(errorMessage);
+                showToast(errorMessage, 'error');
             }
         });
     }
@@ -250,7 +254,7 @@
     $(document).on('click', '.remove-serial-btn', function () {
         const serialList = $(this).closest('.serial-items-list');
         if (serialList.find('.serial-row-data').length <= 1) {
-            alert('At least one serial number field is required.');
+            showToast('At least one serial number field is required.', 'warning');
             return;
         }
         $(this).closest('.serial-row-data').remove();

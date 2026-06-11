@@ -159,19 +159,21 @@
 
     $(document).on('click', '.btn-action-delete', function () {
         let itemId = $(this).data('id');
-        if (!confirm(`Do you want to delete item id= ${itemId}?`)) return;
-        $.ajax({
-            url: '/Item/ItemDelete',
-            type: 'POST',
-            data: { id: itemId },
-            success: function () {
-                alert('Item deleted successfully');
-                FetchData();
-            },
-            error: function (xhr, status, error) {
-                console.log(xhr.responseText);
-                alert('Delete failed');
-            }
+        showConfirm('Delete Item', `Are you sure you want to delete item #${itemId}?`, 'Delete').then(function (confirmed) {
+            if (!confirmed) return;
+            $.ajax({
+                url: '/Item/ItemDelete',
+                type: 'POST',
+                data: { id: itemId },
+                success: function () {
+                    showToast('Item deleted successfully', 'success');
+                    FetchData();
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.responseText);
+                    showToast('Delete failed', 'error');
+                }
+            });
         });
     });
     $(document).on('click', '.btn-action-update', function () {

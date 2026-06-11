@@ -1120,3 +1120,16 @@ footer {
         width: 100%;
     }
 }
+
+/* ===== Toast & Modal Stacking ===== */
+#toastContainer {
+    z-index: 99999 !important;
+}
+
+#confirmModal {
+    z-index: 99999;
+}
+
+.toast-container .toast {
+    z-index: 99999;
+}

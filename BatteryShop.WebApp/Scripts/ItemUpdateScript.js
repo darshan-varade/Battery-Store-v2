@@ -13,22 +13,22 @@
         };
 
         if (!data.SerialNumber) {
-            alert('Serial Number is required.');
+            showToast('Serial Number is required.', 'warning');
             return;
         }
 
         if (isNaN(data.BrandId)) {
-            alert('Please select a Brand.');
+            showToast('Please select a Brand.', 'warning');
             return;
         }
 
         if (isNaN(data.TypeId)) {
-            alert('Please select a Type.');
+            showToast('Please select a Type.', 'warning');
             return;
         }
 
         if (isNaN(data.TransactionId)) {
-            alert('Transaction ID must be numeric.');
+            showToast('Transaction ID must be numeric.', 'warning');
             return;
         }
 
@@ -38,13 +38,15 @@
             data: data, 
             success: function (response) {
                 if (response.success) {
-                    alert(response.message || 'Item updated successfully.');
-                    let returnUrl = sessionStorage.getItem('ItemListReturnUrl');
-                    sessionStorage.removeItem('ItemListReturnUrl');
-                    window.location.href = returnUrl || _urlItemList;
+                    showToast(response.message || 'Item updated successfully.', 'success');
+                    setTimeout(function () {
+                        let returnUrl = sessionStorage.getItem('ItemListReturnUrl');
+                        sessionStorage.removeItem('ItemListReturnUrl');
+                        window.location.href = returnUrl || _urlItemList;
+                    }, 1000);
                 }
                 else {
-                    alert(response.message || 'Update failed.');
+                    showToast(response.message || 'Update failed.', 'error');
                 }
             },
             error: function (xhr, status, error) {
@@ -54,7 +56,7 @@
                     errorMessage =
                         xhr.responseJSON.message;
                 }
-                alert(errorMessage);
+                showToast(errorMessage, 'error');
             }
         });
 
