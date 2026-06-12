@@ -152,9 +152,41 @@
         FetchData();
     });
 
+    // ===== Mode for offcanvas: "update" or "add" =====
+    let updMode = 'update';
+
+    //$('#addItemBtn').click(function () {
+    //    sessionStorage.setItem('ItemListReturnUrl', window.location.href);
+    //    window.location.href = '/Item/ItemAdd';
+    //});
+
     $('#addItemBtn').click(function () {
-        sessionStorage.setItem('ItemListReturnUrl', window.location.href);
-        window.location.href = '/Item/ItemAdd';
+        debugger
+        updMode = 'add';
+
+        $('#updItemIdGroup').hide();
+        $('#updItemId').val('');
+        $('#updSerialNumber').val('');
+        $('#updTransactionId').val('');
+        $('#updBrandId').val('');
+        $('#updTypeId').val('').prop('disabled', true);
+
+        $('#updateOffcanvas .offcanvas-title').html('<i class="bi bi-plus-circle"></i> Add Item');
+        $('#updateOffcanvas .offcanvas-actions .btn-success').html('<i class="bi bi-plus-circle"></i> Add Item');
+
+        $('#updSpinner').hide();
+        $('#updFormContainer').show();
+
+        let isDesktop = window.innerWidth >= 1200;
+        let offcanvas = new bootstrap.Offcanvas(document.getElementById('updateOffcanvas'), {
+            backdrop: isDesktop ? false : true,
+            scroll: isDesktop ? true : false
+        });
+        offcanvas.show();
+
+        if (isDesktop) {
+            $('.layout-wrapper').addClass('drawer-open');
+        }
     });
 
     $(document).on('click', '.btn-action-delete', function () {
@@ -177,6 +209,12 @@
         });
     });
     $(document).on('click', '.btn-action-update', function () {
+        updMode = 'update';
+
+        $('#updItemIdGroup').show();
+        $('#updateOffcanvas .offcanvas-title').html('<i class="bi bi-pencil-square"></i> Update Item');
+        $('#updateOffcanvas .offcanvas-actions .btn-success').html('<i class="bi bi-check-circle"></i> Update');
+
         let itemId = Number($(this).data('id'));
         let isDesktop = window.innerWidth >= 1200;
 
@@ -238,20 +276,25 @@
         e.preventDefault();
 
         var data = {
-            ItemId: parseInt($('#updItemId').val()),
             SerialNumber: $('#updSerialNumber').val().trim(),
             BrandId: parseInt($('#updBrandId').val()),
             TypeId: parseInt($('#updTypeId').val()),
             TransactionId: parseInt($('#updTransactionId').val())
         };
 
+        if (updMode === 'update') {
+            data.ItemId = parseInt($('#updItemId').val());
+        }
+
         if (!data.SerialNumber) { showToast('Serial Number is required.', 'warning'); return; }
         if (isNaN(data.BrandId)) { showToast('Please select a Brand.', 'warning'); return; }
         if (isNaN(data.TypeId)) { showToast('Please select a Type.', 'warning'); return; }
         if (isNaN(data.TransactionId)) { showToast('Transaction ID must be numeric.', 'warning'); return; }
 
+        var url = updMode === 'update' ? '/Item/ItemUpdate' : '/Item/ItemAddOne';
+
         $.ajax({
-            url: '/Item/ItemUpdate',
+            url: url,
             type: 'POST',
             data: data,
             success: function (response) {
@@ -264,7 +307,7 @@
                 }
             },
             error: function (xhr) {
-                var msg = 'Update failed.';
+                var msg = 'Operation failed.';
                 if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
                 showToast(msg, 'error');
             }

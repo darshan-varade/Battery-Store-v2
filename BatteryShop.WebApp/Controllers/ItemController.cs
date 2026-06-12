@@ -132,14 +132,8 @@ namespace BatteryShop.WebApp.Controllers
 
         public ActionResult ItemUpdate(int id)
         {
-            ItemDAL item = new ItemDAL();
-
-            ItemUpdateViewModel vm = item.GetItemForUpdate(id);
-
-            vm.BrandList = GetCachedBrands();
-            vm.TypeList = GetCachedTypes();
-
-            return View(vm);
+            TempData["info"] = "Use the pencil icon in the table to update items.";
+            return RedirectToAction("ItemList");
         }
 
         [HttpPost]
@@ -155,6 +149,44 @@ namespace BatteryShop.WebApp.Controllers
                 {
                     success = true,
                     message = "Item updated successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult ItemAddOne(ItemUpdateViewModel vm)
+        {
+            try
+            {
+                var addVm = new ItemAddViewModel
+                {
+                    TransactionId = vm.TransactionId ?? 0,
+                    Items = new List<ItemAddDetailsViewModel>
+                    {
+                        new ItemAddDetailsViewModel
+                        {
+                            BrandId = vm.BrandId ?? 0,
+                            TypeId = vm.TypeId ?? 0,
+                            SerialNumber = vm.SerialNumber
+                        }
+                    }
+                };
+
+                ItemDAL item = new ItemDAL();
+                item.addItems(addVm);
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Item added successfully"
                 });
             }
             catch (Exception ex)

@@ -3,6 +3,13 @@
     ViewBag.Title = "Inventory";
 }
 
+@if (TempData["info"] != null)
+{
+    <script>
+        $(function () { showToast('@TempData["info"]', 'info'); });
+    </script>
+}
+
 <form method="POST" id="searchForm">
 
     @Html.HiddenFor(m => m.PageNumber, new { id = "PageNumber" })
@@ -32,7 +39,8 @@
         <div class="filter-actions">
             <button type="button" id="searchBtn" class="btn btn-primary">Search</button>
             <button type="reset" id="resetbutton" class="btn btn-secondary">Reset</button>
-            <button type="button" id="addItemBtn" class="btn btn-success">Add Item</button>
+            @*<button type="button" id="addItemBtn" class="btn btn-success">Add Item</button>*@
+            <button type="button" id="addItemBtn" class="btn  btn-success">Add Item</button>
         </div>
     </div>
     <div class="results-wrapper">
@@ -52,76 +60,8 @@
 
 <script>
     var _modelBrandList = @Html.Raw(Json.Encode(Model.BrandList)) || [];
-    var _modelTypeList = @Html.Raw(Json.Encode(Model.TypeList)) || [];
 </script>
 
-<!-- Update Offcanvas -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="updateOffcanvas">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title">
-            <i class="bi bi-pencil-square"></i> Update Item
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-    </div>
-    <div class="offcanvas-body">
-        <div class="offcanvas-spinner" id="updSpinner">
-            <div class="spinner-border text-success" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p>Loading item data...</p>
-        </div>
-        <div id="updFormContainer" style="display:none;">
-            <form id="updateForm">
-                <div class="batch-card">
-                    <div class="batch-filters">
-                        <div class="filter-group">
-                            <label class="form-label">Item ID</label>
-                            <input type="text" id="updItemId" class="form-control" readonly />
-                        </div>
-                        <div class="filter-group">
-                            <label class="form-label">Transaction ID</label>
-                            <input type="number" id="updTransactionId" class="form-control" />
-                        </div>
-                    </div>
+@Html.Partial("_ItemUpdateOffcanvas", Model)
 
-                    <div class="batch-filters">
-                        <div class="filter-group">
-                            <label class="form-label">Brand</label>
-                            <select id="updBrandId" class="form-control">
-                                <option value="">--Select Brand--</option>
-                                @foreach (var brand in Model.BrandList)
-                                {
-                                    <option value="@brand.BrandId">@brand.BrandName</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label class="form-label">Type</label>
-                            <select id="updTypeId" class="form-control">
-                                <option value="">--Select Type--</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="batch-filters">
-                        <div class="filter-group">
-                            <label class="form-label">Serial Number</label>
-                            <input type="text" id="updSerialNumber" class="form-control" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="offcanvas-actions">
-                    <button type="submit" class="btn btn-success">
-                        <i class="bi bi-check-circle"></i> Update
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="offcanvas">
-                        Cancel
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-    <script src="~/PageScripts/ItemListScript.js"></script>
+<script src="~/PageScripts/ItemListScript.js"></script>
