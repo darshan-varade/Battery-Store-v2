@@ -152,7 +152,7 @@ namespace BatteryShop.DataAccess.DAL
         {
             foreach (var item in addItemList.Items)
             {
-                DbCommand cmd = db.GetStoredProcCommand("batteryAddItem");
+                DbCommand cmd = db.GetStoredProcCommand("batteryInsertOrUpdateItem");
 
                 db.AddInParameter(cmd, "@TransactionId",DbType.Int32, addItemList.TransactionId);
                 db.AddInParameter(cmd, "@SerialNumber",DbType.String, item.SerialNumber);
@@ -192,7 +192,7 @@ namespace BatteryShop.DataAccess.DAL
 
         public void UpdateItem(ItemUpdateViewModel item)
         {
-            DbCommand cmd = db.GetStoredProcCommand("batteryUpdateItem");
+            DbCommand cmd = db.GetStoredProcCommand("batteryInsertOrUpdateItem");
 
             db.AddInParameter(cmd, "@ItemId", DbType.Int32, item.ItemId);
             db.AddInParameter(cmd, "@TransactionId", DbType.Int32, item.TransactionId);

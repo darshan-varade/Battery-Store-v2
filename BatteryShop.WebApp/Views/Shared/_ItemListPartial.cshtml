@@ -23,8 +23,12 @@
                 <div class="item-cell cell-model">@item.ItemType</div>
                 <div class="item-cell cell-serial">@item.ItemSerialNumber</div>
                 <div class="item-cell cell-actions">
-                    <button class="btn btn-sm btn-primary btn-action-update" data-id="@item.ItemId" title="Update">Update</button>
-                    <button class="btn btn-sm btn-danger btn-action-delete" data-id="@item.ItemId" title="Delete">Delete</button>
+                    <button class="btn btn-sm btn-primary btn-action-update" data-id="@item.ItemId" title="Update">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-action-delete" data-id="@item.ItemId" title="Delete">
+                        <i class="bi bi-trash"></i>
+                    </button>
                 </div>
             </div>
         }
