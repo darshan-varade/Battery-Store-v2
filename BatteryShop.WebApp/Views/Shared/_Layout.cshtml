@@ -27,10 +27,15 @@
                     <i class="bi bi-house-door"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="@Url.Action("ItemList", "Item")" class="sidebar-nav-item">
-                    <i class="bi bi-box"></i>
-                    <span>Inventory</span>
-                </a>
+                <div class="sidebar-nav-item sidebar-nav-item-has-actions">
+                    <a href="@Url.Action("ItemList", "Item")" class="sidebar-nav-link sidebar-nav-link-main">
+                        <i class="bi bi-box"></i>
+                        <span>Inventory</span>
+                    </a>
+                    <a href="@Url.Action("ItemAdd", "Item")" class="sidebar-nav-link sidebar-nav-add-btn" title="Add New Item">
+                        <i class="bi bi-plus-lg"></i>
+                    </a>
+                </div>
                 <a href="#" class="sidebar-nav-item">
                     <i class="bi bi-receipt"></i>
                     <span>Billing</span>
@@ -132,12 +137,12 @@
         }
 
         // Set active nav item - remove all active classes first
-        document.querySelectorAll('.sidebar-nav-item').forEach(link => {
+        document.querySelectorAll('.sidebar-nav-item, .sidebar-nav-link-main').forEach(link => {
             link.classList.remove('active');
         });
 
         // Add active class to the matching link
-        document.querySelectorAll('.sidebar-nav-item').forEach(link => {
+        document.querySelectorAll('.sidebar-nav-item, .sidebar-nav-link-main').forEach(link => {
             const href = link.getAttribute('href');
             if (href && href !== '#') {
                 const currentPath = window.location.pathname;
