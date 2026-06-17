@@ -27,13 +27,12 @@
         </div>
 
         <div class="filter-group">
-            @Html.LabelFor(m => m.BrandId, "Brand")
-            @Html.DropDownListFor(
-            m => m.BrandId,
-            new SelectList(Model.BrandList, "BrandId", "BrandName"),
-            "--Select--",
-            new { id = "BrandSelect", @class = "form-control" }
-        )
+            @Html.LabelFor(m => m.BrandIds, "Brand", new { @class = "form-label" })
+            @Html.ListBoxFor(
+                m => m.BrandIds,
+                new SelectList(Model.BrandList, "BrandId", "BrandName"),
+                new { id = "BrandSelect", @class = "form-control" }
+            )
         </div>
 
         <div class="filter-actions">

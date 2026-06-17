@@ -1,9 +1,28 @@
-﻿$(document).ready(function () {
+$(document).ready(function () {
     let TotalRows = 1;
     let PageStart = 1;
     let PageWindow = 5;
+    let isInitializing = true;
+
+    // Initialize Select2 first so it is ready to receive restored state
+    $('#BrandSelect').select2({
+        placeholder: 'Filter by brands...',
+        allowClear: true,
+        width: '100%'
+    });
+
+    $('#BrandSelect').on('select2:open select2:close', function () {
+        updateBrandSelectionDisplay();
+    });
+
+    $(window).on('resize', function () {
+        updateBrandSelectionDisplay();
+    });
 
     RestoreFilterState();
+    updateBrandSelectionDisplay();
+
+    isInitializing = false;
     FetchData();
 
     function FetchData() {
@@ -104,16 +123,62 @@
 
     $('#searchForm').on('reset', function () {
         setTimeout(function () {
+            // Reset Select2 selection
+            $('#BrandSelect').val(null).trigger('change');
             PageStart = 1;
             $('#PageNumber').val(1);
-            FetchData();
+            // FetchData() will be called by the trigger('change') above.
         }, 0);
     });
 
-    $('#BrandSelect').change(function () {
+    // ===== Select2 Multi-Select Brand Filter Display Update =====
+    function updateBrandSelectionDisplay() {
+        setTimeout(function () {
+            var $select = $('#BrandSelect');
+            var $container = $select.next('.select2-container');
+            if (!$container.length) return;
+
+            var $rendered = $container.find('.select2-selection__rendered');
+            
+            // Remove existing badge
+            $rendered.find('.select2-selection__badge').remove();
+            
+            var $choices = $rendered.find('.select2-selection__choice');
+            var count = $choices.length;
+            
+            // Show only the first selected option
+            $choices.each(function (index) {
+                if (index < 1) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+            
+            // If more than 1 option is selected, show + (count - 1)
+            if (count > 1) {
+                var badgeHtml = '<li class="select2-selection__choice select2-selection__badge" ' +
+                                'title="' + count + ' brands selected">' +
+                                '+' + (count - 1) +
+                                '</li>';
+                
+                var $search = $rendered.find('.select2-search');
+                if ($search.length) {
+                    $search.before(badgeHtml);
+                } else {
+                    $rendered.append(badgeHtml);
+                }
+            }
+        }, 0);
+    }
+
+    $('#BrandSelect').on('change', function () {
         $('#PageNumber').val(1);
         PageStart = 1;
-        FetchData();
+        updateBrandSelectionDisplay();
+        if (!isInitializing) {
+            FetchData();
+        }
     });
 
     $('#PageSizeList').change(function () {
@@ -318,7 +383,7 @@
         let state = {
             pageNumber: $('#PageNumber').val(),
             pageSize: $('#PageSizeList').val(),
-            brandId: $('#BrandSelect').val(),
+            brandIds: $('#BrandSelect').val(),
             serialNumber: $('#SerialNumber').val().trim()
         };
         sessionStorage.setItem('ItemListFilters', JSON.stringify(state));
@@ -330,7 +395,7 @@
             let state = JSON.parse(saved);
             if (state.pageNumber) $('#PageNumber').val(state.pageNumber);
             if (state.pageSize) $('#PageSizeList').val(state.pageSize);
-            if (state.brandId) $('#BrandSelect').val(state.brandId);
+            if (state.brandIds) $('#BrandSelect').val(state.brandIds).trigger('change');
             if (state.serialNumber) $('#SerialNumber').val(state.serialNumber);
         }
     }

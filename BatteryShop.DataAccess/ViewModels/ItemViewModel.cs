@@ -14,7 +14,7 @@ namespace BatteryShop.DataAccess.ViewModels
         public int PageSize { get; set; } = 0;
         public List<int> PageSizeList = new List<int> { 3,5,10,15,20 };
         public string SerialNumber { get; set; } = "";
-        public int? BrandId { get; set; } = null;   
+        public List<int> BrandIds { get; set; }   
         public List<BrandListViewModel> BrandList { get; set; }
         public int? TypeId { get; set; } = null;
         public List<TypeListViewModel> TypeList { get; set; }

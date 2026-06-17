@@ -55,7 +55,9 @@ namespace BatteryShop.DataAccess.DAL
             ItemVM.PageNumber = ItemVM.PageNumber <= 0 ? 1 : ItemVM.PageNumber ;
             ItemVM.PageSize = ItemVM.PageSize <= 0 ? 100000 : ItemVM.PageSize;
             ItemVM.SerialNumber = ItemVM.SerialNumber == null ? "" : ItemVM.SerialNumber;
-            ItemVM.BrandId = ItemVM.BrandId == null || ItemVM.BrandId <= 0 ? null : ItemVM.BrandId;
+            string brandIds = ItemVM.BrandIds != null && ItemVM.BrandIds.Count > 0
+                ? string.Join(",", ItemVM.BrandIds)
+                : null;
 
             List <ItemModel> list = new List<ItemModel>();
 
@@ -64,7 +66,7 @@ namespace BatteryShop.DataAccess.DAL
             db.AddInParameter(cmd, "@PageNumber", DbType.Int32, ItemVM.PageNumber);
             db.AddInParameter(cmd, "@PageSize", DbType.Int32, ItemVM.PageSize);
             db.AddInParameter(cmd, "@SerialNumber", DbType.String, ItemVM.SerialNumber);
-            db.AddInParameter(cmd, "@BrandId", DbType.Int32, (object)ItemVM.BrandId ?? DBNull.Value);
+            db.AddInParameter(cmd, "@BrandIds", DbType.String, (object)brandIds ?? DBNull.Value);
             db.AddOutParameter(cmd, "@TotalRows", DbType.Int32, 0);
 
             using (IDataReader reader = db.ExecuteReader(cmd))
