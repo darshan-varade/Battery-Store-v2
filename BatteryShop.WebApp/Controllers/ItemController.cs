@@ -55,11 +55,16 @@ namespace BatteryShop.WebApp.Controllers
         [ActionName("ItemList")]
         public ActionResult ItemListPost(ItemViewModel ItemVM)
         {
-            
-            ItemDAL item = new ItemDAL();
-            ItemVM.ItemList = item.ItemGetList(ItemVM);
-            return PartialView("_ItemListPartial", ItemVM);
-          
+            try
+            {
+                ItemDAL item = new ItemDAL();
+                ItemVM.ItemList = item.ItemGetList(ItemVM);
+                return PartialView("_ItemListPartial", ItemVM);
+            }
+            catch (Exception ex)
+            {
+                return Content("<div class='alert alert-danger'>Error loading data: " + ex.Message + "</div>");
+            }
         }
 
         [HttpPost]
@@ -88,16 +93,30 @@ namespace BatteryShop.WebApp.Controllers
         [HttpGet]
         public JsonResult ItemGet(int id)
         {
-            ItemDAL item = new ItemDAL();
-            var vm = item.GetItemForUpdate(id);
-            return Json(new
+            try
             {
-                itemId = vm.ItemId,
-                brandId = vm.BrandId,
-                typeId = vm.TypeId,
-                serialNumber = vm.SerialNumber,
-                transactionId = vm.TransactionId
-            }, JsonRequestBehavior.AllowGet);
+                ItemDAL item = new ItemDAL();
+                var vm = item.GetItemForUpdate(id);
+
+                if (vm == null)
+                {
+                    return Json(new { success = false, message = "Item not found." }, JsonRequestBehavior.AllowGet);
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    itemId = vm.ItemId,
+                    brandId = vm.BrandId,
+                    typeId = vm.TypeId,
+                    serialNumber = vm.SerialNumber,
+                    transactionId = vm.TransactionId
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         public ActionResult ItemAdd(ItemViewModel ItemVM)

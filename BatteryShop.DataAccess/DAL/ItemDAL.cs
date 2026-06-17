@@ -91,7 +91,9 @@ namespace BatteryShop.DataAccess.DAL
                     list.Add(item);
                 }
             }
-            ItemVM.TotalRows = Convert.ToInt32(db.GetParameterValue(cmd, "@TotalRows"));
+            ItemVM.TotalRows = db.GetParameterValue(cmd, "@TotalRows") != DBNull.Value
+                ? Convert.ToInt32(db.GetParameterValue(cmd, "@TotalRows"))
+                : 0;
             return list;
         }
 
@@ -203,6 +205,7 @@ namespace BatteryShop.DataAccess.DAL
             db.AddInParameter(cmd, "@SerialNumber", DbType.String, item.SerialNumber);
             db.AddInParameter(cmd, "@BrandId", DbType.Int32, item.BrandId);
             db.AddInParameter(cmd, "@TypeId", DbType.Int32, item.TypeId);
+            db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, 1);
 
             db.ExecuteNonQuery(cmd);
         }

@@ -41,7 +41,7 @@ $(document).ready(function () {
                 $('#resultContainer').html(result);
                 updateSortIcons();
 
-                TotalRows = parseInt($('#TotalRows').val());
+                TotalRows = parseInt($('#TotalRows').val(), 10);
 
                 LoadButton();
 
@@ -263,7 +263,6 @@ $(document).ready(function () {
     //});
 
     $('#addItemBtn').click(function () {
-        debugger
         updMode = 'add';
 
         $('#updItemIdGroup').hide();
@@ -338,6 +337,12 @@ $(document).ready(function () {
             type: 'GET',
             data: { id: itemId },
             success: function (data) {
+                if (!data.success) {
+                    $('#updSpinner').hide();
+                    showToast(data.message || 'Failed to load item data.', 'error');
+                    offcanvas.hide();
+                    return;
+                }
                 $('#updSpinner').hide();
                 $('#updFormContainer').show();
                 $('#updItemId').val(data.itemId);
@@ -402,7 +407,8 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.success) {
                     showToast(response.message, 'success');
-                    bootstrap.Offcanvas.getInstance(document.getElementById('updateOffcanvas')).hide();
+                    var offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('updateOffcanvas'));
+                    if (offcanvas) offcanvas.hide();
                     FetchData();
                 } else {
                     showToast(response.message, 'error');
