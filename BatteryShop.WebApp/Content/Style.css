@@ -1572,3 +1572,15 @@ footer {
     color: var(--text-secondary) !important;
     opacity: 0.8;
 }
+
+/* ===== Sortable Column Headers ===== */
+.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+.sortable:hover {
+    color: var(--primary);
+}
+.sort-icon {
+    font-size: 0.75rem;
+}

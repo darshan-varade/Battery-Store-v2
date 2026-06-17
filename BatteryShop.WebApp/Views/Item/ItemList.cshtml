@@ -13,6 +13,8 @@
 <form method="POST" id="searchForm">
 
     @Html.HiddenFor(m => m.PageNumber, new { id = "PageNumber" })
+    @Html.HiddenFor(m => m.SortColumn, new { id = "SortColumn" })
+    @Html.HiddenFor(m => m.SortDirection, new { id = "SortDirection" })
 
     <div class="filters-container">
         <div class="filter-group">

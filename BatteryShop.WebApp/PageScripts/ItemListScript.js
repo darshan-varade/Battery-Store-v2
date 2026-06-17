@@ -3,6 +3,8 @@ $(document).ready(function () {
     let PageStart = 1;
     let PageWindow = 5;
     let isInitializing = true;
+    let sortColumn = 'itemId';
+    let sortDirection = 'ASC';
 
     // Initialize Select2 first so it is ready to receive restored state
     $('#BrandSelect').select2({
@@ -23,6 +25,8 @@ $(document).ready(function () {
     updateBrandSelectionDisplay();
 
     isInitializing = false;
+    $('#SortColumn').val(sortColumn);
+    $('#SortDirection').val(sortDirection);
     FetchData();
 
     function FetchData() {
@@ -35,6 +39,7 @@ $(document).ready(function () {
             success: function (result) {
 
                 $('#resultContainer').html(result);
+                updateSortIcons();
 
                 TotalRows = parseInt($('#TotalRows').val());
 
@@ -127,7 +132,11 @@ $(document).ready(function () {
             $('#BrandSelect').val(null).trigger('change');
             PageStart = 1;
             $('#PageNumber').val(1);
-            // FetchData() will be called by the trigger('change') above.
+            sortColumn = 'itemId';
+            sortDirection = 'ASC';
+            $('#SortColumn').val(sortColumn);
+            $('#SortDirection').val(sortDirection);
+            updateSortIcons();
         }, 0);
     });
 
@@ -215,6 +224,34 @@ $(document).ready(function () {
 
         $('#PageNumber').val(num + 1);
         FetchData();
+    });
+
+    // ===== Sortable Column Headers =====
+    function updateSortIcons() {
+        $('.sortable .sort-icon').each(function () {
+            let col = $(this).closest('.sortable').data('column');
+            if (col === sortColumn) {
+                $(this).text(sortDirection === 'ASC' ? ' ▲' : ' ▼');
+            } else {
+                $(this).text(' ↕');
+            }
+        });
+    }
+
+    $(document).on('click', '.sortable', function () {
+        let col = $(this).data('column');
+        if (sortColumn === col) {
+            sortDirection = sortDirection === 'ASC' ? 'DESC' : 'ASC';
+        } else {
+            sortColumn = col;
+            sortDirection = 'ASC';
+        }
+        updateSortIcons();
+        $('#SortColumn').val(sortColumn);
+        $('#SortDirection').val(sortDirection);
+        $('#PageNumber').val(1);
+        PageStart = 1;
+        if (!isInitializing) FetchData();
     });
 
     // ===== Mode for offcanvas: "update" or "add" =====
@@ -384,7 +421,9 @@ $(document).ready(function () {
             pageNumber: $('#PageNumber').val(),
             pageSize: $('#PageSizeList').val(),
             brandIds: $('#BrandSelect').val(),
-            serialNumber: $('#SerialNumber').val().trim()
+            serialNumber: $('#SerialNumber').val().trim(),
+            sortColumn: sortColumn,
+            sortDirection: sortDirection
         };
         sessionStorage.setItem('ItemListFilters', JSON.stringify(state));
     }
@@ -397,6 +436,9 @@ $(document).ready(function () {
             if (state.pageSize) $('#PageSizeList').val(state.pageSize);
             if (state.brandIds) $('#BrandSelect').val(state.brandIds).trigger('change');
             if (state.serialNumber) $('#SerialNumber').val(state.serialNumber);
+            if (state.sortColumn) sortColumn = state.sortColumn;
+            if (state.sortDirection) sortDirection = state.sortDirection;
         }
+        updateSortIcons();
     }
 });

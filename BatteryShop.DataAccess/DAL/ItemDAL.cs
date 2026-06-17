@@ -67,6 +67,8 @@ namespace BatteryShop.DataAccess.DAL
             db.AddInParameter(cmd, "@PageSize", DbType.Int32, ItemVM.PageSize);
             db.AddInParameter(cmd, "@SerialNumber", DbType.String, ItemVM.SerialNumber);
             db.AddInParameter(cmd, "@BrandIds", DbType.String, (object)brandIds ?? DBNull.Value);
+            db.AddInParameter(cmd, "@SortColumn", DbType.String, ItemVM.SortColumn ?? "itemId");
+            db.AddInParameter(cmd, "@SortDirection", DbType.String, ItemVM.SortDirection ?? "ASC");
             db.AddOutParameter(cmd, "@TotalRows", DbType.Int32, 0);
 
             using (IDataReader reader = db.ExecuteReader(cmd))
