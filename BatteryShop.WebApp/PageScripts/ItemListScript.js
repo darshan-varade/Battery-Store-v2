@@ -437,7 +437,12 @@ $(document).ready(function () {
     function RestoreFilterState() {
         let saved = sessionStorage.getItem('ItemListFilters');
         if (saved) {
-            let state = JSON.parse(saved);
+            try {
+                var state = JSON.parse(saved);
+            } catch (e) {
+                sessionStorage.removeItem('ItemListFilters');
+                return;
+            }
             if (state.pageNumber) $('#PageNumber').val(state.pageNumber);
             if (state.pageSize) $('#PageSizeList').val(state.pageSize);
             if (state.brandIds) $('#BrandSelect').val(state.brandIds).trigger('change');
