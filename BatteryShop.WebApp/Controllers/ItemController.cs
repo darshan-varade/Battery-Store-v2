@@ -6,6 +6,7 @@ using System.Web.Caching;
 using System.Web.Mvc;
 using BatteryShop.DataAccess.DAL;
 using BatteryShop.DataAccess.ViewModels;
+using Serilog;
 
 namespace BatteryShop.WebApp.Controllers
 {
@@ -63,6 +64,7 @@ namespace BatteryShop.WebApp.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in ItemListPost");
                 return Content("<div class='alert alert-danger'>Error loading data: " + ex.Message + "</div>");
             }
         }
@@ -82,6 +84,7 @@ namespace BatteryShop.WebApp.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in ItemDelete");
                 return Json(new
                 {
                     success = false,
@@ -115,6 +118,7 @@ namespace BatteryShop.WebApp.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in ItemGet");
                 return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
@@ -141,6 +145,7 @@ namespace BatteryShop.WebApp.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in ItemAdd");
                 return Json(new
                 {
                     success = false,
@@ -172,6 +177,7 @@ namespace BatteryShop.WebApp.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in ItemUpdate");
                 return Json(new
                 {
                     success = false,
@@ -210,6 +216,7 @@ namespace BatteryShop.WebApp.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in ItemAddOne");
                 return Json(new
                 {
                     success = false,
