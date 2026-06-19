@@ -37,6 +37,15 @@
             )
         </div>
 
+        <div class="filter-group">
+            @Html.LabelFor(m => m.StatusIds, "Status", new { @class = "form-label" })
+            @Html.ListBoxFor(
+                m => m.StatusIds,
+                new SelectList(Model.StatusList, "StatusId", "StatusName"),
+                new { id = "StatusSelect", @class = "form-control" }
+            )
+        </div>
+
         <div class="filter-actions">
             <button type="button" id="searchBtn" class="btn btn-primary">Search</button>
             <button type="reset" id="resetbutton" class="btn btn-secondary">Reset</button>

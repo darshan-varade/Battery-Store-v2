@@ -13,6 +13,8 @@ namespace BatteryShop.DataAccess.Models
         public string ItemBrand { get; set; }
         public string ItemType { get; set; }
         public int TransactionId { get; set; }
+        public int ItemStatusId { get; set; }
+        public string ItemStatusName { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public string CreatedBy { get; set; }

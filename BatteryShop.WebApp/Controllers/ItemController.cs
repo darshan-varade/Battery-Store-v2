@@ -36,6 +36,19 @@ namespace BatteryShop.WebApp.Controllers
             HttpRuntime.Cache.Insert(key, list, null, DateTime.Now.AddMinutes(30), Cache.NoSlidingExpiration);
             return list;
         }
+
+        private List<StatusListViewModel> GetCachedStatuses()
+        {
+            string key = "StatusList";
+            var cached = HttpRuntime.Cache[key] as List<StatusListViewModel>;
+            if (cached != null) return cached;
+
+            var dal = new ItemDAL();
+            var list = dal.ItemFetchStatus();
+            HttpRuntime.Cache.Insert(key, list, null, DateTime.Now.AddMinutes(30), Cache.NoSlidingExpiration);
+            return list;
+        }
+
         // GET: Item
         public ActionResult Index()
         {
@@ -48,6 +61,7 @@ namespace BatteryShop.WebApp.Controllers
             ItemViewModel ItemVM = new ItemViewModel();
             ItemVM.BrandList = GetCachedBrands();
             ItemVM.TypeList = GetCachedTypes();
+            ItemVM.StatusList = GetCachedStatuses();
             
             return View(ItemVM);
         }
@@ -113,7 +127,8 @@ namespace BatteryShop.WebApp.Controllers
                     brandId = vm.BrandId,
                     typeId = vm.TypeId,
                     serialNumber = vm.SerialNumber,
-                    transactionId = vm.TransactionId
+                    transactionId = vm.TransactionId,
+                    itemStatusId = vm.ItemStatusId
                 }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)

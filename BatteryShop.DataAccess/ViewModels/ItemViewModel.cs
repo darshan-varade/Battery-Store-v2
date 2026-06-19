@@ -14,12 +14,14 @@ namespace BatteryShop.DataAccess.ViewModels
         public int PageSize { get; set; } = 0;
         public List<int> PageSizeList = new List<int> { 3,5,10,15,20 };
         public string SerialNumber { get; set; } = "";
-        public List<int> BrandIds { get; set; }   
+        public List<int> BrandIds { get; set; }
+        public List<int> StatusIds { get; set; }
         public string SortColumn { get; set; } = "itemId";
         public string SortDirection { get; set; } = "ASC";
         public List<BrandListViewModel> BrandList { get; set; }
         public int? TypeId { get; set; } = null;
         public List<TypeListViewModel> TypeList { get; set; }
+        public List<StatusListViewModel> StatusList { get; set; }
         public int? TransactionId { get; set; } = null;
         public List<ItemModel> ItemList { get; set; }
         public int TotalRows { get; set; } = 1;

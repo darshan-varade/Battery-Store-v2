@@ -13,6 +13,7 @@
         <div class="item-cell cell-serial sortable" data-column="itemSerialNumber">
             Serial <span class="sort-icon"></span>
         </div>
+        <div class="item-cell cell-status">Status</div>
         <div class="item-cell cell-actions"></div>
     </div>
 
@@ -26,6 +27,11 @@
                 <div class="item-cell cell-brand">@item.ItemBrand</div>
                 <div class="item-cell cell-model">@item.ItemType</div>
                 <div class="item-cell cell-serial">@item.ItemSerialNumber</div>
+                <div class="item-cell cell-status">
+                    <span class="badge bg-@(item.ItemStatusName == "In Stock" ? "success" : item.ItemStatusName == "Sold" ? "secondary" : item.ItemStatusName == "Replacement Given" ? "info" : item.ItemStatusName == "Damaged" ? "danger" : "warning")">
+                        @item.ItemStatusName
+                    </span>
+                </div>
                 <div class="item-cell cell-actions">
                     <button class="btn btn-sm btn-primary btn-action-update" data-id="@item.ItemId" title="Update">
                         <i class="bi bi-pencil"></i>

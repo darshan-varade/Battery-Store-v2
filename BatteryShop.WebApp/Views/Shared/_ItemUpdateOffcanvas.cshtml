@@ -57,6 +57,16 @@
                             <label class="form-label">Serial Number</label>
                             <input type="text" id="updSerialNumber" class="form-control" />
                         </div>
+                        <div class="filter-group">
+                            <label class="form-label">Status</label>
+                            <select id="updStatusId" class="form-control">
+                                <option value="">--Select Status--</option>
+                                @foreach (var status in Model.StatusList)
+                                {
+                                    <option value="@status.StatusId">@status.StatusName</option>
+                                }
+                            </select>
+                        </div>
                     </div>
                 </div>
 

@@ -13,6 +13,12 @@ $(document).ready(function () {
         width: '100%'
     });
 
+    $('#StatusSelect').select2({
+        placeholder: 'Filter by status...',
+        allowClear: true,
+        width: '100%'
+    });
+
     $('#BrandSelect').on('select2:open select2:close', function () {
         updateBrandSelectionDisplay();
     });
@@ -130,6 +136,7 @@ $(document).ready(function () {
         setTimeout(function () {
             // Reset Select2 selection
             $('#BrandSelect').val(null).trigger('change');
+            $('#StatusSelect').val(null).trigger('change');
             PageStart = 1;
             $('#PageNumber').val(1);
             sortColumn = 'itemId';
@@ -185,6 +192,14 @@ $(document).ready(function () {
         $('#PageNumber').val(1);
         PageStart = 1;
         updateBrandSelectionDisplay();
+        if (!isInitializing) {
+            FetchData();
+        }
+    });
+
+    $('#StatusSelect').on('change', function () {
+        $('#PageNumber').val(1);
+        PageStart = 1;
         if (!isInitializing) {
             FetchData();
         }
@@ -271,6 +286,7 @@ $(document).ready(function () {
         $('#updTransactionId').val('');
         $('#updBrandId').val('');
         $('#updTypeId').val('').prop('disabled', true);
+        $('#updStatusId').val('');
 
         $('#updateOffcanvas .offcanvas-title').html('<i class="bi bi-plus-circle"></i> Add Item');
         $('#updateOffcanvas .offcanvas-actions .btn-success').html('<i class="bi bi-plus-circle"></i> Add Item');
@@ -352,6 +368,7 @@ $(document).ready(function () {
 
                 populateTypeDropdown(data.brandId);
                 $('#updTypeId').val(data.typeId);
+                $('#updStatusId').val(data.itemStatusId);
             },
             error: function () {
                 $('#updSpinner').hide();
@@ -386,7 +403,8 @@ $(document).ready(function () {
             SerialNumber: $('#updSerialNumber').val().trim(),
             BrandId: parseInt($('#updBrandId').val()),
             TypeId: parseInt($('#updTypeId').val()),
-            TransactionId: parseInt($('#updTransactionId').val())
+            TransactionId: parseInt($('#updTransactionId').val()),
+            ItemStatusId: parseInt($('#updStatusId').val()) || 1
         };
 
         if (updMode === 'update') {
@@ -427,6 +445,7 @@ $(document).ready(function () {
             pageNumber: $('#PageNumber').val(),
             pageSize: $('#PageSizeList').val(),
             brandIds: $('#BrandSelect').val(),
+            statusIds: $('#StatusSelect').val(),
             serialNumber: $('#SerialNumber').val().trim(),
             sortColumn: sortColumn,
             sortDirection: sortDirection
@@ -446,6 +465,7 @@ $(document).ready(function () {
             if (state.pageNumber) $('#PageNumber').val(state.pageNumber);
             if (state.pageSize) $('#PageSizeList').val(state.pageSize);
             if (state.brandIds) $('#BrandSelect').val(state.brandIds).trigger('change');
+            if (state.statusIds) $('#StatusSelect').val(state.statusIds).trigger('change');
             if (state.serialNumber) $('#SerialNumber').val(state.serialNumber);
             if (state.sortColumn) sortColumn = state.sortColumn;
             if (state.sortDirection) sortDirection = state.sortDirection;

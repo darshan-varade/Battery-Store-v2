@@ -654,6 +654,11 @@ footer {
     min-width: 120px;
 }
 
+.cell-status {
+    flex: 0 0 140px;
+    text-align: center;
+}
+
 .cell-actions {
     flex: 0 0 80px;
     display: flex;
@@ -878,6 +883,16 @@ footer {
 
     .cell-serial::before {
         content: "Serial Number";
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        margin-right: auto;
+        text-align: left;
+    }
+
+    .cell-status::before {
+        content: "Status";
         font-weight: 600;
         color: var(--text-secondary);
         font-size: 0.85rem;

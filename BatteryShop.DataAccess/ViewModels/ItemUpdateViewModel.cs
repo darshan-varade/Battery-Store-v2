@@ -15,5 +15,7 @@ namespace BatteryShop.DataAccess.ViewModels
         public List<TypeListViewModel> TypeList { get; set; }
         public string SerialNumber { get; set; } = "";
         public int? TransactionId { get; set; } = null;
+        public int? ItemStatusId { get; set; } = null;
+        public List<StatusListViewModel> StatusList { get; set; }
     }
 }

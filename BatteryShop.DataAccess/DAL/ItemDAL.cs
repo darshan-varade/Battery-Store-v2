@@ -59,6 +59,9 @@ namespace BatteryShop.DataAccess.DAL
             string brandIds = ItemVM.BrandIds != null && ItemVM.BrandIds.Count > 0
                 ? string.Join(",", ItemVM.BrandIds)
                 : null;
+            string statusIds = ItemVM.StatusIds != null && ItemVM.StatusIds.Count > 0
+                ? string.Join(",", ItemVM.StatusIds)
+                : null;
 
             List <ItemModel> list = new List<ItemModel>();
 
@@ -68,6 +71,7 @@ namespace BatteryShop.DataAccess.DAL
             db.AddInParameter(cmd, "@PageSize", DbType.Int32, ItemVM.PageSize);
             db.AddInParameter(cmd, "@SerialNumber", DbType.String, ItemVM.SerialNumber);
             db.AddInParameter(cmd, "@BrandIds", DbType.String, (object)brandIds ?? DBNull.Value);
+            db.AddInParameter(cmd, "@StatusIds", DbType.String, (object)statusIds ?? DBNull.Value);
             db.AddInParameter(cmd, "@SortColumn", DbType.String, ItemVM.SortColumn ?? "itemId");
             db.AddInParameter(cmd, "@SortDirection", DbType.String, ItemVM.SortDirection ?? "ASC");
             db.AddOutParameter(cmd, "@TotalRows", DbType.Int32, 0);
@@ -85,6 +89,8 @@ namespace BatteryShop.DataAccess.DAL
                             ItemBrand = reader["itemBrand"].ToString(),
                             ItemType = reader["itemType"].ToString(),
                             TransactionId = Convert.ToInt32(reader["transactionId"]),
+                            ItemStatusId = Convert.ToInt32(reader["itemStatusId"]),
+                            ItemStatusName = reader["itemStatusName"].ToString(),
                             IsActive = Convert.ToBoolean(reader["isActive"]),
                             CreatedAt = Convert.ToDateTime(reader["createdAt"]),
                             CreatedBy = reader["createdBy"].ToString(),
@@ -172,6 +178,36 @@ namespace BatteryShop.DataAccess.DAL
             return list;
         }
 
+        public List<StatusListViewModel> ItemFetchStatus()
+        {
+            List<StatusListViewModel> list = new List<StatusListViewModel>();
+
+            DbCommand cmd = db.GetStoredProcCommand("FetchDistinctStatusValues");
+
+            try
+            {
+                using (IDataReader reader = db.ExecuteReader(cmd))
+                {
+                    while (reader.Read())
+                    {
+                        StatusListViewModel item = new StatusListViewModel
+                        {
+                            StatusId = Convert.ToInt32(reader["StatusId"]),
+                            StatusName = reader["StatusName"].ToString()
+                        };
+                        list.Add(item);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in ItemFetchStatus");
+                throw;
+            }
+
+            return list;
+        }
+
         public void deleteItem(int id)
         {
             DbCommand cmd = db.GetStoredProcCommand("batteryDeleteItem");
@@ -199,6 +235,7 @@ namespace BatteryShop.DataAccess.DAL
                     db.AddInParameter(cmd, "@SerialNumber",DbType.String, item.SerialNumber);
                     db.AddInParameter(cmd, "@BrandId",DbType.Int32, item.BrandId);
                     db.AddInParameter(cmd, "@TypeId",DbType.Int32, item.TypeId);
+                    db.AddInParameter(cmd, "@ItemStatusId", DbType.Int32, 1);
                     db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, 1);
                     db.ExecuteNonQuery(cmd);
                 }
@@ -230,7 +267,8 @@ namespace BatteryShop.DataAccess.DAL
                             SerialNumber = reader["itemSerialNumber"].ToString(),
                             BrandId = Convert.ToInt32(reader["itemBrand"]),
                             TypeId = Convert.ToInt32(reader["itemType"]),
-                            TransactionId = Convert.ToInt32(reader["transactionId"])
+                            TransactionId = Convert.ToInt32(reader["transactionId"]),
+                            ItemStatusId = Convert.ToInt32(reader["itemStatusId"])
                         };
                     }
                 }
@@ -254,6 +292,7 @@ namespace BatteryShop.DataAccess.DAL
             db.AddInParameter(cmd, "@SerialNumber", DbType.String, item.SerialNumber);
             db.AddInParameter(cmd, "@BrandId", DbType.Int32, item.BrandId);
             db.AddInParameter(cmd, "@TypeId", DbType.Int32, item.TypeId);
+            db.AddInParameter(cmd, "@ItemStatusId", DbType.Int32, item.ItemStatusId ?? 1);
             db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, 1);
 
             try
