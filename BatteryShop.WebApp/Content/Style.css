@@ -660,13 +660,14 @@ footer {
 }
 
 .cell-actions {
-    flex: 0 0 80px;
+    flex: 0 0 120px;
     display: flex;
     gap: 0.35rem;
     justify-content: flex-end;
 }
 
 /* Icon-only action buttons */
+.btn-action-view,
 .btn-action-update,
 .btn-action-delete {
     width: 32px;

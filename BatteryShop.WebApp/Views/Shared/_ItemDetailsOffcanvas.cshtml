@@ -1,0 +1,23 @@
+@model BatteryShop.DataAccess.ViewModels.ItemViewModel
+
+<!-- Item Details Offcanvas -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="detailsOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">
+            <i class="bi bi-info-circle"></i> Item Details
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="offcanvas-spinner text-center py-4" id="detailsSpinner" style="display:none;">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading item details...</p>
+        </div>
+        <div id="detailsContainer" style="display:none;">
+            <!-- Details will be populated by JavaScript -->
+            <dl class="row mb-0" id="detailsContent"></dl>
+        </div>
+    </div>
+</div>

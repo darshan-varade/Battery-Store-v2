@@ -72,6 +72,9 @@
     var _modelBrandList = @Html.Raw(Json.Encode(Model.BrandList)) || [];
 </script>
 
-@Html.Partial("_ItemUpdateOffcanvas", Model)
-
 <script src="~/PageScripts/ItemListScript.js"></script>
+
+@section modals {
+    @Html.Partial("_ItemUpdateModal", Model)
+    @Html.Partial("_ItemDetailsOffcanvas", Model)
+}

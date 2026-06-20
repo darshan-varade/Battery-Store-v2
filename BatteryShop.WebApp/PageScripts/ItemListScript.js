@@ -269,18 +269,12 @@ $(document).ready(function () {
         if (!isInitializing) FetchData();
     });
 
-    // ===== Mode for offcanvas: "update" or "add" =====
+    // ===== Mode: "add" or "update" for modal =====
     let updMode = 'update';
-
-    //$('#addItemBtn').click(function () {
-    //    sessionStorage.setItem('ItemListReturnUrl', window.location.href);
-    //    window.location.href = '/Item/ItemAdd';
-    //});
 
     $('#addItemBtn').click(function () {
         updMode = 'add';
 
-        $('#updItemIdGroup').hide();
         $('#updItemId').val('');
         $('#updSerialNumber').val('');
         $('#updTransactionId').val('');
@@ -288,22 +282,14 @@ $(document).ready(function () {
         $('#updTypeId').val('').prop('disabled', true);
         $('#updStatusId').val('');
 
-        $('#updateOffcanvas .offcanvas-title').html('<i class="bi bi-plus-circle"></i> Add Item');
-        $('#updateOffcanvas .offcanvas-actions .btn-success').html('<i class="bi bi-plus-circle"></i> Add Item');
+        $('#updateModalTitle').html('<i class="bi bi-plus-circle"></i> Add Item');
+        $('#updateModal .modal-footer .btn-success').html('<i class="bi bi-plus-circle"></i> Add Item');
 
         $('#updSpinner').hide();
         $('#updFormContainer').show();
 
-        let isDesktop = window.innerWidth >= 1200;
-        let offcanvas = new bootstrap.Offcanvas(document.getElementById('updateOffcanvas'), {
-            backdrop: isDesktop ? false : true,
-            scroll: isDesktop ? true : false
-        });
-        offcanvas.show();
-
-        if (isDesktop) {
-            $('.layout-wrapper').addClass('drawer-open');
-        }
+        let modal = new bootstrap.Modal(document.getElementById('updateModal'));
+        modal.show();
     });
 
     $(document).on('click', '.btn-action-delete', function () {
@@ -328,25 +314,16 @@ $(document).ready(function () {
     $(document).on('click', '.btn-action-update', function () {
         updMode = 'update';
 
-        $('#updItemIdGroup').show();
-        $('#updateOffcanvas .offcanvas-title').html('<i class="bi bi-pencil-square"></i> Update Item');
-        $('#updateOffcanvas .offcanvas-actions .btn-success').html('<i class="bi bi-check-circle"></i> Update');
+        $('#updateModalTitle').html('<i class="bi bi-pencil-square"></i> Update Item');
+        $('#updateModal .modal-footer .btn-success').html('<i class="bi bi-check-circle"></i> Update');
 
         let itemId = Number($(this).data('id'));
-        let isDesktop = window.innerWidth >= 1200;
 
         $('#updFormContainer').hide();
         $('#updSpinner').show();
 
-        var offcanvas = new bootstrap.Offcanvas(document.getElementById('updateOffcanvas'), {
-            backdrop: isDesktop ? false : true,
-            scroll: isDesktop ? true : false
-        });
-        offcanvas.show();
-
-        if (isDesktop) {
-            $('.layout-wrapper').addClass('drawer-open');
-        }
+        let modal = new bootstrap.Modal(document.getElementById('updateModal'));
+        modal.show();
 
         $.ajax({
             url: '/Item/ItemGet',
@@ -356,7 +333,7 @@ $(document).ready(function () {
                 if (!data.success) {
                     $('#updSpinner').hide();
                     showToast(data.message || 'Failed to load item data.', 'error');
-                    offcanvas.hide();
+                    modal.hide();
                     return;
                 }
                 $('#updSpinner').hide();
@@ -373,14 +350,81 @@ $(document).ready(function () {
             error: function () {
                 $('#updSpinner').hide();
                 showToast('Failed to load item data.', 'error');
+                modal.hide();
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-action-view', function () {
+        let itemId = Number($(this).data('id'));
+
+        $('#detailsSpinner').show();
+        $('#detailsContainer').hide();
+
+        let isDesktop = window.innerWidth >= 1200;
+        let offcanvas = new bootstrap.Offcanvas(document.getElementById('detailsOffcanvas'), {
+            backdrop: isDesktop ? false : true,
+            scroll: isDesktop ? true : false
+        });
+        offcanvas.show();
+
+        if (isDesktop) {
+            $('.layout-wrapper').addClass('drawer-open');
+        }
+
+        $.ajax({
+            url: '/Item/ItemGet',
+            type: 'GET',
+            data: { id: itemId },
+            success: function (data) {
+                if (!data.success) {
+                    $('#detailsSpinner').hide();
+                    showToast(data.message || 'Failed to load item details.', 'error');
+                    offcanvas.hide();
+                    return;
+                }
+                $('#detailsSpinner').hide();
+                $('#detailsContent').html(
+                    '<dt class="col-sm-5">Item ID</dt><dd class="col-sm-7">' + data.itemId + '</dd>' +
+                    '<dt class="col-sm-5">Serial Number</dt><dd class="col-sm-7">' + escapeHtml(data.serialNumber) + '</dd>' +
+                    '<dt class="col-sm-5">Brand</dt><dd class="col-sm-7">' + getBrandName(data.brandId) + '</dd>' +
+                    '<dt class="col-sm-5">Type</dt><dd class="col-sm-7">' + getTypeName(data.typeId) + '</dd>' +
+                    '<dt class="col-sm-5">Transaction ID</dt><dd class="col-sm-7">' + data.transactionId + '</dd>' +
+                    '<dt class="col-sm-5">Status</dt><dd class="col-sm-7">' + getStatusName(data.itemStatusId) + '</dd>'
+                );
+                $('#detailsContainer').show();
+            },
+            error: function () {
+                $('#detailsSpinner').hide();
+                showToast('Failed to load item details.', 'error');
                 offcanvas.hide();
             }
         });
     });
 
-    $('#updateOffcanvas').on('hidden.bs.offcanvas', function () {
+    $('#detailsOffcanvas').on('hidden.bs.offcanvas', function () {
         $('.layout-wrapper').removeClass('drawer-open');
     });
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return $('<span>').text(str).html();
+    }
+
+    function getBrandName(brandId) {
+        var brand = (_modelBrandList || []).find(function(b) { return b.BrandId === brandId; });
+        return brand ? escapeHtml(brand.BrandName) : brandId;
+    }
+
+    function getTypeName(typeId) {
+        var type = (_modelTypeList || []).find(function(t) { return t.TypeId === typeId; });
+        return type ? escapeHtml(type.TypeName) : typeId;
+    }
+
+    function getStatusName(statusId) {
+        var statusMap = { 1: 'In Stock', 2: 'Sold', 3: 'Replacement Given', 4: 'Damaged', 5: 'Scrapped', 6: 'Received Back' };
+        return statusMap[statusId] || 'Unknown';
+    }
 
     function populateTypeDropdown(brandId) {
         var $typeSelect = $('#updTypeId');
@@ -425,8 +469,8 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.success) {
                     showToast(response.message, 'success');
-                    var offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('updateOffcanvas'));
-                    if (offcanvas) offcanvas.hide();
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('updateModal'));
+                    if (modal) modal.hide();
                     FetchData();
                 } else {
                     showToast(response.message, 'error');

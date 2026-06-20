@@ -229,7 +229,7 @@ namespace BatteryShop.DataAccess.DAL
             {
                 foreach (var item in addItemList.Items)
                 {
-                    DbCommand cmd = db.GetStoredProcCommand("batteryInsertOrUpdateItem");
+                    DbCommand cmd = db.GetStoredProcCommand("batteryAddItem");
 
                     db.AddInParameter(cmd, "@TransactionId",DbType.Int32, addItemList.TransactionId);
                     db.AddInParameter(cmd, "@SerialNumber",DbType.String, item.SerialNumber);
@@ -251,7 +251,7 @@ namespace BatteryShop.DataAccess.DAL
         {
             ItemUpdateViewModel item = null;
 
-            DbCommand cmd = db.GetStoredProcCommand("GetItemForUpdate");
+            DbCommand cmd = db.GetStoredProcCommand("batteryGetItemById");
 
             db.AddInParameter(cmd,"@ItemId",DbType.Int32,itemId);
 
@@ -285,7 +285,7 @@ namespace BatteryShop.DataAccess.DAL
 
         public void UpdateItem(ItemUpdateViewModel item)
         {
-            DbCommand cmd = db.GetStoredProcCommand("batteryInsertOrUpdateItem");
+            DbCommand cmd = db.GetStoredProcCommand("batteryUpdateItem");
 
             db.AddInParameter(cmd, "@ItemId", DbType.Int32, item.ItemId);
             db.AddInParameter(cmd, "@TransactionId", DbType.Int32, item.TransactionId);
@@ -293,7 +293,7 @@ namespace BatteryShop.DataAccess.DAL
             db.AddInParameter(cmd, "@BrandId", DbType.Int32, item.BrandId);
             db.AddInParameter(cmd, "@TypeId", DbType.Int32, item.TypeId);
             db.AddInParameter(cmd, "@ItemStatusId", DbType.Int32, item.ItemStatusId ?? 1);
-            db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, 1);
+            db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, 1);
 
             try
             {

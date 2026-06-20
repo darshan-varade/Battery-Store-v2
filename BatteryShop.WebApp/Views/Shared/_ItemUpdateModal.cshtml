@@ -1,0 +1,75 @@
+@model BatteryShop.DataAccess.ViewModels.ItemViewModel
+
+<script>
+    var _modelTypeList = @Html.Raw(Json.Encode(Model.TypeList)) || [];
+</script>
+
+<!-- Item Add/Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateModalTitle">
+                    <i class="bi bi-pencil-square"></i> Update Item
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-spinner text-center py-4" id="updSpinner" style="display:none;">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading item data...</p>
+                </div>
+                <div id="updFormContainer">
+                    <form id="updateForm">
+                        <input type="hidden" id="updItemId" value="" />
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Transaction ID</label>
+                                <input type="number" id="updTransactionId" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Brand</label>
+                                <select id="updBrandId" class="form-control">
+                                    <option value="">--Select Brand--</option>
+                                    @foreach (var brand in Model.BrandList)
+                                    {
+                                        <option value="@brand.BrandId">@brand.BrandName</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Type</label>
+                                <select id="updTypeId" class="form-control">
+                                    <option value="">--Select Type--</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Serial Number</label>
+                                <input type="text" id="updSerialNumber" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <select id="updStatusId" class="form-control">
+                                    <option value="">--Select Status--</option>
+                                    @foreach (var status in Model.StatusList)
+                                    {
+                                        <option value="@status.StatusId">@status.StatusName</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="updateForm" class="btn btn-success">
+                    <i class="bi bi-check-circle"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
