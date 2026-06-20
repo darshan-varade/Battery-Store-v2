@@ -342,6 +342,7 @@ $(document).ready(function () {
                 $('#updSerialNumber').val(data.serialNumber);
                 $('#updTransactionId').val(data.transactionId);
 
+                $('#updBrandFilter').val(data.brandId);
                 populateTypeDropdown(data.brandId);
                 $('#updTypeId').val(data.typeId);
                 $('#updStatusId').val(data.itemStatusId);
