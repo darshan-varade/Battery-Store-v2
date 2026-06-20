@@ -10,5 +10,6 @@ namespace BatteryShop.DataAccess.ViewModels
     {
         public int TypeId { get; set; }
         public string TypeName { get; set; }
+        public int BrandId { get; set; }
     }
 }

@@ -10,12 +10,11 @@ namespace BatteryShop.DataAccess.ViewModels
     {
         public int ItemId { get; set; } = 0;
         public int? BrandId { get; set; } = null;
-        public List<BrandListViewModel> BrandList { get; set; }
+        public string BrandName { get; set; } = "";
         public int? TypeId { get; set; } = null;
-        public List<TypeListViewModel> TypeList { get; set; }
+        public string TypeName { get; set; } = "";
         public string SerialNumber { get; set; } = "";
         public int? TransactionId { get; set; } = null;
         public int? ItemStatusId { get; set; } = null;
-        public List<StatusListViewModel> StatusList { get; set; }
     }
 }

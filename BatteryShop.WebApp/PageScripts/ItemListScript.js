@@ -278,8 +278,8 @@ $(document).ready(function () {
         $('#updItemId').val('');
         $('#updSerialNumber').val('');
         $('#updTransactionId').val('');
-        $('#updBrandId').val('');
-        $('#updTypeId').val('').prop('disabled', true);
+        $('#updBrandFilter').val('');
+        $('#updTypeId').val('');
         $('#updStatusId').val('');
 
         $('#updateModalTitle').html('<i class="bi bi-plus-circle"></i> Add Item');
@@ -341,7 +341,6 @@ $(document).ready(function () {
                 $('#updItemId').val(data.itemId);
                 $('#updSerialNumber').val(data.serialNumber);
                 $('#updTransactionId').val(data.transactionId);
-                $('#updBrandId').val(data.brandId);
 
                 populateTypeDropdown(data.brandId);
                 $('#updTypeId').val(data.typeId);
@@ -387,8 +386,8 @@ $(document).ready(function () {
                 $('#detailsContent').html(
                     '<dt class="col-sm-5">Item ID</dt><dd class="col-sm-7">' + data.itemId + '</dd>' +
                     '<dt class="col-sm-5">Serial Number</dt><dd class="col-sm-7">' + escapeHtml(data.serialNumber) + '</dd>' +
-                    '<dt class="col-sm-5">Brand</dt><dd class="col-sm-7">' + getBrandName(data.brandId) + '</dd>' +
-                    '<dt class="col-sm-5">Type</dt><dd class="col-sm-7">' + getTypeName(data.typeId) + '</dd>' +
+                    '<dt class="col-sm-5">Brand</dt><dd class="col-sm-7">' + escapeHtml(data.brandName) + '</dd>' +
+                    '<dt class="col-sm-5">Type</dt><dd class="col-sm-7">' + escapeHtml(data.typeName) + '</dd>' +
                     '<dt class="col-sm-5">Transaction ID</dt><dd class="col-sm-7">' + data.transactionId + '</dd>' +
                     '<dt class="col-sm-5">Status</dt><dd class="col-sm-7">' + getStatusName(data.itemStatusId) + '</dd>'
                 );
@@ -411,11 +410,6 @@ $(document).ready(function () {
         return $('<span>').text(str).html();
     }
 
-    function getBrandName(brandId) {
-        var brand = (_modelBrandList || []).find(function(b) { return b.BrandId === brandId; });
-        return brand ? escapeHtml(brand.BrandName) : brandId;
-    }
-
     function getTypeName(typeId) {
         var type = (_modelTypeList || []).find(function(t) { return t.TypeId === typeId; });
         return type ? escapeHtml(type.TypeName) : typeId;
@@ -430,22 +424,25 @@ $(document).ready(function () {
         var $typeSelect = $('#updTypeId');
         $typeSelect.empty().append('<option value="">--Select Type--</option>');
         (_modelTypeList || []).forEach(function (type) {
-            $typeSelect.append('<option value="' + type.TypeId + '">' + type.TypeName + '</option>');
+            if (!brandId || type.BrandId === brandId) {
+                $typeSelect.append('<option value="' + type.TypeId + '" data-brand-id="' + type.BrandId + '">' + type.TypeName + '</option>');
+            }
         });
-        $typeSelect.prop('disabled', !brandId);
+        $typeSelect.prop('disabled', false);
     }
 
-    $('#updBrandId').change(function () {
-        populateTypeDropdown($(this).val());
-        if (!$(this).val()) $('#updTypeId').val('');
+    $('#updBrandFilter').change(function () {
+        populateTypeDropdown(parseInt($(this).val()) || 0);
+        $('#updTypeId').val('');
     });
+
+
 
     $('#updateForm').submit(function (e) {
         e.preventDefault();
 
         var data = {
             SerialNumber: $('#updSerialNumber').val().trim(),
-            BrandId: parseInt($('#updBrandId').val()),
             TypeId: parseInt($('#updTypeId').val()),
             TransactionId: parseInt($('#updTransactionId').val()),
             ItemStatusId: parseInt($('#updStatusId').val()) || 1
@@ -456,7 +453,6 @@ $(document).ready(function () {
         }
 
         if (!data.SerialNumber) { showToast('Serial Number is required.', 'warning'); return; }
-        if (isNaN(data.BrandId)) { showToast('Please select a Brand.', 'warning'); return; }
         if (isNaN(data.TypeId)) { showToast('Please select a Type.', 'warning'); return; }
         if (isNaN(data.TransactionId)) { showToast('Transaction ID must be numeric.', 'warning'); return; }
 

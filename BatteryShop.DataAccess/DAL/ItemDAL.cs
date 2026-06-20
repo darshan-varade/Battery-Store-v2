@@ -161,8 +161,8 @@ namespace BatteryShop.DataAccess.DAL
                         TypeListViewModel item = new TypeListViewModel
                         {
                             TypeId = Convert.ToInt32(reader["TypeId"]),
-                            TypeName = reader["TypeName"].ToString()
-
+                            TypeName = reader["TypeName"].ToString(),
+                            BrandId = Convert.ToInt32(reader["itemBrandId"])
                         };
                         list.Add(item);
 
@@ -233,7 +233,6 @@ namespace BatteryShop.DataAccess.DAL
 
                     db.AddInParameter(cmd, "@TransactionId",DbType.Int32, addItemList.TransactionId);
                     db.AddInParameter(cmd, "@SerialNumber",DbType.String, item.SerialNumber);
-                    db.AddInParameter(cmd, "@BrandId",DbType.Int32, item.BrandId);
                     db.AddInParameter(cmd, "@TypeId",DbType.Int32, item.TypeId);
                     db.AddInParameter(cmd, "@ItemStatusId", DbType.Int32, 1);
                     db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, 1);
@@ -265,8 +264,10 @@ namespace BatteryShop.DataAccess.DAL
                         {
                             ItemId = Convert.ToInt32(reader["itemId"]),
                             SerialNumber = reader["itemSerialNumber"].ToString(),
-                            BrandId = Convert.ToInt32(reader["itemBrand"]),
-                            TypeId = Convert.ToInt32(reader["itemType"]),
+                            BrandId = Convert.ToInt32(reader["itemBrandId"]),
+                            BrandName = reader["itemBrandName"].ToString(),
+                            TypeId = Convert.ToInt32(reader["itemTypeId"]),
+                            TypeName = reader["itemTypeName"].ToString(),
                             TransactionId = Convert.ToInt32(reader["transactionId"]),
                             ItemStatusId = Convert.ToInt32(reader["itemStatusId"])
                         };
@@ -290,7 +291,6 @@ namespace BatteryShop.DataAccess.DAL
             db.AddInParameter(cmd, "@ItemId", DbType.Int32, item.ItemId);
             db.AddInParameter(cmd, "@TransactionId", DbType.Int32, item.TransactionId);
             db.AddInParameter(cmd, "@SerialNumber", DbType.String, item.SerialNumber);
-            db.AddInParameter(cmd, "@BrandId", DbType.Int32, item.BrandId);
             db.AddInParameter(cmd, "@TypeId", DbType.Int32, item.TypeId);
             db.AddInParameter(cmd, "@ItemStatusId", DbType.Int32, item.ItemStatusId ?? 1);
             db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, 1);

@@ -125,7 +125,9 @@ namespace BatteryShop.WebApp.Controllers
                     success = true,
                     itemId = vm.ItemId,
                     brandId = vm.BrandId,
+                    brandName = vm.BrandName,
                     typeId = vm.TypeId,
+                    typeName = vm.TypeName,
                     serialNumber = vm.SerialNumber,
                     transactionId = vm.TransactionId,
                     itemStatusId = vm.ItemStatusId
@@ -213,7 +215,6 @@ namespace BatteryShop.WebApp.Controllers
                     {
                         new ItemAddDetailsViewModel
                         {
-                            BrandId = vm.BrandId ?? 0,
                             TypeId = vm.TypeId ?? 0,
                             SerialNumber = vm.SerialNumber
                         }
