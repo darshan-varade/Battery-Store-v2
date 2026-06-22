@@ -1,0 +1,58 @@
+@model BatteryShop.DataAccess.ViewModels.CustomerViewModel
+
+<div class="modal fade" id="updateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateModalTitle">
+                    <i class="bi bi-pencil-square"></i> Update Customer
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-spinner text-center py-4" id="updSpinner" style="display:none;">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading customer data...</p>
+                </div>
+                <div id="updFormContainer">
+                    <form id="updateForm">
+                        <input type="hidden" id="updUserId" value="" />
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Customer Name</label>
+                                <select id="updName" class="form-control" style="width:100%;"></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" id="updPhone" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">City</label>
+                                <select id="updCity" class="form-control" style="width:100%;">
+                                    <option value="">--Select City--</option>
+                                    @foreach (var city in Model.CityList)
+                                    {
+                                        <option value="@city.CityName">@city.CityName</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6" id="updBalanceRow" style="display:none;">
+                                <label class="form-label">Balance</label>
+                                <input type="text" id="updBalance" class="form-control" readonly />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="updateForm" class="btn btn-success">
+                    <i class="bi bi-check-circle"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

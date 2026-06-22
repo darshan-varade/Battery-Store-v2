@@ -571,6 +571,10 @@ footer {
     margin-left: auto;
 }
 
+#addCustomerBtn {
+    margin-left: auto;
+}
+
 /* Items Table */
 .items-table {
     width: 100%;
@@ -665,6 +669,15 @@ footer {
     gap: 0.35rem;
     justify-content: flex-end;
 }
+
+/* ===== Customer Table Cells ===== */
+.cell-user-id     { flex: 0 0 70px; }
+.cell-name        { flex: 1 1 160px; min-width: 120px; }
+.cell-phone       { flex: 1 1 130px; min-width: 100px; }
+.cell-city        { flex: 1 1 120px; min-width: 80px; }
+.cell-balance     { flex: 0 0 100px; text-align: right; }
+.cell-created-at  { flex: 0 0 130px; }
+.cell-created-by  { flex: 1 1 100px; min-width: 80px; }
 
 /* Icon-only action buttons */
 .btn-action-view,
@@ -902,6 +915,14 @@ footer {
         text-align: left;
     }
 
+    .cell-user-id::before    { content: "ID"; }
+    .cell-name::before       { content: "Name"; }
+    .cell-phone::before      { content: "Phone"; }
+    .cell-city::before       { content: "City"; }
+    .cell-balance::before    { content: "Balance"; }
+    .cell-created-at::before { content: "Created At"; }
+    .cell-created-by::before { content: "Created By"; }
+
     .cell-actions {
         flex: 1 1 auto !important;
         width: 100% !important;
@@ -944,6 +965,12 @@ footer {
     }
 
     #addItemBtn {
+        flex: 1 1 100% !important;
+        max-width: none !important;
+        margin-left: 0 !important;
+    }
+
+    #addCustomerBtn {
         flex: 1 1 100% !important;
         max-width: none !important;
         margin-left: 0 !important;
@@ -1506,6 +1533,55 @@ footer {
     margin-right: 6px !important;
     flex-shrink: 0 !important;
     float: none !important;
+}
+
+/* --- Single-select matching Bootstrap form-control --- */
+.select2-container--default .select2-selection--single {
+    background-color: var(--main-bg) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 0.375rem !important;
+    height: 38px !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 36px !important;
+    padding-left: 12px !important;
+    padding-right: 30px !important;
+    color: var(--text-primary) !important;
+    font-size: 0.875rem !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: var(--text-secondary) !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px !important;
+    right: 8px !important;
+    top: 1px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: var(--text-secondary) transparent transparent transparent !important;
+    border-width: 5px 4px 0 4px !important;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-container--open .select2-selection--single {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.1) !important;
+    outline: none !important;
+}
+
+body.dark-theme .select2-container--default .select2-selection--single {
+    background-color: var(--main-bg) !important;
+    border-color: var(--border) !important;
+}
+
+body.dark-theme .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--text-primary) !important;
 }
 
 /* Dropdown list styling */

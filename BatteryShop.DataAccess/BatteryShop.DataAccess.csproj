@@ -55,10 +55,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DAL\CustomerDAL.cs" />
     <Compile Include="DAL\ItemDAL.cs" />
+    <Compile Include="Models\CustomerModel.cs" />
     <Compile Include="Models\ItemModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\BrandListViewModel.cs" />
+    <Compile Include="ViewModels\CityListViewModel.cs" />
+    <Compile Include="ViewModels\CustomerUpdateViewModel.cs" />
+    <Compile Include="ViewModels\CustomerViewModel.cs" />
     <Compile Include="ViewModels\ItemAddDetailsViewModel.cs" />
     <Compile Include="ViewModels\ItemAddViewModel.cs" />
     <Compile Include="ViewModels\ItemUpdateViewModel.cs" />

@@ -133,6 +133,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\CustomerController.cs" />
     <Compile Include="Controllers\ItemController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -152,6 +153,7 @@
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="PageScripts\ItemAddScript.js" />
+    <Content Include="PageScripts\CustomerListScript.js" />
     <Content Include="PageScripts\ItemListScript.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
@@ -180,9 +182,14 @@
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Customer\CustomerList.cshtml" />
     <Content Include="Views\Item\ItemList.cshtml" />
+    <Content Include="Views\Shared\_CustomerListPartial.cshtml" />
+    <Content Include="Views\Shared\_CustomerUpdateModal.cshtml" />
     <Content Include="Views\Shared\_ItemListPartial.cshtml" />
     <Content Include="Views\Item\ItemAdd.cshtml" />
+    <Content Include="Views\Shared\_ItemDetailsOffcanvas.cshtml" />
+    <Content Include="Views\Shared\_ItemUpdateModal.cshtml" />
     <Content Include="Views\Shared\_ItemUpdateOffcanvas.cshtml" />
   </ItemGroup>
   <ItemGroup>
