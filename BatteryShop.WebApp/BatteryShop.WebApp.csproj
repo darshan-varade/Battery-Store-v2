@@ -135,6 +135,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\CustomerController.cs" />
     <Compile Include="Controllers\ItemController.cs" />
+    <Compile Include="Controllers\BillController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -155,6 +156,7 @@
     <Content Include="PageScripts\ItemAddScript.js" />
     <Content Include="PageScripts\CustomerListScript.js" />
     <Content Include="PageScripts\ItemListScript.js" />
+    <Content Include="PageScripts\BillListScript.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
@@ -183,10 +185,13 @@
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Customer\CustomerList.cshtml" />
+    <Content Include="Views\Bill\BillList.cshtml" />
     <Content Include="Views\Item\ItemList.cshtml" />
     <Content Include="Views\Shared\_CustomerListPartial.cshtml" />
     <Content Include="Views\Shared\_CustomerUpdateModal.cshtml" />
     <Content Include="Views\Shared\_ItemListPartial.cshtml" />
+    <Content Include="Views\Shared\_BillListPartial.cshtml" />
+    <Content Include="Views\Shared\_BillDetailsOffcanvas.cshtml" />
     <Content Include="Views\Item\ItemAdd.cshtml" />
     <Content Include="Views\Shared\_ItemDetailsOffcanvas.cshtml" />
     <Content Include="Views\Shared\_ItemUpdateModal.cshtml" />

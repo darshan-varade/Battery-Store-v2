@@ -678,6 +678,9 @@ footer {
 .cell-balance     { flex: 0 0 100px; text-align: right; }
 .cell-created-at  { flex: 0 0 130px; }
 .cell-created-by  { flex: 1 1 100px; min-width: 80px; }
+.cell-date        { flex: 0 0 110px; }
+.cell-total       { flex: 0 0 100px; text-align: right; }
+.cell-paid        { flex: 0 0 100px; text-align: right; }
 
 /* Icon-only action buttons */
 .btn-action-view,
@@ -922,6 +925,9 @@ footer {
     .cell-balance::before    { content: "Balance"; }
     .cell-created-at::before { content: "Created At"; }
     .cell-created-by::before { content: "Created By"; }
+    .cell-date::before       { content: "Date"; }
+    .cell-total::before      { content: "Total"; }
+    .cell-paid::before       { content: "Paid"; }
 
     .cell-actions {
         flex: 1 1 auto !important;

@@ -70,6 +70,9 @@
     <Compile Include="ViewModels\ItemViewModel.cs" />
     <Compile Include="ViewModels\TypeListViewModel.cs" />
     <Compile Include="ViewModels\StatusListViewModel.cs" />
+    <Compile Include="DAL\BillDAL.cs" />
+    <Compile Include="Models\BillModel.cs" />
+    <Compile Include="ViewModels\BillViewModel.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
