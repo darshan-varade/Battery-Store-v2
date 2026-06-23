@@ -120,5 +120,209 @@ namespace BatteryShop.DataAccess.DAL
                 throw;
             }
         }
+
+        public List<VehicleModelViewModel> GetBillItemTypes()
+        {
+            List<VehicleModelViewModel> list = new List<VehicleModelViewModel>();
+            DbCommand cmd = db.GetStoredProcCommand("fetchBillItemTypes");
+
+            try
+            {
+                using (IDataReader reader = db.ExecuteReader(cmd))
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(new VehicleModelViewModel
+                        {
+                            TypeId = Convert.ToInt32(reader["TypeId"]),
+                            TypeName = reader["TypeName"].ToString(),
+                            BrandId = Convert.ToInt32(reader["BrandId"]),
+                            itemPrice = reader["ItemPrice"] != DBNull.Value ? Convert.ToDecimal(reader["ItemPrice"]) : 0,
+                            oldItemPrice = reader["OldItemPrice"] != DBNull.Value ? Convert.ToDecimal(reader["OldItemPrice"]) : 0
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetBillItemTypes");
+                throw;
+            }
+            return list;
+        }
+
+        public List<OldItemStatusViewModel> GetOldItemStatusList()
+        {
+            List<OldItemStatusViewModel> list = new List<OldItemStatusViewModel>();
+            DbCommand cmd = db.GetStoredProcCommand("FetchOldItemStatusValues");
+
+            try
+            {
+                using (IDataReader reader = db.ExecuteReader(cmd))
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(new OldItemStatusViewModel
+                        {
+                            OldItemStatusId = Convert.ToInt32(reader["oldItemStatusId"]),
+                            OldItemStatusName = reader["oldItemStatusName"].ToString()
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetOldItemStatusList");
+                throw;
+            }
+            return list;
+        }
+
+        public List<VehicleBrandViewModel> GetVehicleBrands()
+        {
+            List<VehicleBrandViewModel> list = new List<VehicleBrandViewModel>();
+            DbCommand cmd = db.GetStoredProcCommand("FetchVehicleBrands");
+
+            try
+            {
+                using (IDataReader reader = db.ExecuteReader(cmd))
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(new VehicleBrandViewModel
+                        {
+                            BrandId = Convert.ToInt32(reader["vehicleBrandId"]),
+                            BrandName = reader["vehicleBrandName"].ToString()
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetVehicleBrands");
+                throw;
+            }
+            return list;
+        }
+
+        public List<VehicleModelInfoViewModel> GetVehicleModelsByBrand(int brandId)
+        {
+            List<VehicleModelInfoViewModel> list = new List<VehicleModelInfoViewModel>();
+            DbCommand cmd = db.GetStoredProcCommand("FetchVehicleModelsByBrand");
+            db.AddInParameter(cmd, "@BrandId", DbType.Int32, brandId);
+
+            try
+            {
+                using (IDataReader reader = db.ExecuteReader(cmd))
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(new VehicleModelInfoViewModel
+                        {
+                            VehicleModelId = Convert.ToInt32(reader["vehicleModelId"]),
+                            VehicleModelName = reader["vehicleModelName"].ToString()
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetVehicleModelsByBrand");
+                throw;
+            }
+            return list;
+        }
+
+        public List<Dictionary<string, object>> FetchAvailableSerials(int brandId, int typeId, int count)
+        {
+            var list = new List<Dictionary<string, object>>();
+            DbCommand cmd = db.GetStoredProcCommand("fetchAvailableSerials");
+            db.AddInParameter(cmd, "@BrandId", DbType.Int32, brandId);
+            db.AddInParameter(cmd, "@TypeId", DbType.Int32, typeId);
+            db.AddInParameter(cmd, "@Count", DbType.Int32, count);
+
+            try
+            {
+                using (IDataReader reader = db.ExecuteReader(cmd))
+                {
+                    while (reader.Read())
+                    {
+                        var row = new Dictionary<string, object>();
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            row[reader.GetName(i)] = reader.GetValue(i);
+                        }
+                        list.Add(row);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in FetchAvailableSerials");
+                throw;
+            }
+            return list;
+        }
+
+        public decimal GetDiscountPercentage(int itemTypeId, DateTime oldItemDateOfSale)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("getDiscountPercentage");
+            db.AddInParameter(cmd, "@ItemTypeId", DbType.Int32, itemTypeId);
+            db.AddInParameter(cmd, "@OldItemDateOfSale", DbType.Date, oldItemDateOfSale);
+            db.AddOutParameter(cmd, "@DiscountPercent", DbType.Decimal, 0);
+
+            try
+            {
+                db.ExecuteNonQuery(cmd);
+                var val = db.GetParameterValue(cmd, "@DiscountPercent");
+                return val != DBNull.Value ? Convert.ToDecimal(val) : 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetDiscountPercentage");
+                throw;
+            }
+        }
+
+        public int AddVehicleInfo(int modelId, string regNumber, int ownerId)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("vehicleInfoAdd");
+            db.AddInParameter(cmd, "@ModelId", DbType.Int32, modelId);
+            db.AddInParameter(cmd, "@RegNumber", DbType.String, regNumber);
+            db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, ownerId);
+
+            try
+            {
+                object result = db.ExecuteScalar(cmd);
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in AddVehicleInfo");
+                throw;
+            }
+        }
+
+        public int BillAdd(int userId, DateTime dateOfSale, decimal totalAmount, decimal paidAmount, string itemsJson)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("billAdd");
+            db.AddInParameter(cmd, "@UserId", DbType.Int32, userId);
+            db.AddInParameter(cmd, "@DateOfSale", DbType.Date, dateOfSale);
+            db.AddInParameter(cmd, "@TotalAmount", DbType.Decimal, totalAmount);
+            db.AddInParameter(cmd, "@PaidAmount", DbType.Decimal, paidAmount);
+            db.AddInParameter(cmd, "@ItemsJson", DbType.String, itemsJson);
+            db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, 1);
+
+            try
+            {
+                object result = db.ExecuteScalar(cmd);
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in BillAdd");
+                throw;
+            }
+        }
     }
 }

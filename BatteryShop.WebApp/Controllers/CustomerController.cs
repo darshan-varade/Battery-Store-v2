@@ -134,7 +134,13 @@ namespace BatteryShop.WebApp.Controllers
             {
                 CustomerDAL dal = new CustomerDAL();
                 dal.CustomerAdd(vm);
-                return Json(new { success = true, message = "Customer added successfully" });
+                var customers = dal.CustomerSearchByPhone(vm.UserPhone);
+                int userId = 0;
+                if (customers != null && customers.Count > 0)
+                {
+                    userId = customers[0].UserId;
+                }
+                return Json(new { success = true, message = "Customer added successfully", userId = userId });
             }
             catch (Exception ex)
             {

@@ -1,0 +1,103 @@
+@model BatteryShop.DataAccess.ViewModels.BillAddViewModel
+@{
+    ViewBag.Title = "Add Bill";
+}
+
+<style>
+    .section-card { border: 1px solid #ddd; border-radius: 6px; padding: 16px; margin-bottom: 16px; background: #fff; }
+    .section-card h5 { margin-top: 0; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+    .batch-card { border: 1px solid #ccc; border-radius: 6px; padding: 14px; margin-bottom: 12px; background: #fafafa; }
+    .serial-row { background: #fff; border: 1px solid #eee; border-radius: 4px; padding: 10px; margin-bottom: 8px; }
+    .serial-row .row { align-items: center; }
+    .payment-row { display: flex; justify-content: space-between; padding: 4px 0; }
+    .payment-row.total { font-size: 1.1em; font-weight: bold; border-top: 2px solid #333; padding-top: 8px; margin-top: 4px; }
+    .hidden-section { display: none; }
+</style>
+
+<div class="page-header">
+    <a href="@Url.Action("BillList", "Bill")" class="btn btn-outline-secondary btn-sm">&larr; Back to List</a>
+    <h2><i class="bi bi-receipt"></i> Add Bill</h2>
+</div>
+
+<form id="billAddForm">
+    @* ====== SECTION 1: CUSTOMER ====== *@
+    <div class="section-card">
+        <h5>1. Customer</h5>
+        <div class="row g-3">
+            <div class="col-md-5">
+                <label class="form-label">Customer Name</label>
+                <select id="custName" class="form-control" style="width:100%;"></select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Phone</label>
+                <input type="tel" id="custPhone" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">City</label>
+                <select id="custCity" class="form-control" style="width:100%;">
+                    <option value="">--Select City--</option>
+                    @foreach (var c in Model.CityList)
+                    {
+                        <option value="@c.CityName">@c.CityName</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="button" id="confirmCustBtn" class="btn btn-success btn-sm w-100">OK</button>
+            </div>
+        </div>
+        <input type="hidden" id="custUserId" value="" />
+    </div>
+
+    @* ====== SECTION 2: BILL DATE (hidden until customer confirmed) ====== *@
+    <div class="section-card hidden-section" id="dateSection">
+        <h5>2. Bill Date</h5>
+        <div class="row">
+            <div class="col-md-4">
+                <input type="date" id="billDate" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    @* ====== SECTION 3: ITEM BATCHES (hidden until customer confirmed) ====== *@
+    <div class="section-card hidden-section" id="itemsSection">
+        <h5>3. Items</h5>
+        <div id="batchesContainer"></div>
+        <button type="button" id="addBatchBtn" class="btn btn-outline-primary btn-sm mt-2">+ Add Item Batch</button>
+    </div>
+
+    @* ====== SECTION 4: PAYMENT BREAKDOWN (hidden until customer confirmed) ====== *@
+    <div class="section-card hidden-section" id="paymentSection">
+        <h5>4. Payment Breakdown</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="payment-row"><span>Subtotal:</span><span id="paySubtotal">0.00</span></div>
+                <div class="payment-row"><span>Less Trade-in:</span><span id="payTradein">0.00</span></div>
+                <div class="payment-row"><span>Less Warranty Discount:</span><span id="payDiscount">0.00</span></div>
+                <div class="payment-row total"><span>Total Amount:</span><span id="payTotal">0.00</span></div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <label class="form-label">Paid Amount</label>
+                    <input type="number" id="payPaid" class="form-control" step="0.01" min="0" />
+                </div>
+                <div class="payment-row total"><span>Due Amount:</span><span id="payDue">0.00</span></div>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" id="saveBillBtn" class="btn btn-lg btn-success hidden-section" disabled>
+        <i class="bi bi-check-circle"></i> Save Bill
+    </button>
+</form>
+
+@section modals {
+    @Html.Partial("_VehicleInfoModal", Model)
+}
+
+<script>
+    var _modelBrandList = @Html.Raw(Json.Encode(Model.BrandList)) || [];
+    var _modelTypeList = @Html.Raw(Json.Encode(Model.TypeList)) || [];
+    var _modelOldStatusList = @Html.Raw(Json.Encode(Model.OldItemStatusList)) || [];
+</script>
+<script src="~/PageScripts/BillAddScript.js"></script>

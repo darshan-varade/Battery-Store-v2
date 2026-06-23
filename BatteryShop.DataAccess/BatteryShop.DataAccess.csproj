@@ -73,6 +73,12 @@
     <Compile Include="DAL\BillDAL.cs" />
     <Compile Include="Models\BillModel.cs" />
     <Compile Include="ViewModels\BillViewModel.cs" />
+    <Compile Include="ViewModels\BillAddViewModel.cs" />
+    <Compile Include="ViewModels\OldItemStatusViewModel.cs" />
+    <Compile Include="ViewModels\VehicleBrandViewModel.cs" />
+    <Compile Include="ViewModels\VehicleModelViewModel.cs" />
+    <Compile Include="ViewModels\VehicleModelInfoViewModel.cs" />
+    <Compile Include="ViewModels\BillAddRequest.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

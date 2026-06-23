@@ -3,6 +3,7 @@
     ViewBag.Title = "Bills";
 }
 
+
 <form method="POST" id="searchForm">
 
     @Html.HiddenFor(m => m.PageNumber, new { id = "PageNumber" })
@@ -41,6 +42,8 @@
             <button type="button" id="searchBtn" class="btn btn-primary">Search</button>
             <button type="reset" id="resetbutton" class="btn btn-secondary">Reset</button>
         </div>
+            <a href="@Url.Action("BillAdd", "Bill")" class="btn btn-success"><i class="bi bi-plus-circle"></i> Add Bill</a>
+        
     </div>
 
     <div class="results-wrapper">

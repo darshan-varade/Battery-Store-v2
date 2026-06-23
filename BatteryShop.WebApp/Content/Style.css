@@ -699,6 +699,15 @@ footer {
     transition: all 0.3s ease;
 }
 
+.btn-action-view {
+    background-color: #6B7280;
+    color: white;
+}
+
+.btn-action-view:hover {
+    background-color: #4B5563;
+}
+
 .btn-action-update {
     background-color: #3B82F6;
     color: white;
@@ -1441,6 +1450,32 @@ footer {
     #updateOffcanvas .offcanvas-actions {
         flex-direction: column;
     }
+}
+
+/* ===== Page Header (for add/edit pages) ===== */
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--primary);
+}
+
+.page-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.page-header h2 i {
+    color: var(--primary);
+    margin-right: 0.5rem;
+}
+
+/* ===== Hidden Sections (Add Bill) ===== */
+.hidden-section {
+    display: none !important;
 }
 
 /* ===== Toast & Modal Stacking ===== */
