@@ -303,10 +303,14 @@ namespace BatteryShop.DataAccess.DAL
             }
         }
 
-        public int BillAdd(int userId, DateTime dateOfSale, decimal totalAmount, decimal paidAmount, string itemsJson)
+        public int BillAdd(int? customerId, string customerName, string customerPhone, string customerCity,
+            DateTime dateOfSale, decimal totalAmount, decimal paidAmount, string itemsJson)
         {
             DbCommand cmd = db.GetStoredProcCommand("billAdd");
-            db.AddInParameter(cmd, "@UserId", DbType.Int32, userId);
+            db.AddInParameter(cmd, "@CustomerId", DbType.Int32, (object)customerId ?? DBNull.Value);
+            db.AddInParameter(cmd, "@CustomerName", DbType.String, customerName ?? "");
+            db.AddInParameter(cmd, "@CustomerPhone", DbType.String, customerPhone ?? "");
+            db.AddInParameter(cmd, "@CustomerCity", DbType.String, customerCity ?? "");
             db.AddInParameter(cmd, "@DateOfSale", DbType.Date, dateOfSale);
             db.AddInParameter(cmd, "@TotalAmount", DbType.Decimal, totalAmount);
             db.AddInParameter(cmd, "@PaidAmount", DbType.Decimal, paidAmount);

@@ -40,7 +40,7 @@ $(document).ready(function () {
         width: '100%'
     });
 
-    // ====== Confirm Customer ======
+    // ====== Confirm Customer (no DB call — deferred to bill submit) ======
     $('#confirmCustBtn').click(function () {
         var sel = $('#custName').select2('data');
         var name = sel && sel.length > 0 ? (sel[0].text || '') : '';
@@ -51,27 +51,7 @@ $(document).ready(function () {
         if (!phone) { showToast('Phone number is required.', 'warning'); return; }
         if (!city) { showToast('City is required.', 'warning'); return; }
 
-        var userId = getCustomerUserId();
-        if (!userId) {
-            $.ajax({
-                url: '/Customer/CustomerAdd',
-                type: 'POST',
-                data: { userFullName: name, userPhone: phone, cityName: city },
-                success: function (data) {
-                    if (data.success) {
-                        $('#custUserId').val(data.userId);
-                        afterCustomerConfirm();
-                    } else {
-                        showToast(data.message || 'Failed to create customer.', 'error');
-                    }
-                },
-                error: function () {
-                    showToast('Failed to create customer.', 'error');
-                }
-            });
-        } else {
-            afterCustomerConfirm();
-        }
+        afterCustomerConfirm();
     });
 
     function afterCustomerConfirm() {
@@ -403,15 +383,21 @@ $(document).ready(function () {
     });
 
     function saveBill() {
-        var userId = getCustomerUserId();
-        if (!userId) { showToast('Customer not confirmed.', 'warning'); return; }
+        var sel = $('#custName').select2('data');
+        var name = sel && sel.length > 0 ? (sel[0].text || '') : '';
+        var phone = $('#custPhone').val().trim();
+        var city = $('#custCity').val();
+
+        if (!name || !phone || !city) {
+            showToast('Customer information is incomplete.', 'warning');
+            return;
+        }
 
         var dateOfSale = $('#billDate').val();
         if (!dateOfSale) { showToast('Bill date is required.', 'warning'); return; }
 
-        // Build item list
+        // Build item list (vehicle info embedded directly)
         var items = [];
-        var vehInfoKeys = {};
 
         $('.serial-row').each(function () {
             var row = $(this);
@@ -442,12 +428,9 @@ $(document).ready(function () {
                 oldItemPrice: statusId >= 3 ? oldPrice : 0,
                 discountPercentage: discountPct,
                 itemFinalPrice: Math.round(finalPrice * 100) / 100,
-                vehicleInfoId: null
+                vehicleModelId: (pendingVehicleInfos[sid] || {}).modelId || null,
+                vehicleRegNumber: (pendingVehicleInfos[sid] || {}).regNumber || null
             };
-
-            if (pendingVehicleInfos[sid]) {
-                vehInfoKeys[sid] = items.length;
-            }
 
             items.push(item);
         });
@@ -457,85 +440,45 @@ $(document).ready(function () {
         var totalAmount = parseFloat($('#payTotal').text()) || 0;
         var paidAmount = parseFloat($('#payPaid').val()) || 0;
 
-        // Save vehicle infos first, then bill
-        function doSaveBill(vehIdMap) {
-            items.forEach(function (item, idx) {
-                var sid = Object.keys(pendingVehicleInfos).find(function (k) { return vehInfoKeys[k] === idx; });
-                if (sid && vehIdMap && vehIdMap[sid]) {
-                    item.vehicleInfoId = vehIdMap[sid];
-                }
-            });
+        // Build request — all data sent together, SP handles customer + vehicle creation
+        var request = {
+            dateOfSale: dateOfSale,
+            totalAmount: totalAmount,
+            paidAmount: paidAmount,
+            itemsJson: JSON.stringify(items)
+        };
 
-            $.ajax({
-                url: '/Bill/BillAdd',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    userId: userId,
-                    dateOfSale: dateOfSale,
-                    totalAmount: totalAmount,
-                    paidAmount: paidAmount,
-                    itemsJson: JSON.stringify(items)
-                }),
-                success: function (data) {
-                    if (data.success) {
-                        showToast('Bill #' + data.billId + ' created successfully!', 'success');
-                        setTimeout(function () {
-                            window.location.href = '/Bill/BillList';
-                        }, 1000);
-                    } else {
-                        showToast(data.message || 'Failed to save bill.', 'error');
-                        $('#saveBillBtn').prop('disabled', false).text('Save Bill');
-                    }
-                },
-                error: function () {
-                    showToast('Failed to save bill.', 'error');
+        var custId = getCustomerUserId();
+        if (custId) {
+            request.customerId = custId;
+        } else {
+            request.customerName = name;
+            request.customerPhone = phone;
+            request.customerCity = city;
+        }
+
+        $('#saveBillBtn').prop('disabled', true).text('Saving bill...');
+
+        $.ajax({
+            url: '/Bill/BillAdd',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(request),
+            success: function (data) {
+                if (data.success) {
+                    showToast('Bill #' + data.billId + ' created successfully!', 'success');
+                    setTimeout(function () {
+                        window.location.href = '/Bill/BillList';
+                    }, 1000);
+                } else {
+                    showToast(data.message || 'Failed to save bill.', 'error');
                     $('#saveBillBtn').prop('disabled', false).text('Save Bill');
                 }
-            });
-        }
-
-        var pendingKeys = Object.keys(pendingVehicleInfos);
-        if (pendingKeys.length === 0) {
-            doSaveBill({});
-            return;
-        }
-
-        $('#saveBillBtn').prop('disabled', true).text('Saving vehicle info...');
-
-        var vehIdMap = {};
-        var completed = 0;
-        var failed = false;
-
-        pendingKeys.forEach(function (sid) {
-            var info = pendingVehicleInfos[sid];
-            $.ajax({
-                url: '/Bill/VehicleInfoAdd',
-                type: 'POST',
-                data: { modelId: info.modelId, regNumber: info.regNumber },
-                success: function (data) {
-                    if (data.success) {
-                        vehIdMap[sid] = data.vehicleInformationId;
-                    } else {
-                        failed = true;
-                    }
-                },
-                error: function () {
-                    failed = true;
-                },
-                complete: function () {
-                    completed++;
-                    if (completed === pendingKeys.length) {
-                        if (failed) {
-                            showToast('Failed to save some vehicle info.', 'error');
-                            $('#saveBillBtn').prop('disabled', false).text('Save Bill');
-                            return;
-                        }
-                        $('#saveBillBtn').text('Saving bill...');
-                        doSaveBill(vehIdMap);
-                    }
-                }
-            });
+            },
+            error: function () {
+                showToast('Failed to save bill.', 'error');
+                $('#saveBillBtn').prop('disabled', false).text('Save Bill');
+            }
         });
     }
 

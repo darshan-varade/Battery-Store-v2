@@ -119,7 +119,16 @@ namespace BatteryShop.WebApp.Controllers
             {
                 BillDAL dal = new BillDAL();
                 DateTime dt = DateTime.Parse(request.DateOfSale);
-                int billId = dal.BillAdd(request.UserId, dt, request.TotalAmount, request.PaidAmount, request.ItemsJson);
+                int billId = dal.BillAdd(
+                    request.CustomerId,
+                    request.CustomerName,
+                    request.CustomerPhone,
+                    request.CustomerCity,
+                    dt,
+                    request.TotalAmount,
+                    request.PaidAmount,
+                    request.ItemsJson
+                );
                 return Json(new { success = true, billId = billId });
             }
             catch (Exception ex)
