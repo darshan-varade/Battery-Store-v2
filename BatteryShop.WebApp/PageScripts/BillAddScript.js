@@ -76,8 +76,8 @@ $(document).ready(function () {
         var html =
             '<div class="batch-card" data-batch="' + id + '">' +
             '  <div class="d-flex justify-content-between align-items-center mb-2">' +
-            '    <strong>Batch #' + id + '</strong>' +
-            '    <button type="button" class="btn btn-sm btn-outline-danger remove-batch" data-batch="' + id + '">\u2715 Remove</button>' +
+            '    <strong><i class="bi bi-box-seam text-primary me-2"></i>Item Entry</strong>' +
+            '    <button type="button" class="btn btn-sm btn-outline-danger remove-batch" data-batch="' + id + '"><i class="bi bi-trash me-1"></i>Remove</button>' +
             '  </div>' +
             '  <div class="row g-2 mb-2">' +
             '    <div class="col-md-4">' +
@@ -92,9 +92,15 @@ $(document).ready(function () {
             '      <label class="form-label">Qty</label>' +
             '      <input type="number" id="qty-' + id + '" class="form-control batch-qty" value="1" min="1" />' +
             '    </div>' +
-            '    <div class="col-md-2 d-flex align-items-end">' +
-            '      <button type="button" class="btn btn-primary btn-sm w-100 fetch-serials" data-batch="' + id + '">Fetch</button>' +
+            '    <div class="col-md-2">' +
+            '      <label class="form-label d-none d-md-block">&nbsp;</label>' +
+            '      <button type="button" class="btn btn-primary w-100 fetch-serials" data-batch="' + id + '"><i class="bi bi-search me-1"></i>Fetch</button>' +
             '    </div>' +
+            '  </div>' +
+            '  <div class="batch-price-info d-none" id="priceInfo-' + id + '">' +
+            '    <span>Price: <strong class="batch-unit-price">₹0</strong>' +
+            '    &nbsp;×&nbsp; Qty: <span class="batch-qty-label">1</span>' +
+            '    &nbsp;=&nbsp; <strong class="batch-total-price text-primary">₹0</strong></span>' +
             '  </div>' +
             '  <div class="serials-container" id="serials-' + id + '"></div>' +
             '</div>';
@@ -127,10 +133,15 @@ $(document).ready(function () {
         });
 
         $('#type-' + id).change(function () {
+            var sel = $(this);
+            var price = Number(sel.find('option:selected').data('price') || 0);
+            $('#priceInfo-' + id).removeClass('d-none').find('.batch-unit-price').text('₹' + price.toFixed(2));
+            updateBatchPrice(id);
             clearSerials(id);
         });
 
         $('#qty-' + id).change(function () {
+            updateBatchPrice(id);
             clearSerials(id);
         });
 
@@ -139,13 +150,20 @@ $(document).ready(function () {
                 $(this).closest('.batch-card').remove();
                 recalcPayment();
             } else {
-                showToast('At least one batch is required.', 'warning');
+                showToast('At least one item is required.', 'warning');
             }
         });
 
         $('.fetch-serials[data-batch="' + id + '"]').click(function () {
             fetchSerials(id);
         });
+    }
+
+    function updateBatchPrice(id) {
+        var price = Number($('#type-' + id).find('option:selected').data('price') || 0);
+        var qty = Number($('#qty-' + id).val() || 0);
+        $('#priceInfo-' + id).find('.batch-qty-label').text(qty);
+        $('#priceInfo-' + id).find('.batch-total-price').text('₹' + (price * qty).toFixed(2));
     }
 
     function clearSerials(id) {
@@ -189,12 +207,12 @@ $(document).ready(function () {
             var row =
                 '<div class="serial-row" data-serial-id="' + sid + '" data-item-id="' + s.itemId + '">' +
                 '  <div class="row g-2">' +
-                '    <div class="col-md-2"><label class="form-label">Serial</label><input type="text" class="form-control serial-display" value="' + escapeHtml(s.itemSerialNumber) + '" readonly /></div>' +
-                '    <div class="col-md-2"><label class="form-label">Old Status</label><select class="form-control old-status"><option value="">--None--</option></select></div>' +
-                '    <div class="col-md-2 old-date-col hidden-section"><label class="form-label">Old Date</label><input type="date" class="form-control old-date" /></div>' +
-                '    <div class="col-md-2 old-serial-col hidden-section"><label class="form-label">Old Serial</label><input type="text" class="form-control old-serial" placeholder="Enter old serial" /></div>' +
-                '    <div class="col-md-2 discount-col hidden-section"><label class="form-label">Discount %</label><input type="text" class="form-control discount-pct" readonly value="0" /></div>' +
-                '    <div class="col-md-2"><label class="form-label">Vehicle</label><button type="button" class="btn btn-outline-info btn-sm w-100 veh-btn" data-serial-id="' + sid + '">Add Vehicle</button></div>' +
+                '    <div class="col-md"><label class="form-label text-secondary small">Serial</label><input type="text" class="form-control serial-display" value="' + escapeHtml(s.itemSerialNumber) + '" readonly /></div>' +
+                '    <div class="col-md"><label class="form-label text-secondary small">Old Status</label><select class="form-control old-status"><option value="">--None--</option></select></div>' +
+                '    <div class="col-md old-date-col hidden-section"><label class="form-label text-secondary small">Old Date</label><input type="date" class="form-control old-date" /></div>' +
+                '    <div class="col-md old-serial-col hidden-section"><label class="form-label text-secondary small">Old Serial</label><input type="text" class="form-control old-serial" placeholder="Enter old serial" /></div>' +
+                '    <div class="col-md discount-col hidden-section"><label class="form-label text-secondary small">Discount %</label><input type="text" class="form-control discount-pct" readonly value="0" /></div>' +
+                '    <div class="col-md"><label class="form-label text-secondary small">Vehicle</label><button type="button" class="btn btn-outline-info w-100 veh-btn" data-serial-id="' + sid + '"><i class="bi bi-car-front me-1"></i>Add Vehicle</button></div>' +
                 '  </div>' +
                 '  <input type="hidden" class="old-item-price" value="0" />' +
                 '  <input type="hidden" class="item-price" value="' + s.itemPrice + '" />' +
@@ -205,6 +223,7 @@ $(document).ready(function () {
         });
 
         recalcPayment();
+        updateBatchPrice(batchId);
     }
 
     function populateOldStatus(sid) {

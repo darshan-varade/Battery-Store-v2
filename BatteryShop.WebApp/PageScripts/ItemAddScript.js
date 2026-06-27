@@ -10,10 +10,12 @@
     function addBatch() {
         batchCount++;
         const batchId = `batch-${batchCount}`;
+        
         const batchHTML = `
                 <div class="batch-card" data-batch-id="${batchId}">
                     <div class="batch-header">
                         ${batchCount > 1 ? `<button type="button" class="btn-remove-batch" title="Remove this batch"><i class="bi bi-trash"></i></button>` : ''}
+                        
                     </div>
                     <div class="batch-filters">
                         <div class="filter-group">
