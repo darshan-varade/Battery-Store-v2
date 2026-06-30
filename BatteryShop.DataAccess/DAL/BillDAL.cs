@@ -303,6 +303,24 @@ namespace BatteryShop.DataAccess.DAL
             }
         }
 
+        public int GetAvailableCount(int brandId, int typeId)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("getAvailableCount");
+            db.AddInParameter(cmd, "@BrandId", DbType.Int32, brandId);
+            db.AddInParameter(cmd, "@TypeId", DbType.Int32, typeId);
+
+            try
+            {
+                object result = db.ExecuteScalar(cmd);
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetAvailableCount");
+                throw;
+            }
+        }
+
         public int BillAdd(int? customerId, string customerName, string customerPhone, string customerCity,
             DateTime dateOfSale, decimal totalAmount, decimal paidAmount, string itemsJson)
         {

@@ -155,6 +155,22 @@ namespace BatteryShop.WebApp.Controllers
         }
 
         [HttpGet]
+        public JsonResult GetAvailableCount(int brandId, int typeId)
+        {
+            try
+            {
+                BillDAL dal = new BillDAL();
+                int count = dal.GetAvailableCount(brandId, typeId);
+                return Json(new { availableCount = count }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetAvailableCount");
+                return Json(new { availableCount = 0 }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
         public JsonResult GetDiscount(int itemTypeId, string oldItemDateOfSale)
         {
             try

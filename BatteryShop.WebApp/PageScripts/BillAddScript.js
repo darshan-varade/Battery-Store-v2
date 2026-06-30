@@ -138,6 +138,22 @@ $(document).ready(function () {
             $('#priceInfo-' + id).removeClass('d-none').find('.batch-unit-price').text('₹' + price.toFixed(2));
             updateBatchPrice(id);
             clearSerials(id);
+
+            var brandId = Number($('#brand-' + id).val());
+            var typeId = Number(sel.val());
+            if (brandId && typeId) {
+                $.getJSON('/Bill/GetAvailableCount', { brandId: brandId, typeId: typeId })
+                    .done(function (data) {
+                        $('#priceInfo-' + id + ' .batch-count').remove();
+                        var ct = data.availableCount || 0;
+                        var cls = ct > 0 ? 'text-success' : 'text-danger';
+                        $('#priceInfo-' + id + ' span').append(' <span class="batch-count">| In Stock: <strong class="' + cls + '">' + ct + '</strong></span>');
+                    })
+                    .fail(function () {
+                        $('#priceInfo-' + id + ' .batch-count').remove();
+                        $('#priceInfo-' + id + ' span').append(' <span class="batch-count text-muted">| In Stock: <strong>—</strong></span>');
+                    });
+            }
         });
 
         $('#qty-' + id).change(function () {
@@ -204,16 +220,39 @@ $(document).ready(function () {
 
         serials.forEach(function (s, idx) {
             var sid = batchId + '-' + idx;
+            var formattedPrice = Number(s.itemPrice || 0).toFixed(2);
             var row =
                 '<div class="serial-row" data-serial-id="' + sid + '" data-item-id="' + s.itemId + '">' +
-                '  <div class="row g-2">' +
-                '    <div class="col-md"><label class="form-label text-secondary small">Serial</label><input type="text" class="form-control serial-display" value="' + escapeHtml(s.itemSerialNumber) + '" readonly /></div>' +
-                '    <div class="col-md"><label class="form-label text-secondary small">Old Status</label><select class="form-control old-status"><option value="">--None--</option></select></div>' +
-                '    <div class="col-md old-date-col hidden-section"><label class="form-label text-secondary small">Old Date</label><input type="date" class="form-control old-date" /></div>' +
-                '    <div class="col-md old-serial-col hidden-section"><label class="form-label text-secondary small">Old Serial</label><input type="text" class="form-control old-serial" placeholder="Enter old serial" /></div>' +
-                '    <div class="col-md discount-col hidden-section"><label class="form-label text-secondary small">Discount %</label><input type="text" class="form-control discount-pct" readonly value="0" /></div>' +
-                '    <div class="col-md"><label class="form-label text-secondary small">Vehicle</label><button type="button" class="btn btn-outline-info w-100 veh-btn" data-serial-id="' + sid + '"><i class="bi bi-car-front me-1"></i>Add Vehicle</button></div>' +
+                '  <div class="serial-header-bar">' +
+                '    <div class="d-flex align-items-center gap-2">' +
+                '      <span class="serial-tag-badge"><i class="bi bi-upc-scan me-2"></i>Item #' + (idx + 1) + '&nbsp;&bull;&nbsp;<span class="font-monospace text-primary ms-1">' + escapeHtml(s.itemSerialNumber) + '</span></span>' +
+                '      <span class="serial-price-badge">₹' + formattedPrice + '</span>' +
+                '    </div>' +
+                '    <button type="button" class="btn btn-sm btn-outline-danger border-0 remove-serial px-2" title="Remove Item"><i class="bi bi-trash3 me-1"></i>Remove</button>' +
                 '  </div>' +
+                '  <div class="row g-3 align-items-end">' +
+                '    <div class="col-md-4 col-sm-6">' +
+                '      <label class="serial-label">Exchange / Return Status</label>' +
+                '      <select class="form-control old-status"></select>' +
+                '    </div>' +
+                '    <div class="col-md-4 col-sm-6 old-date-col hidden-section">' +
+                '      <label class="serial-label">Old Sale Date</label>' +
+                '      <input type="date" class="form-control old-date" />' +
+                '    </div>' +
+                '    <div class="col-md-4 col-sm-6 old-serial-col hidden-section">' +
+                '      <label class="serial-label">Old Serial Number</label>' +
+                '      <input type="text" class="form-control old-serial" placeholder="Enter old serial #" />' +
+                '    </div>' +
+                '    <div class="col-md-4 col-sm-6 discount-col hidden-section">' +
+                '      <label class="serial-label">Warranty Discount %</label>' +
+                '      <input type="text" class="form-control discount-pct fw-bold text-success" readonly value="0" />' +
+                '    </div>' +
+                '    <div class="col-md-4 col-sm-6">' +
+                '      <label class="serial-label">Vehicle Mapping</label>' +
+                '      <button type="button" class="btn btn-outline-primary w-100 veh-btn btn-veh-custom" data-serial-id="' + sid + '"><i class="bi bi-car-front me-1"></i>Link Vehicle</button>' +
+                '    </div>' +
+                '  </div>' +
+                '  <input type="text" class="serial-display d-none" value="' + escapeHtml(s.itemSerialNumber) + '" readonly />' +
                 '  <input type="hidden" class="old-item-price" value="0" />' +
                 '  <input type="hidden" class="item-price" value="' + s.itemPrice + '" />' +
                 '  <input type="hidden" class="vehicle-info-id" value="" />' +
@@ -228,11 +267,22 @@ $(document).ready(function () {
 
     function populateOldStatus(sid) {
         var sel = $('[data-serial-id="' + sid + '"] .old-status');
-        sel.append('<option value="">--None--</option>');
+        sel.empty().append('<option value="">-- No Return (New Sale) --</option>');
         _modelOldStatusList.forEach(function (os) {
             sel.append('<option value="' + os.OldItemStatusId + '">' + os.OldItemStatusName + '</option>');
         });
     }
+
+    // ====== Per-item remove ======
+    $(document).on('click', '.remove-serial', function () {
+        var row = $(this).closest('.serial-row');
+        var batchCard = row.closest('.batch-card');
+        var batchId = batchCard.data('batch');
+        row.remove();
+        var remaining = batchCard.find('.serial-row').length;
+        $('#qty-' + batchId).val(remaining);
+        recalcPayment();
+    });
 
     // ====== Old Status change ======
     $(document).on('change', '.old-status', function () {
@@ -334,7 +384,7 @@ $(document).ready(function () {
 
         var brandText = $('#vehBrand option:selected').text();
         var modelText = $('#vehModel option:selected').text();
-        $('[data-serial-id="' + sid + '"] .veh-btn').text(brandText + ' ' + modelText + ' ' + reg).removeClass('btn-outline-info').addClass('btn-info');
+        $('[data-serial-id="' + sid + '"] .veh-btn').html('<i class="bi bi-car-front-fill me-1"></i> ' + escapeHtml(brandText) + ' ' + escapeHtml(modelText) + ' (' + escapeHtml(reg) + ')').removeClass('btn-outline-primary btn-outline-info').addClass('btn-success');
         $('[data-serial-id="' + sid + '"] .vehicle-info-id').val('-1');
 
         var modal = bootstrap.Modal.getInstance(document.getElementById('vehicleInfoModal'));
