@@ -321,18 +321,71 @@ namespace BatteryShop.DataAccess.DAL
             }
         }
 
-        public int BillAdd(int? customerId, string customerName, string customerPhone, string customerCity,
-            DateTime dateOfSale, decimal totalAmount, decimal paidAmount, string itemsJson)
+        public List<Dictionary<string, object>> BillGetItems(int billId)
+        {
+            var list = new List<Dictionary<string, object>>();
+            DbCommand cmd = db.GetStoredProcCommand("billGetItems");
+            db.AddInParameter(cmd, "@BillId", DbType.Int32, billId);
+
+            try
+            {
+                using (IDataReader reader = db.ExecuteReader(cmd))
+                {
+                    while (reader.Read())
+                    {
+                        var row = new Dictionary<string, object>();
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            row[reader.GetName(i)] = reader.GetValue(i);
+                        }
+                        list.Add(row);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in BillGetItems");
+                throw;
+            }
+            return list;
+        }
+
+        public int BillEdit(BillAddRequest request)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("billEdit");
+            db.AddInParameter(cmd, "@BillId", DbType.Int32, request.BillId);
+            db.AddInParameter(cmd, "@CustomerId", DbType.Int32, (object)request.CustomerId ?? DBNull.Value);
+            db.AddInParameter(cmd, "@CustomerName", DbType.String, request.CustomerName ?? "");
+            db.AddInParameter(cmd, "@CustomerPhone", DbType.String, request.CustomerPhone ?? "");
+            db.AddInParameter(cmd, "@CustomerCity", DbType.String, request.CustomerCity ?? "");
+            db.AddInParameter(cmd, "@DateOfSale", DbType.Date, DateTime.Parse(request.DateOfSale));
+            db.AddInParameter(cmd, "@PaidAmount", DbType.Decimal, request.PaidAmount);
+            db.AddInParameter(cmd, "@ItemsJson", DbType.String, request.ItemsJson);
+            db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, 1);
+
+            try
+            {
+                object result = db.ExecuteScalar(cmd);
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in BillEdit");
+                throw;
+            }
+        }
+
+        public int BillAdd(BillAddRequest request)
         {
             DbCommand cmd = db.GetStoredProcCommand("billAdd");
-            db.AddInParameter(cmd, "@CustomerId", DbType.Int32, (object)customerId ?? DBNull.Value);
-            db.AddInParameter(cmd, "@CustomerName", DbType.String, customerName ?? "");
-            db.AddInParameter(cmd, "@CustomerPhone", DbType.String, customerPhone ?? "");
-            db.AddInParameter(cmd, "@CustomerCity", DbType.String, customerCity ?? "");
-            db.AddInParameter(cmd, "@DateOfSale", DbType.Date, dateOfSale);
-            db.AddInParameter(cmd, "@TotalAmount", DbType.Decimal, totalAmount);
-            db.AddInParameter(cmd, "@PaidAmount", DbType.Decimal, paidAmount);
-            db.AddInParameter(cmd, "@ItemsJson", DbType.String, itemsJson);
+            db.AddInParameter(cmd, "@CustomerId", DbType.Int32, (object)request.CustomerId ?? DBNull.Value);
+            db.AddInParameter(cmd, "@CustomerName", DbType.String, request.CustomerName ?? "");
+            db.AddInParameter(cmd, "@CustomerPhone", DbType.String, request.CustomerPhone ?? "");
+            db.AddInParameter(cmd, "@CustomerCity", DbType.String, request.CustomerCity ?? "");
+            db.AddInParameter(cmd, "@DateOfSale", DbType.Date, DateTime.Parse(request.DateOfSale));
+            db.AddInParameter(cmd, "@TotalAmount", DbType.Decimal, request.TotalAmount);
+            db.AddInParameter(cmd, "@PaidAmount", DbType.Decimal, request.PaidAmount);
+            db.AddInParameter(cmd, "@ItemsJson", DbType.String, request.ItemsJson);
             db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, 1);
 
             try

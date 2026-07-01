@@ -6,7 +6,6 @@ $(document).ready(function () {
     let sortColumn = 'itemId';
     let sortDirection = 'ASC';
 
-    // Initialize Select2 first so it is ready to receive restored state
     $('#BrandSelect').select2({
         placeholder: 'Filter by brands...',
         allowClear: true,
@@ -134,7 +133,6 @@ $(document).ready(function () {
 
     $('#searchForm').on('reset', function () {
         setTimeout(function () {
-            // Reset Select2 selection
             $('#BrandSelect').val(null).trigger('change');
             $('#StatusSelect').val(null).trigger('change');
             PageStart = 1;
@@ -147,7 +145,6 @@ $(document).ready(function () {
         }, 0);
     });
 
-    // ===== Select2 Multi-Select Brand Filter Display Update =====
     function updateBrandSelectionDisplay() {
         setTimeout(function () {
             var $select = $('#BrandSelect');
@@ -156,13 +153,11 @@ $(document).ready(function () {
 
             var $rendered = $container.find('.select2-selection__rendered');
             
-            // Remove existing badge
             $rendered.find('.select2-selection__badge').remove();
             
             var $choices = $rendered.find('.select2-selection__choice');
             var count = $choices.length;
             
-            // Show only the first selected option
             $choices.each(function (index) {
                 if (index < 1) {
                     $(this).show();
@@ -171,7 +166,6 @@ $(document).ready(function () {
                 }
             });
             
-            // If more than 1 option is selected, show + (count - 1)
             if (count > 1) {
                 var badgeHtml = '<li class="select2-selection__choice select2-selection__badge" ' +
                                 'title="' + count + ' brands selected">' +
@@ -241,7 +235,6 @@ $(document).ready(function () {
         FetchData();
     });
 
-    // ===== Sortable Column Headers =====
     function updateSortIcons() {
         $('.sortable .sort-icon').each(function () {
             let col = $(this).closest('.sortable').data('column');
@@ -269,7 +262,6 @@ $(document).ready(function () {
         if (!isInitializing) FetchData();
     });
 
-    // ===== Mode: "add" or "update" for modal =====
     let updMode = 'update';
 
     $('#addItemBtn').click(function () {

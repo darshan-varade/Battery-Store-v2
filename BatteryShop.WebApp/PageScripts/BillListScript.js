@@ -305,7 +305,8 @@ $(document).ready(function () {
     });
 
     $(document).on('click', '.btn-action-update', function () {
-        showToast('Edit feature coming soon.', 'info');
+        var billId = Number($(this).data('id'));
+        window.location.href = '/Bill/BillEdit?id=' + billId;
     });
 
     $(document).on('click', '.btn-action-delete', function () {

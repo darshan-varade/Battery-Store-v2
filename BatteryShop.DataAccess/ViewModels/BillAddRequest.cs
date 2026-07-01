@@ -2,6 +2,7 @@ namespace BatteryShop.DataAccess.ViewModels
 {
     public class BillAddRequest
     {
+        public int BillId { get; set; }
         public int? CustomerId { get; set; }
         public string CustomerName { get; set; }
         public string CustomerPhone { get; set; }

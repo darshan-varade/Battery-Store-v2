@@ -19,38 +19,7 @@ namespace BatteryShop.DataAccess.DAL
         {
             this.db = DatabaseFactory.CreateDatabase();
         }
-        /*
-        public List<ItemModel> ItemGetList()
-        {
-            List<ItemModel> list = new List<ItemModel>();
 
-            DbCommand cmd = db.GetStoredProcCommand("batteryGetList");
-            db.AddInParameter(cmd, "@PageNumber", DbType.Int32, 1);
-            db.AddInParameter(cmd, "@PageSize", DbType.Int32, int.MaxValue);
-
-            using (IDataReader reader = db.ExecuteReader(cmd))
-            {
-                while (reader.Read())
-                {
-                    ItemModel item = new ItemModel
-                    {
-                        ItemId = Convert.ToInt32(reader["itemId"]),
-                        ItemSerialNumber = reader["itemSerialNumber"].ToString(),
-                        ItemBrand = reader["itemBrand"].ToString(),
-                        ItemType = reader["itemType"].ToString(),
-                        TransactionId = Convert.ToInt32(reader["transactionId"]),
-                        IsActive = Convert.ToBoolean(reader["isActive"]),
-                        CreatedAt = Convert.ToDateTime(reader["createdAt"]),
-                        CreatedBy = reader["createdBy"].ToString(),
-                        ModifiedAt = Convert.ToDateTime(reader["lastModifiedAt"]),
-                        ModifiedBy = reader["lastModifiedBy"].ToString()
-                    };
-                    list.Add(item);
-                }
-            }
-            return list;
-        }
-        */
         public List<ItemModel> ItemGetList(ItemViewModel ItemVM)
         {
             ItemVM.PageNumber = ItemVM.PageNumber <= 0 ? 1 : ItemVM.PageNumber ;

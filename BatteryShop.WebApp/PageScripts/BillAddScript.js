@@ -3,7 +3,6 @@ $(document).ready(function () {
     var customerConfirmed = false;
     var pendingVehicleInfos = {};
 
-    // ====== Customer Select2 ======
     $('#custName').select2({
         ajax: {
             url: '/Customer/CustomerSearch',
@@ -40,7 +39,6 @@ $(document).ready(function () {
         width: '100%'
     });
 
-    // ====== Confirm Customer (no DB call — deferred to bill submit) ======
     $('#confirmCustBtn').click(function () {
         var sel = $('#custName').select2('data');
         var name = sel && sel.length > 0 ? (sel[0].text || '') : '';
@@ -50,6 +48,11 @@ $(document).ready(function () {
         if (!name) { showToast('Customer name is required.', 'warning'); return; }
         if (!phone) { showToast('Phone number is required.', 'warning'); return; }
         if (!city) { showToast('City is required.', 'warning'); return; }
+
+        if (_editMode) {
+            showToast('Customer info validated.', 'success');
+            return;
+        }
 
         afterCustomerConfirm();
     });
@@ -65,11 +68,9 @@ $(document).ready(function () {
         if (batchCount === 0) addBatch();
     }
 
-    // ====== Bill Date default ======
     var today = new Date().toISOString().split('T')[0];
     $('#billDate').val(today);
 
-    // ====== Add Item Batch ======
     function addBatch() {
         batchCount++;
         var id = batchCount;
@@ -187,7 +188,6 @@ $(document).ready(function () {
         recalcPayment();
     }
 
-    // ====== Fetch Serials ======
     function fetchSerials(batchId) {
         var brandId = Number($('#brand-' + batchId).val());
         var typeId = Number($('#type-' + batchId).val());
@@ -273,7 +273,6 @@ $(document).ready(function () {
         });
     }
 
-    // ====== Per-item remove ======
     $(document).on('click', '.remove-serial', function () {
         var row = $(this).closest('.serial-row');
         var batchCard = row.closest('.batch-card');
@@ -284,7 +283,6 @@ $(document).ready(function () {
         recalcPayment();
     });
 
-    // ====== Old Status change ======
     $(document).on('change', '.old-status', function () {
         var row = $(this).closest('.serial-row');
         var sid = row.data('serial-id');
@@ -321,7 +319,6 @@ $(document).ready(function () {
         recalcPayment();
     });
 
-    // ====== Old Date change ======
     $(document).on('change', '.old-date', function () {
         var row = $(this).closest('.serial-row');
         var typeId = Number($('#type-' + row.closest('.batch-card').data('batch')).val());
@@ -341,7 +338,6 @@ $(document).ready(function () {
         }
     });
 
-    // ====== Vehicle Info Modal (local only, no DB save) ======
     $(document).on('click', '.veh-btn', function () {
         var sid = $(this).data('serial-id');
         $('#vehTargetSerialId').val(sid);
@@ -391,7 +387,6 @@ $(document).ready(function () {
         if (modal) modal.hide();
     });
 
-    // ====== Payment Calculation ======
     function recalcPayment() {
         var subtotal = 0;
         var tradein = 0;
@@ -445,7 +440,6 @@ $(document).ready(function () {
         $('#saveBillBtn').prop('disabled', !enabled);
     }
 
-    // ====== Save Bill ======
     $('#billAddForm').submit(function (e) {
         e.preventDefault();
         saveBill();
@@ -465,7 +459,6 @@ $(document).ready(function () {
         var dateOfSale = $('#billDate').val();
         if (!dateOfSale) { showToast('Bill date is required.', 'warning'); return; }
 
-        // Build item list (vehicle info embedded directly)
         var items = [];
 
         $('.serial-row').each(function () {
@@ -488,7 +481,9 @@ $(document).ready(function () {
                 finalPrice = itemPrice;
             }
 
+            var billItemId = row.data('bill-item-id') || null;
             var item = {
+                billItemId: billItemId,
                 itemId: itemId,
                 oldItemId: null,
                 oldItemDateOfSale: oldItemDate,
@@ -509,44 +504,74 @@ $(document).ready(function () {
         var totalAmount = parseFloat($('#payTotal').text()) || 0;
         var paidAmount = parseFloat($('#payPaid').val()) || 0;
 
-        // Build request — all data sent together, SP handles customer + vehicle creation
+        if (_editMode) {
+            var origPhone = _editCustomer ? _editCustomer.userPhone : '';
+            if (phone !== origPhone) {
+                $.ajax({
+                    url: '/Bill/CheckCustomerPhone',
+                    type: 'GET',
+                    data: { phone: phone, excludeUserId: (_editCustomer ? _editCustomer.userId : 0) },
+                    success: function (data) {
+                        if (data.exists) {
+                            showConfirm('Duplicate Phone', 'This phone belongs to <strong>' + escapeHtml(data.userName) + '</strong>. The bill will be assigned to this customer. Continue?', 'Assign to ' + escapeHtml(data.userName)).then(function (confirmed) {
+                                if (confirmed) {
+                                    doSaveBill(name, phone, city, dateOfSale, items, totalAmount, paidAmount);
+                                }
+                            });
+                        } else {
+                            doSaveBill(name, phone, city, dateOfSale, items, totalAmount, paidAmount);
+                        }
+                    },
+                    error: function () {
+                        doSaveBill(name, phone, city, dateOfSale, items, totalAmount, paidAmount);
+                    }
+                });
+                return;
+            }
+        }
+
+        doSaveBill(name, phone, city, dateOfSale, items, totalAmount, paidAmount);
+    }
+
+    function doSaveBill(name, phone, city, dateOfSale, items, totalAmount, paidAmount) {
         var request = {
+            billId: _editMode ? _editBillId : 0,
             dateOfSale: dateOfSale,
             totalAmount: totalAmount,
             paidAmount: paidAmount,
             itemsJson: JSON.stringify(items)
         };
 
-        var custId = getCustomerUserId();
-        if (custId) {
-            request.customerId = custId;
-        } else {
-            request.customerName = name;
-            request.customerPhone = phone;
-            request.customerCity = city;
-        }
+        request.customerId = getCustomerUserId();
+        request.customerName = name;
+        request.customerPhone = phone;
+        request.customerCity = city;
 
         $('#saveBillBtn').prop('disabled', true).text('Saving bill...');
 
+        var saveUrl = _editMode ? '/Bill/BillEdit' : '/Bill/BillAdd';
+        var saveLabel = _editMode ? 'Update Bill' : 'Save Bill';
+
         $.ajax({
-            url: '/Bill/BillAdd',
+            url: saveUrl,
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(request),
             success: function (data) {
                 if (data.success) {
-                    showToast('Bill #' + data.billId + ' created successfully!', 'success');
+                    var msg = _editMode ? 'Bill #' + data.billId + ' updated successfully!' : 'Bill #' + data.billId + ' created successfully!';
+                    showToast(msg, 'success');
                     setTimeout(function () {
                         window.location.href = '/Bill/BillList';
                     }, 1000);
                 } else {
                     showToast(data.message || 'Failed to save bill.', 'error');
-                    $('#saveBillBtn').prop('disabled', false).text('Save Bill');
+                    $('#saveBillBtn').prop('disabled', false).text(saveLabel);
                 }
             },
             error: function () {
                 showToast('Failed to save bill.', 'error');
-                $('#saveBillBtn').prop('disabled', false).text('Save Bill');
+                $('#saveBillBtn').prop('disabled', false).text(saveLabel);
             }
         });
     }
@@ -561,12 +586,10 @@ $(document).ready(function () {
         return null;
     }
 
-    // ====== Add Batch button ======
     $('#addBatchBtn').click(function () {
         addBatch();
     });
 
-    // ====== Key events to recalc ======
     $(document).on('change', '.batch-qty, .old-date, .old-serial, .discount-pct', function () {
         recalcPayment();
     });
@@ -575,8 +598,132 @@ $(document).ready(function () {
         recalcPayment();
     });
 
+    function renderEditSerials(batchId, items) {
+        var container = $('#serials-' + batchId);
+
+        items.forEach(function (item, idx) {
+            var sid = 'edit-' + batchId + '-' + idx;
+            var formattedPrice = Number(item.itemPrice || 0).toFixed(2);
+            var hasWarranty = item.discountPercentage > 0;
+            var hasExchange = Number(item.oldItemPrice || 0) > 0;
+            var hasOldItem = item.oldItemId !== null && item.oldItemId !== undefined;
+
+            var rowHtml =
+                '<div class="serial-row" data-serial-id="' + sid + '" data-item-id="' + item.itemId + '" data-bill-item-id="' + (item.billItemId || '') + '">' +
+                '  <div class="serial-header-bar">' +
+                '    <div class="d-flex align-items-center gap-2">' +
+                '      <span class="serial-tag-badge"><i class="bi bi-upc-scan me-2"></i>Item #' + (idx + 1) + '&nbsp;&bull;&nbsp;<span class="font-monospace text-primary ms-1">' + escapeHtml(item.itemSerialNumber) + '</span></span>' +
+                '      <span class="serial-price-badge">₹' + formattedPrice + '</span>' +
+                '    </div>' +
+                '    <button type="button" class="btn btn-sm btn-outline-danger border-0 remove-serial px-2" title="Remove Item"><i class="bi bi-trash3 me-1"></i>Remove</button>' +
+                '  </div>' +
+                '  <div class="row g-3 align-items-end">' +
+                '    <div class="col-md-4 col-sm-6">' +
+                '      <label class="serial-label">Exchange / Return Status</label>' +
+                '      <select class="form-control old-status"></select>' +
+                '    </div>' +
+                '    <div class="col-md-4 col-sm-6 old-date-col' + (hasOldItem ? '' : ' hidden-section') + '">' +
+                '      <label class="serial-label">Old Sale Date</label>' +
+                '      <input type="date" class="form-control old-date" value="' + (item.oldItemDateOfSale || '') + '" />' +
+                '    </div>' +
+                '    <div class="col-md-4 col-sm-6 old-serial-col' + (hasOldItem ? '' : ' hidden-section') + '">' +
+                '      <label class="serial-label">Old Serial Number</label>' +
+                '      <input type="text" class="form-control old-serial" value="' + escapeHtml(item.oldItemSerialNumber || '') + '" placeholder="Enter old serial #" />' +
+                '    </div>' +
+                '    <div class="col-md-4 col-sm-6 discount-col' + (hasWarranty ? '' : ' hidden-section') + '">' +
+                '      <label class="serial-label">Warranty Discount %</label>' +
+                '      <input type="text" class="form-control discount-pct fw-bold text-success" readonly value="' + (item.discountPercentage || 0) + '" />' +
+                '    </div>' +
+                '    <div class="col-md-4 col-sm-6">' +
+                '      <label class="serial-label">Vehicle Mapping</label>' +
+                '      <button type="button" class="btn btn-outline-primary w-100 veh-btn btn-veh-custom" data-serial-id="' + sid + '"><i class="bi bi-car-front me-1"></i>Link Vehicle</button>' +
+                '    </div>' +
+                '  </div>' +
+                '  <input type="text" class="serial-display d-none" value="' + escapeHtml(item.itemSerialNumber) + '" readonly />' +
+                '  <input type="hidden" class="old-item-price" value="' + (Number(item.oldItemPrice) || 0) + '" />' +
+                '  <input type="hidden" class="item-price" value="' + (Number(item.itemPrice) || 0) + '" />' +
+                '  <input type="hidden" class="vehicle-info-id" value="" />' +
+                '</div>';
+
+            container.append(rowHtml);
+            populateOldStatus(sid);
+
+            if (hasOldItem) {
+                var statusSel = $('[data-serial-id="' + sid + '"] .old-status');
+                if (hasWarranty) {
+                    statusSel.val(1);
+                } else if (hasExchange) {
+                    statusSel.val(3);
+                }
+            }
+
+            if (item.vehicleRegNumber) {
+                pendingVehicleInfos[sid] = { modelId: item.vehicleModelId, regNumber: item.vehicleRegNumber };
+                $('[data-serial-id="' + sid + '"] .veh-btn').html('<i class="bi bi-car-front-fill me-1"></i> ' + escapeHtml(item.vehicleRegNumber)).removeClass('btn-outline-primary').addClass('btn-success');
+            }
+        });
+
+        recalcPayment();
+        updateBatchPrice(batchId);
+    }
+
+    function initEditMode() {
+        customerConfirmed = true;
+
+        if (_editCustomer && _editCustomer.userFullName) {
+            var opt = new Option(_editCustomer.userFullName, _editCustomer.userId || _editCustomer.userFullName, true, true);
+            $('#custName').append(opt).trigger('change');
+            $('#custPhone').val(_editCustomer.userPhone || '');
+            $('#custUserId').val(_editCustomer.userId || '');
+            if (_editCustomer.cityName) {
+                if ($('#custCity').find('option[value="' + _editCustomer.cityName + '"]').length) {
+                    $('#custCity').val(_editCustomer.cityName).trigger('change');
+                } else {
+                    $('#custCity').append(new Option(_editCustomer.cityName, _editCustomer.cityName, true, true)).trigger('change');
+                }
+            }
+        }
+
+        $('#dateSection, #itemsSection, #paymentSection, #saveBillBtn').removeClass('hidden-section');
+
+        var groups = {};
+        _editItems.forEach(function (item) {
+            var key = item.BrandId + '-' + item.itemTypeId;
+            if (!groups[key]) groups[key] = { brandId: item.BrandId, typeId: item.itemTypeId, items: [] };
+            groups[key].items.push(item);
+        });
+
+        $('#batchesContainer').empty();
+        batchCount = 0;
+
+        var groupKeys = Object.keys(groups);
+        groupKeys.forEach(function (key, gIdx) {
+            var group = groups[key];
+            addBatch();
+            var id = batchCount;
+            $('#brand-' + id).val(group.brandId).trigger('change');
+            setTimeout(function () {
+                $('#type-' + id).val(group.typeId).trigger('change');
+                setTimeout(function () {
+                    $('#serials-' + id).empty();
+                    renderEditSerials(id, group.items);
+                    $('#brand-' + id).prop('disabled', true);
+                    $('#type-' + id).prop('disabled', true);
+                    $('#qty-' + id).prop('readonly', true);
+                }, 100);
+            }, 100);
+        });
+
+        if (_editDateOfSale) $('#billDate').val(_editDateOfSale);
+        if (_editPaidAmount > 0) $('#payPaid').val(_editPaidAmount);
+
+        setTimeout(function () { recalcPayment(); }, 500);
+    }
+
     function escapeHtml(str) {
         if (!str) return '';
         return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
+
+    if (_editMode) initEditMode();
 });

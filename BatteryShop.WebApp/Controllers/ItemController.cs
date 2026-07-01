@@ -49,7 +49,6 @@ namespace BatteryShop.WebApp.Controllers
             return list;
         }
 
-        // GET: Item
         public ActionResult Index()
         {
             

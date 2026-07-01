@@ -3,7 +3,6 @@
 <input type="hidden" id="TotalRows" value="@Model.TotalRows" />
 
 <div class="items-rows-container">
-    <!-- Header Row -->
     <div class="item-row item-row-header">
         <div class="item-cell cell-id sortable" data-column="itemId">
             ID <span class="sort-icon"></span>
@@ -17,7 +16,6 @@
         <div class="item-cell cell-actions"></div>
     </div>
 
-    <!-- Data Rows -->
     @if (Model.ItemList.Count > 0)
     {
         foreach (var item in Model.ItemList)

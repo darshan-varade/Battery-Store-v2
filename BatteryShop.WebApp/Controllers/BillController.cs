@@ -3,6 +3,7 @@ using System.Linq;
 using System.Web.Mvc;
 using BatteryShop.DataAccess.DAL;
 using BatteryShop.DataAccess.ViewModels;
+using Newtonsoft.Json;
 using Serilog;
 
 namespace BatteryShop.WebApp.Controllers
@@ -86,24 +87,7 @@ namespace BatteryShop.WebApp.Controllers
         {
             try
             {
-                BillDAL dal = new BillDAL();
-                ItemDAL itemDal = new ItemDAL();
-                CustomerDAL custDal = new CustomerDAL();
-
-                BillAddViewModel vm = new BillAddViewModel
-                {
-                    CityList = custDal.CustomerGetDistinctCities(),
-                    BrandList = itemDal.ItemFetchBrand().Select(b => new VehicleBrandViewModel
-                    {
-                        BrandId = b.BrandId,
-                        BrandName = b.BrandName
-                    }).ToList(),
-                    TypeList = dal.GetBillItemTypes(),
-                    OldItemStatusList = dal.GetOldItemStatusList(),
-                    VehicleBrandList = dal.GetVehicleBrands()
-                };
-
-                return View(vm);
+                return View(BuildReferenceLists());
             }
             catch (Exception ex)
             {
@@ -118,17 +102,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 BillDAL dal = new BillDAL();
-                DateTime dt = DateTime.Parse(request.DateOfSale);
-                int billId = dal.BillAdd(
-                    request.CustomerId,
-                    request.CustomerName,
-                    request.CustomerPhone,
-                    request.CustomerCity,
-                    dt,
-                    request.TotalAmount,
-                    request.PaidAmount,
-                    request.ItemsJson
-                );
+                int billId = dal.BillAdd(request);
                 return Json(new { success = true, billId = billId });
             }
             catch (Exception ex)
@@ -233,6 +207,89 @@ namespace BatteryShop.WebApp.Controllers
                 Log.Error(ex, "Error in VehicleInfoAdd");
                 return Json(new { success = false, message = ex.Message });
             }
+        }
+
+        [HttpGet]
+        public JsonResult CheckCustomerPhone(string phone, int excludeUserId = 0)
+        {
+            try
+            {
+                CustomerDAL dal = new CustomerDAL();
+                var list = dal.CustomerSearchByPhone(phone ?? "");
+                var match = list.FirstOrDefault(c => c.UserPhone == phone && c.UserId != excludeUserId);
+                if (match != null)
+                    return Json(new { exists = true, userName = match.UserFullName, userId = match.UserId }, JsonRequestBehavior.AllowGet);
+                return Json(new { exists = false }, JsonRequestBehavior.AllowGet);
+            }
+            catch
+            {
+                return Json(new { exists = false }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult BillEdit(int id)
+        {
+            try
+            {
+                BillDAL dal = new BillDAL();
+                var bill = dal.BillGetById(id);
+                if (bill == null) return HttpNotFound();
+
+                var customer = new CustomerDAL().CustomerGetById(bill.UserId);
+
+                var vm = BuildReferenceLists();
+                vm.BillId = id;
+                vm.EditUserId = bill.UserId;
+                vm.EditCustomerName = bill.UserFullName;
+                vm.EditCustomerPhone = bill.UserPhone;
+                vm.EditCustomerCity = customer?.CityName ?? "";
+                vm.EditDateOfSale = bill.DateOfSale.ToString("yyyy-MM-dd");
+                vm.EditPaidAmount = bill.PaidAmount;
+                vm.EditItemsJson = JsonConvert.SerializeObject(dal.BillGetItems(id));
+
+                return View("BillAdd", vm);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in BillEdit GET");
+                return Content("<div class='alert alert-danger'>Error: " + ex.Message + "</div>");
+            }
+        }
+
+        [HttpPost]
+        public JsonResult BillEdit(BillAddRequest request)
+        {
+            try
+            {
+                BillDAL dal = new BillDAL();
+                int billId = dal.BillEdit(request);
+                return Json(new { success = true, billId = billId });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in BillEdit POST");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+        private BillAddViewModel BuildReferenceLists()
+        {
+            BillDAL dal = new BillDAL();
+            ItemDAL itemDal = new ItemDAL();
+            CustomerDAL custDal = new CustomerDAL();
+
+            return new BillAddViewModel
+            {
+                CityList = custDal.CustomerGetDistinctCities(),
+                BrandList = itemDal.ItemFetchBrand().Select(b => new VehicleBrandViewModel
+                {
+                    BrandId = b.BrandId,
+                    BrandName = b.BrandName
+                }).ToList(),
+                TypeList = dal.GetBillItemTypes(),
+                OldItemStatusList = dal.GetOldItemStatusList(),
+                VehicleBrandList = dal.GetVehicleBrands()
+            };
         }
     }
 }

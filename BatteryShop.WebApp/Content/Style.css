@@ -1,31 +1,25 @@
-/* ===== CSS Variables - Light Theme (Default) ===== */
 
 :root {
-    /* Primary Colors */
+    
     --primary: #84CC16;
     --primary-hover: #65A30D;
-    
-    /* Sidebar */
+
     --sidebar-bg: #1E293B;
     --sidebar-hover: #334155;
-    
-    /* Background */
+
     --main-bg: #F1F5F9;
     --card-bg: #FFFFFF;
     --border: #CBD5E1;
     --table-header: #E2E8F0;
-    
-    /* Text */
+
     --text-primary: #111827;
     --text-secondary: #64748B;
-    
-    /* Status Colors */
+
     --success: #22C55E;
     --warning: #F59E0B;
     --danger: #EF4444;
 }
 
-/* ===== CSS Variables - Dark Theme ===== */
 body.dark-theme {
     --primary: #84CC16;
     --primary-hover: #65A30D;
@@ -42,7 +36,6 @@ body.dark-theme {
     --danger: #EF4444;
 }
 
-/* ===== Global Styles ===== */
 * {
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
@@ -59,13 +52,11 @@ body {
     padding: 0;
 }
 
-/* ===== Layout Container ===== */
 .layout-wrapper {
     display: flex;
     min-height: 100vh;
 }
 
-/* ===== Sidebar Styling ===== */
 .sidebar {
     background-color: var(--sidebar-bg);
     color: white;
@@ -219,7 +210,6 @@ body {
     background-color: var(--primary-hover);
 }
 
-/* ===== Main Content Area ===== */
 .main-content {
     flex: 1;
     margin-left: 250px;
@@ -350,7 +340,6 @@ body {
     color: #000;
 }
 
-/* ===== Content Area ===== */
 .content {
     flex: 1;
     padding: 2rem 2rem 1rem;
@@ -361,7 +350,6 @@ body {
     min-height: 0;
 }
 
-/* ===== Offcanvas Sidebar (Mobile) ===== */
 @media (max-width: 767.98px) {
     .sidebar {
         position: fixed;
@@ -416,7 +404,6 @@ body {
     }
 }
 
-/* ===== Form Elements ===== */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -448,7 +435,6 @@ button {
     transition: all 0.3s ease;
 }
 
-/* ===== Footer ===== */
 footer {
     background-color: var(--card-bg);
     border-top: 1px solid var(--border);
@@ -460,7 +446,6 @@ footer {
     margin-top: auto;
 }
 
-/* ===== Dashboard Page ===== */
 .dashboard-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -508,7 +493,6 @@ footer {
     margin: 0;
 }
 
-/* ===== Inventory Page ===== */
 .page-title {
     font-size: 1.8rem;
     font-weight: 700;
@@ -517,7 +501,6 @@ footer {
     padding: 0;
 }
 
-/* ===== Filters Container (Horizontal Layout) ===== */
 .filters-container {
     background-color: var(--card-bg);
     border: 1px solid var(--border);
@@ -575,7 +558,6 @@ footer {
     margin-left: auto;
 }
 
-/* Items Table */
 .items-table {
     width: 100%;
     border-collapse: collapse;
@@ -584,7 +566,6 @@ footer {
     margin-bottom: 1.5rem;
 }
 
-/* ===== Items Rows Container ===== */
 .results-wrapper {
     background-color: transparent;
     border: none;
@@ -602,7 +583,6 @@ footer {
     gap: 0.5rem;
 }
 
-/* Item Row Styling */
 .item-row {
     display: flex;
     gap: 1.5rem;
@@ -631,7 +611,6 @@ footer {
     background-color: var(--main-bg);
 }
 
-/* Item Cell Sizing */
 .item-cell {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -670,7 +649,6 @@ footer {
     justify-content: flex-end;
 }
 
-/* ===== Customer Table Cells ===== */
 .cell-user-id     { flex: 0 0 70px; }
 .cell-name        { flex: 1 1 160px; min-width: 120px; }
 .cell-phone       { flex: 1 1 130px; min-width: 100px; }
@@ -682,7 +660,6 @@ footer {
 .cell-total       { flex: 0 0 100px; text-align: right; }
 .cell-paid        { flex: 0 0 100px; text-align: right; }
 
-/* Icon-only action buttons */
 .btn-action-view,
 .btn-action-update,
 .btn-action-delete {
@@ -726,7 +703,6 @@ footer {
     background-color: #DC2626;
 }
 
-/* ===== Pagination Footer ===== */
 .pagination-footer {
     display: flex;
     justify-content: space-between;
@@ -755,7 +731,6 @@ footer {
     gap: 0.5rem;
 }
 
-/* Previous/Next Buttons */
 #prevButton,
 #nextButton {
     padding: 0.5rem 1rem;
@@ -781,7 +756,6 @@ footer {
     cursor: not-allowed;
 }
 
-/* Page Number Buttons */
 .page-btn {
     padding: 0.5rem 0.75rem;
     min-width: 2.5rem;
@@ -816,7 +790,6 @@ footer {
     border-color: var(--primary-hover);
 }
 
-/* Responsive Design */
 @media (max-width: 992px) {
     .filters-container {
         padding: 1.25rem;
@@ -841,9 +814,8 @@ footer {
         max-width: 180px;
     }
 
-    /* Transform Table Row to Card */
     .item-row-header {
-        display: none; /* Hide header row on tablets/mobiles */
+        display: none; 
     }
 
     .item-row-data {
@@ -1060,7 +1032,6 @@ footer {
     }
 }
 
-/* ===== Item Add Page ===== */
 .item-add-container {
     width: 100%;
     max-width: 800px;
@@ -1088,7 +1059,6 @@ footer {
     font-style: italic;
 }
 
-/* Form Styling */
 .form-section {
     margin-bottom: 2rem;
 }
@@ -1121,7 +1091,6 @@ footer {
     box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.1);
 }
 
-/* Batches Container */
 .batches-container {
     display: flex;
     flex-direction: column;
@@ -1143,7 +1112,6 @@ footer {
     border-color: var(--primary);
 }
 
-/* Batch Header */
 .batch-header {
     text-align: right;
     margin-bottom: 1.5rem;
@@ -1164,7 +1132,6 @@ footer {
     transform: scale(1.15);
 }
 
-/* Batch Filters (Brand and Type - Horizontal) */
 .batch-filters {
     display: flex;
     gap: 1.5rem;
@@ -1176,7 +1143,6 @@ footer {
     min-width: 0;
 }
 
-/* Serial Numbers Container */
 .serial-numbers-container {
     background-color: var(--main-bg);
     border: 1px solid var(--border);
@@ -1185,7 +1151,6 @@ footer {
     margin-top: 1.5rem;
 }
 
-/* Serial Rows (Similar to Item List) */
 .serial-row {
     display: flex;
     gap: 1rem;
@@ -1216,7 +1181,6 @@ footer {
     background-color: var(--main-bg);
 }
 
-/* Serial Columns */
 .serial-col {
     flex: 1;
     min-width: 0;
@@ -1242,7 +1206,6 @@ footer {
     outline: none;
 }
 
-/* Serial Items List */
 .serial-items-list {
     display: flex;
     flex-direction: column;
@@ -1266,7 +1229,6 @@ footer {
     color: white;
 }
 
-/* Button Groups */
 .button-group {
     display: flex;
     justify-content: center;
@@ -1302,7 +1264,6 @@ footer {
     border-color: #16A34A;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     .item-add-container {
         padding: 0 1rem;
@@ -1335,7 +1296,6 @@ footer {
     }
 }
 
-/* ===== Layout Push Effect for Drawer ===== */
 @media (min-width: 1200px) {
     .drawer-open .main-content {
         margin-right: 450px;
@@ -1343,7 +1303,6 @@ footer {
     }
 }
 
-/* ===== Update Offcanvas ===== */
 #updateOffcanvas {
     background-color: var(--main-bg);
     color: var(--text-primary);
@@ -1416,7 +1375,6 @@ footer {
     font-weight: 600;
 }
 
-/* ===== Offcanvas Loading Spinner ===== */
 .offcanvas-spinner {
     display: flex;
     flex-direction: column;
@@ -1452,7 +1410,6 @@ footer {
     }
 }
 
-/* ===== Page Header (for add/edit pages) ===== */
 .page-header {
     display: flex;
     align-items: center;
@@ -1473,12 +1430,10 @@ footer {
     margin-right: 0.5rem;
 }
 
-/* ===== Hidden Sections (Add Bill) ===== */
 .hidden-section {
     display: none !important;
 }
 
-/* ===== Toast & Modal Stacking ===== */
 #toastContainer {
     z-index: 99999 !important;
 }
@@ -1491,7 +1446,6 @@ footer {
     z-index: 99999;
 }
 
-/* ===== Select2 Custom Styling ===== */
 .select2-container--default .select2-selection--multiple {
     background-color: var(--main-bg) !important;
     border: 1px solid var(--border) !important;
@@ -1539,7 +1493,6 @@ footer {
     flex-shrink: 0 !important;
 }
 
-/* Only show the first selected option, hide the rest */
 .select2-container--default .select2-selection--multiple .select2-selection__rendered .select2-selection__choice:not(.select2-selection__badge) ~ .select2-selection__choice:not(.select2-selection__badge) {
     display: none !important;
 }
@@ -1555,14 +1508,9 @@ footer {
     cursor: pointer !important;
 }
 
-/*.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
-    color: var(--danger) !important;
-}*/
-
-/* Custom +N Badge */
 .select2-container--default .select2-selection--multiple .select2-selection__rendered .select2-selection__badge {
     background-color: var(--primary) !important;
-    /*border: 1px solid var(--primary-hover) !important;*/
+    
     color: #000 !important;
     font-weight: bold !important;
     padding: 2px 8px !important;
@@ -1576,7 +1524,6 @@ footer {
     float: none !important;
 }
 
-/* --- Single-select matching Bootstrap form-control --- */
 .select2-container--default .select2-selection--single {
     background-color: var(--main-bg) !important;
     border: 1px solid var(--border) !important;
@@ -1625,7 +1572,6 @@ body.dark-theme .select2-container--default .select2-selection--single .select2-
     color: var(--text-primary) !important;
 }
 
-/* Dropdown list styling */
 .select2-dropdown {
     background-color: var(--card-bg) !important;
     border: 1px solid var(--border) !important;
@@ -1706,7 +1652,6 @@ body.dark-theme .select2-container--default .select2-selection--single .select2-
     opacity: 0.8;
 }
 
-/* ===== Sortable Column Headers ===== */
 .sortable {
     cursor: pointer;
     user-select: none;
@@ -1718,11 +1663,6 @@ body.dark-theme .select2-container--default .select2-selection--single .select2-
     font-size: 0.75rem;
 }
 
-/* ==========================================
-   MODAL PREMIUM DESIGN STYLES
-   ========================================== */
-
-/* Main Modal Content Styling */
 .modal-content {
     background-color: var(--card-bg) !important;
     color: var(--text-primary) !important;
@@ -1733,7 +1673,6 @@ body.dark-theme .select2-container--default .select2-selection--single .select2-
     transition: transform 0.3s ease-out, background-color 0.3s ease, border-color 0.3s ease;
 }
 
-/* Modal Header Styling */
 .modal-header {
     border-bottom: 1px solid var(--border) !important;
     padding: 1.25rem 1.5rem !important;
@@ -1756,12 +1695,10 @@ body.dark-theme .select2-container--default .select2-selection--single .select2-
     font-size: 1.35rem;
 }
 
-/* Modal Body Styling */
 .modal-body {
     padding: 1.5rem !important;
 }
 
-/* Modal Footer Styling */
 .modal-footer {
     border-top: 1px solid var(--border) !important;
     padding: 1rem 1.5rem !important;
@@ -1776,7 +1713,6 @@ body.dark-theme .modal-footer {
     background-color: rgba(255, 255, 255, 0.02);
 }
 
-/* Form Spacing inside Modal */
 .modal-body label.form-label {
     font-size: 0.85rem;
     font-weight: 600;
@@ -1802,7 +1738,6 @@ body.dark-theme .modal-footer {
     outline: none !important;
 }
 
-/* Close Button Styling */
 .modal .btn-close {
     background-color: transparent;
     opacity: 0.6;
@@ -1825,7 +1760,6 @@ body.dark-theme .modal .btn-close:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Button Styling in Modals */
 .modal .btn {
     padding: 0.625rem 1.25rem;
     font-weight: 600;
@@ -1866,10 +1800,9 @@ body.dark-theme .modal .btn-close:hover {
     box-shadow: 0 4px 12px rgba(132, 204, 22, 0.25) !important;
 }
 
-/* Custom Confirmation / Delete Modal Styling */
 .confirm-modal-content {
     border-radius: 20px !important;
-    border: 1px solid rgba(239, 68, 68, 0.2) !important; /* Soft red border */
+    border: 1px solid rgba(239, 68, 68, 0.2) !important; 
 }
 
 body.dark-theme .confirm-modal-content {
@@ -1941,3 +1874,6 @@ body.dark-theme .confirm-modal-content {
     color: var(--text-primary) !important;
     border-color: var(--text-secondary) !important;
 }
+
+
+

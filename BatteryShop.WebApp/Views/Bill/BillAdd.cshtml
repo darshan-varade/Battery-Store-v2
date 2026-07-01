@@ -1,6 +1,6 @@
 @model BatteryShop.DataAccess.ViewModels.BillAddViewModel
 @{
-    ViewBag.Title = "Add Bill";
+    ViewBag.Title = Model.BillId > 0 ? "Edit Bill" : "Add Bill";
 }
 
 <style>
@@ -140,11 +140,10 @@
 
 <div class="page-header">
     <a href="@Url.Action("BillList", "Bill")" class="btn btn-outline-secondary btn-sm">&larr; Back to List</a>
-    <h2><i class="bi bi-receipt"></i> Add Bill</h2>
+    <h2><i class="bi bi-receipt"></i> @(Model.BillId > 0 ? "Edit Bill" : "Add Bill")</h2>
 </div>
 
 <form id="billAddForm">
-    @* ====== CUSTOMER & BILLING INFO ====== *@
     <div class="section-card">
         <h5><i class="bi bi-person text-primary me-2"></i>Customer & Billing Info</h5>
         <div class="row g-3">
@@ -183,14 +182,12 @@
         <input type="hidden" id="custUserId" value="" />
     </div>
 
-    @* ====== SECTION 3: ITEM BATCHES (hidden until customer confirmed) ====== *@
     <div class="section-card hidden-section" id="itemsSection">
         <h5><i class="bi bi-box-seam text-primary me-2"></i>Items Details</h5>
         <div id="batchesContainer"></div>
         <button type="button" id="addBatchBtn" class="btn btn-outline-primary btn-sm mt-2"><i class="bi bi-plus-lg me-1"></i>Add Item Entry</button>
     </div>
 
-    @* ====== SECTION 4: PAYMENT BREAKDOWN (hidden until customer confirmed) ====== *@
     <div class="section-card hidden-section" id="paymentSection">
         <h5><i class="bi bi-cash-coin text-primary me-2"></i>Payment Summary</h5>
         <div class="row">
@@ -211,7 +208,7 @@
     </div>
 
     <button type="submit" id="saveBillBtn" class="btn btn-lg btn-success hidden-section" disabled>
-        <i class="bi bi-check-circle"></i> Save Bill
+        <i class="bi bi-check-circle"></i> @(Model.BillId > 0 ? "Update Bill" : "Save Bill")
     </button>
 </form>
 
@@ -223,5 +220,16 @@
     var _modelBrandList = @Html.Raw(Json.Encode(Model.BrandList)) || [];
     var _modelTypeList = @Html.Raw(Json.Encode(Model.TypeList)) || [];
     var _modelOldStatusList = @Html.Raw(Json.Encode(Model.OldItemStatusList)) || [];
+    var _editMode = @(Model.BillId > 0 ? "true" : "false");
+    var _editBillId = @Model.BillId;
+    var _editCustomer = @Html.Raw(Json.Encode(new {
+        userId = Model.EditUserId,
+        userFullName = Model.EditCustomerName,
+        userPhone = Model.EditCustomerPhone,
+        cityName = Model.EditCustomerCity
+    }));
+    var _editDateOfSale = '@Model.EditDateOfSale';
+    var _editPaidAmount = @(Model.EditPaidAmount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+    var _editItems = @Html.Raw(Model.EditItemsJson);
 </script>
 <script src="~/PageScripts/BillAddScript.js"></script>
