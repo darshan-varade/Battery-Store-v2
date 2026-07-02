@@ -3,13 +3,6 @@
     ViewBag.Title = "Customers";
 }
 
-@if (TempData["info"] != null)
-{
-    <script>
-        $(function () { showToast('@TempData["info"]', 'info'); });
-    </script>
-}
-
 <form method="POST" id="searchForm">
 
     @Html.HiddenFor(m => m.PageNumber, new { id = "PageNumber" })
