@@ -16,8 +16,8 @@ namespace BatteryShop.WebApp.Controllers
 
         public ActionResult About()
         {
-            ViewBag.Message = "Your application description page.";
-
+            string hash = BCrypt.Net.BCrypt.HashPassword("Pass");
+            ViewBag.Message = hash;
             return View();
         }
 

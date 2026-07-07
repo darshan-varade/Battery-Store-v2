@@ -44,6 +44,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BCrypt.Net-Next, Version=4.0.3.0, Culture=neutral, PublicKeyToken=1e11be04b6288443, processorArchitecture=MSIL">
+      <HintPath>..\packages\BCrypt.Net-Next.4.0.3\lib\net35\BCrypt.Net-Next.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Serilog">
       <HintPath>..\packages\serilog.2.5.0\lib\net45\Serilog.dll</HintPath>
     </Reference>
@@ -136,6 +140,7 @@
     <Compile Include="Controllers\CustomerController.cs" />
     <Compile Include="Controllers\ItemController.cs" />
     <Compile Include="Controllers\BillController.cs" />
+    <Compile Include="Controllers\AuthController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -195,6 +200,8 @@
     <Content Include="Views\Shared\_BillListPartial.cshtml" />
     <Content Include="Views\Shared\_BillDetailsOffcanvas.cshtml" />
     <Content Include="Views\Shared\_VehicleInfoModal.cshtml" />
+    <Content Include="Views\Auth\Login.cshtml" />
+    <Content Include="Views\Auth\Signup.cshtml" />
     <Content Include="Views\Item\ItemAdd.cshtml" />
     <Content Include="Views\Shared\_ItemDetailsOffcanvas.cshtml" />
     <Content Include="Views\Shared\_ItemUpdateModal.cshtml" />

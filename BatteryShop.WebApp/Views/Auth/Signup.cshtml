@@ -1,0 +1,120 @@
+@model BatteryShop.DataAccess.ViewModels.SignupViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Battery Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .auth-card .logo {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .auth-card .logo i {
+            font-size: 2.5rem;
+            color: #2563eb;
+        }
+        .auth-card .logo h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 8px;
+            color: #1e293b;
+        }
+        .auth-card .form-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+        .auth-card .btn-primary {
+            background-color: #2563eb;
+            border-color: #2563eb;
+            padding: 10px;
+            font-weight: 600;
+        }
+        .auth-card .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        .field-validation-error {
+            color: #dc2626;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <div class="logo">
+            <i class="bi bi-lightning-charge"></i>
+            <h2>Create Account</h2>
+            <p class="text-secondary" style="font-size: 0.9rem;">Register a new owner account</p>
+        </div>
+
+        @using (Html.BeginForm("Signup", "Auth", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                @Html.LabelFor(m => m.OwnerName, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.OwnerName, new { @class = "form-control", placeholder = "Full name" })
+                @Html.ValidationMessageFor(m => m.OwnerName)
+            </div>
+
+            <div class="mb-3">
+                @Html.LabelFor(m => m.OwnerPhone, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.OwnerPhone, new { @class = "form-control", placeholder = "Phone number" })
+                @Html.ValidationMessageFor(m => m.OwnerPhone)
+            </div>
+
+            <div class="mb-3">
+                @Html.LabelFor(m => m.OwnerEmail, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.OwnerEmail, new { @class = "form-control", placeholder = "Email address" })
+                @Html.ValidationMessageFor(m => m.OwnerEmail)
+            </div>
+
+            <div class="mb-3">
+                @Html.LabelFor(m => m.Password, new { @class = "form-label" })
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Min 6 characters" })
+                @Html.ValidationMessageFor(m => m.Password)
+            </div>
+
+            <div class="mb-3">
+                @Html.LabelFor(m => m.ConfirmPassword, new { @class = "form-label" })
+                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", placeholder = "Re-enter password" })
+                @Html.ValidationMessageFor(m => m.ConfirmPassword)
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+        }
+
+        <div class="auth-footer">
+            Already have an account? <a href="@Url.Action("Login", "Auth")">Sign in</a>
+        </div>
+    </div>
+</body>
+</html>

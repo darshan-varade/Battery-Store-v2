@@ -50,6 +50,7 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
@@ -70,8 +71,10 @@
     <Compile Include="ViewModels\ItemViewModel.cs" />
     <Compile Include="ViewModels\TypeListViewModel.cs" />
     <Compile Include="ViewModels\StatusListViewModel.cs" />
+    <Compile Include="DAL\AuthDAL.cs" />
     <Compile Include="DAL\BillDAL.cs" />
     <Compile Include="Models\BillModel.cs" />
+    <Compile Include="Models\OwnerModel.cs" />
     <Compile Include="ViewModels\BillViewModel.cs" />
     <Compile Include="ViewModels\BillAddViewModel.cs" />
     <Compile Include="ViewModels\OldItemStatusViewModel.cs" />
@@ -79,6 +82,8 @@
     <Compile Include="ViewModels\VehicleModelViewModel.cs" />
     <Compile Include="ViewModels\VehicleModelInfoViewModel.cs" />
     <Compile Include="ViewModels\BillAddRequest.cs" />
+    <Compile Include="ViewModels\LoginViewModel.cs" />
+    <Compile Include="ViewModels\SignupViewModel.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
