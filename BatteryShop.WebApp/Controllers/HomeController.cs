@@ -7,6 +7,7 @@ using BatteryShop.DataAccess.DAL;
 
 namespace BatteryShop.WebApp.Controllers
 {
+    [AllowAnonymous]
     public class HomeController : Controller
     {
         public ActionResult Index()
@@ -16,8 +17,7 @@ namespace BatteryShop.WebApp.Controllers
 
         public ActionResult About()
         {
-            string hash = BCrypt.Net.BCrypt.HashPassword("Pass");
-            ViewBag.Message = hash;
+            ViewBag.Message = "This is site for battery shop owners";
             return View();
         }
 

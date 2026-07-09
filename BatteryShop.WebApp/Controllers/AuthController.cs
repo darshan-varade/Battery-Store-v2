@@ -36,7 +36,7 @@ namespace BatteryShop.WebApp.Controllers
                     return View(vm);
                 }
 
-                FormsAuthentication.SetAuthCookie(owner.OwnerEmail, false);
+                FormsAuthentication.SetAuthCookie(owner.OwnerEmail, vm.RememberMe);
 
                 Session["OwnerId"] = owner.OwnerId;
                 Session["OwnerName"] = owner.OwnerName;
