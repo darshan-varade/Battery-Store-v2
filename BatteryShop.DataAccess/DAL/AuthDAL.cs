@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using Microsoft.Practices.EnterpriseLibrary.Data;
 using BatteryShop.DataAccess.Models;
+using BatteryShop.DataAccess.ViewModels;
 using Serilog;
 
 namespace BatteryShop.DataAccess.DAL
@@ -16,14 +18,13 @@ namespace BatteryShop.DataAccess.DAL
             this.db = DatabaseFactory.CreateDatabase();
         }
 
-        public int OwnerRegister(string ownerName, string ownerPhone, string ownerEmail, string passwordHash, int roleId = 2)
+        public int OwnerRegister(string ownerName, string ownerPhone, string ownerEmail, string passwordHash)
         {
             DbCommand cmd = db.GetStoredProcCommand("ownerRegister");
             db.AddInParameter(cmd, "@OwnerName", DbType.String, ownerName);
             db.AddInParameter(cmd, "@OwnerPhone", DbType.String, ownerPhone);
             db.AddInParameter(cmd, "@OwnerEmail", DbType.String, ownerEmail);
             db.AddInParameter(cmd, "@PasswordHash", DbType.String, passwordHash);
-            db.AddInParameter(cmd, "@RoleId", DbType.Int32, roleId);
 
             try
             {
@@ -84,6 +85,72 @@ namespace BatteryShop.DataAccess.DAL
             catch (Exception ex)
             {
                 Log.Error(ex, "Error in OwnerCheckEmail");
+                throw;
+            }
+        }
+
+        public List<PendingOwnerViewModel> GetPendingOwners()
+        {
+            List<PendingOwnerViewModel> list = new List<PendingOwnerViewModel>();
+
+            DbCommand cmd = db.GetStoredProcCommand("pendingOwnerGetList");
+
+            try
+            {
+                using (IDataReader reader = db.ExecuteReader(cmd))
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(new PendingOwnerViewModel
+                        {
+                            PendingOwnerId = Convert.ToInt32(reader["pendingOwnerId"]),
+                            OwnerName = reader["ownerName"].ToString(),
+                            OwnerPhone = reader["ownerPhone"].ToString(),
+                            OwnerEmail = reader["ownerEmail"].ToString(),
+                            CreatedAt = Convert.ToDateTime(reader["createdAt"])
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetPendingOwners");
+                throw;
+            }
+
+            return list;
+        }
+
+        public int ApprovePendingOwner(int pendingOwnerId, int approvedBy)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("pendingOwnerApprove");
+            db.AddInParameter(cmd, "@PendingOwnerId", DbType.Int32, pendingOwnerId);
+            db.AddInParameter(cmd, "@ApprovedBy", DbType.Int32, approvedBy);
+
+            try
+            {
+                object result = db.ExecuteScalar(cmd);
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in ApprovePendingOwner");
+                throw;
+            }
+        }
+
+        public void RejectPendingOwner(int pendingOwnerId)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("pendingOwnerReject");
+            db.AddInParameter(cmd, "@PendingOwnerId", DbType.Int32, pendingOwnerId);
+
+            try
+            {
+                db.ExecuteNonQuery(cmd);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in RejectPendingOwner");
                 throw;
             }
         }

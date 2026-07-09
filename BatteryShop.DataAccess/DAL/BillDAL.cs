@@ -18,7 +18,7 @@ namespace BatteryShop.DataAccess.DAL
             this.db = DatabaseFactory.CreateDatabase();
         }
 
-        public List<BillModel> BillGetList(BillViewModel vm)
+        public List<BillModel> BillGetList(BillViewModel vm, int ownerId, string roleName)
         {
             vm.PageNumber = vm.PageNumber <= 0 ? 1 : vm.PageNumber;
             vm.PageSize = vm.PageSize <= 0 ? 100000 : vm.PageSize;
@@ -37,6 +37,8 @@ namespace BatteryShop.DataAccess.DAL
             db.AddInParameter(cmd, "@DateTo", DbType.Date, (object)vm.DateTo ?? DBNull.Value);
             db.AddInParameter(cmd, "@SortColumn", DbType.String, vm.SortColumn ?? "billId");
             db.AddInParameter(cmd, "@SortDirection", DbType.String, vm.SortDirection ?? "DESC");
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+            db.AddInParameter(cmd, "@RoleName", DbType.String, roleName);
             db.AddOutParameter(cmd, "@TotalRows", DbType.Int32, 0);
 
             try
@@ -70,12 +72,14 @@ namespace BatteryShop.DataAccess.DAL
             return list;
         }
 
-        public BillModel BillGetById(int billId)
+        public BillModel BillGetById(int billId, int ownerId, string roleName)
         {
             BillModel item = null;
 
             DbCommand cmd = db.GetStoredProcCommand("billGetById");
             db.AddInParameter(cmd, "@BillId", DbType.Int32, billId);
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+            db.AddInParameter(cmd, "@RoleName", DbType.String, roleName);
 
             try
             {
@@ -105,10 +109,12 @@ namespace BatteryShop.DataAccess.DAL
             return item;
         }
 
-        public void BillDelete(int billId)
+        public void BillDelete(int billId, int ownerId, string roleName)
         {
             DbCommand cmd = db.GetStoredProcCommand("billDelete");
             db.AddInParameter(cmd, "@BillId", DbType.Int32, billId);
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+            db.AddInParameter(cmd, "@RoleName", DbType.String, roleName);
 
             try
             {
@@ -350,7 +356,7 @@ namespace BatteryShop.DataAccess.DAL
             return list;
         }
 
-        public int BillEdit(BillAddRequest request)
+        public int BillEdit(BillAddRequest request, int ownerId)
         {
             DbCommand cmd = db.GetStoredProcCommand("billEdit");
             db.AddInParameter(cmd, "@BillId", DbType.Int32, request.BillId);
@@ -361,7 +367,7 @@ namespace BatteryShop.DataAccess.DAL
             db.AddInParameter(cmd, "@DateOfSale", DbType.Date, DateTime.Parse(request.DateOfSale));
             db.AddInParameter(cmd, "@PaidAmount", DbType.Decimal, request.PaidAmount);
             db.AddInParameter(cmd, "@ItemsJson", DbType.String, request.ItemsJson);
-            db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, 1);
+            db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, ownerId);
 
             try
             {
@@ -375,7 +381,7 @@ namespace BatteryShop.DataAccess.DAL
             }
         }
 
-        public int BillAdd(BillAddRequest request)
+        public int BillAdd(BillAddRequest request, int ownerId)
         {
             DbCommand cmd = db.GetStoredProcCommand("billAdd");
             db.AddInParameter(cmd, "@CustomerId", DbType.Int32, (object)request.CustomerId ?? DBNull.Value);
@@ -386,7 +392,7 @@ namespace BatteryShop.DataAccess.DAL
             db.AddInParameter(cmd, "@TotalAmount", DbType.Decimal, request.TotalAmount);
             db.AddInParameter(cmd, "@PaidAmount", DbType.Decimal, request.PaidAmount);
             db.AddInParameter(cmd, "@ItemsJson", DbType.String, request.ItemsJson);
-            db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, 1);
+            db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, ownerId);
 
             try
             {

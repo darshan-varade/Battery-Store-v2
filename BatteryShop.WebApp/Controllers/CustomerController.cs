@@ -10,7 +10,7 @@ using Serilog;
 
 namespace BatteryShop.WebApp.Controllers
 {
-    public class CustomerController : Controller
+    public class CustomerController : BaseController
     {
         private List<CityListViewModel> GetCachedCities()
         {
@@ -38,7 +38,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 CustomerDAL dal = new CustomerDAL();
-                vm.CustomerList = dal.CustomerGetList(vm);
+                vm.CustomerList = dal.CustomerGetList(vm, CurrentOwnerId, CurrentRoleName);
                 return PartialView("_CustomerListPartial", vm);
             }
             catch (Exception ex)
@@ -54,7 +54,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 CustomerDAL dal = new CustomerDAL();
-                var vm = dal.CustomerGetById(id);
+                var vm = dal.CustomerGetById(id, CurrentOwnerId, CurrentRoleName);
 
                 if (vm == null)
                 {
@@ -84,7 +84,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 CustomerDAL dal = new CustomerDAL();
-                var list = dal.CustomerSearch(term ?? "");
+                var list = dal.CustomerSearch(term ?? "", CurrentOwnerId, CurrentRoleName);
 
                 var results = list.Select(c => new
                 {
@@ -110,7 +110,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 CustomerDAL dal = new CustomerDAL();
-                var list = dal.CustomerSearchByPhone(term ?? "");
+                var list = dal.CustomerSearchByPhone(term ?? "", CurrentOwnerId, CurrentRoleName);
 
                 var results = list.Select(c => new
                 {
@@ -133,8 +133,8 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 CustomerDAL dal = new CustomerDAL();
-                dal.CustomerAdd(vm);
-                var customers = dal.CustomerSearchByPhone(vm.UserPhone);
+                dal.CustomerAdd(vm, CurrentOwnerId);
+                var customers = dal.CustomerSearchByPhone(vm.UserPhone, CurrentOwnerId, CurrentRoleName);
                 int userId = 0;
                 if (customers != null && customers.Count > 0)
                 {
@@ -155,7 +155,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 CustomerDAL dal = new CustomerDAL();
-                dal.CustomerUpdate(vm);
+                dal.CustomerUpdate(vm, CurrentOwnerId);
                 return Json(new { success = true, message = "Customer updated successfully" });
             }
             catch (Exception ex)
@@ -171,7 +171,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 CustomerDAL dal = new CustomerDAL();
-                dal.CustomerDelete(id);
+                dal.CustomerDelete(id, CurrentOwnerId, CurrentRoleName);
                 return Json(new { success = true, message = "Customer deleted successfully" });
             }
             catch (Exception ex)

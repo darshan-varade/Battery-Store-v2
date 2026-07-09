@@ -8,7 +8,7 @@ using Serilog;
 
 namespace BatteryShop.WebApp.Controllers
 {
-    public class BillController : Controller
+    public class BillController : BaseController
     {
         public ActionResult BillList()
         {
@@ -23,7 +23,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 BillDAL dal = new BillDAL();
-                vm.BillList = dal.BillGetList(vm);
+                vm.BillList = dal.BillGetList(vm, CurrentOwnerId, CurrentRoleName);
                 return PartialView("_BillListPartial", vm);
             }
             catch (Exception ex)
@@ -39,7 +39,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 BillDAL dal = new BillDAL();
-                var vm = dal.BillGetById(id);
+                var vm = dal.BillGetById(id, CurrentOwnerId, CurrentRoleName);
 
                 if (vm == null)
                 {
@@ -72,7 +72,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 BillDAL dal = new BillDAL();
-                dal.BillDelete(id);
+                dal.BillDelete(id, CurrentOwnerId, CurrentRoleName);
                 return Json(new { success = true, message = "Bill deleted successfully" });
             }
             catch (Exception ex)
@@ -102,7 +102,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 BillDAL dal = new BillDAL();
-                int billId = dal.BillAdd(request);
+                int billId = dal.BillAdd(request, CurrentOwnerId);
                 return Json(new { success = true, billId = billId });
             }
             catch (Exception ex)
@@ -199,7 +199,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 BillDAL dal = new BillDAL();
-                int id = dal.AddVehicleInfo(modelId, regNumber, 1);
+                int id = dal.AddVehicleInfo(modelId, regNumber, CurrentOwnerId);
                 return Json(new { success = true, vehicleInformationId = id });
             }
             catch (Exception ex)
@@ -215,7 +215,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 CustomerDAL dal = new CustomerDAL();
-                var list = dal.CustomerSearchByPhone(phone ?? "");
+                var list = dal.CustomerSearchByPhone(phone ?? "", CurrentOwnerId, CurrentRoleName);
                 var match = list.FirstOrDefault(c => c.UserPhone == phone && c.UserId != excludeUserId);
                 if (match != null)
                     return Json(new { exists = true, userName = match.UserFullName, userId = match.UserId }, JsonRequestBehavior.AllowGet);
@@ -233,10 +233,10 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 BillDAL dal = new BillDAL();
-                var bill = dal.BillGetById(id);
+                var bill = dal.BillGetById(id, CurrentOwnerId, CurrentRoleName);
                 if (bill == null) return HttpNotFound();
 
-                var customer = new CustomerDAL().CustomerGetById(bill.UserId);
+                var customer = new CustomerDAL().CustomerGetById(bill.UserId, CurrentOwnerId, CurrentRoleName);
 
                 var vm = BuildReferenceLists();
                 vm.BillId = id;
@@ -263,7 +263,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 BillDAL dal = new BillDAL();
-                int billId = dal.BillEdit(request);
+                int billId = dal.BillEdit(request, CurrentOwnerId);
                 return Json(new { success = true, billId = billId });
             }
             catch (Exception ex)

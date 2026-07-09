@@ -83,6 +83,7 @@
     <Compile Include="ViewModels\VehicleModelInfoViewModel.cs" />
     <Compile Include="ViewModels\BillAddRequest.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
+    <Compile Include="ViewModels\PendingOwnerViewModel.cs" />
     <Compile Include="ViewModels\SignupViewModel.cs" />
   </ItemGroup>
   <ItemGroup />

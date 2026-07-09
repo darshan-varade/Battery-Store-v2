@@ -8,7 +8,7 @@ using BatteryShop.DataAccess.DAL;
 namespace BatteryShop.WebApp.Controllers
 {
     [AllowAnonymous]
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         public ActionResult Index()
         {

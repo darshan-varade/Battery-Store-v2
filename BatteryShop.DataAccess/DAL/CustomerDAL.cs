@@ -18,7 +18,7 @@ namespace BatteryShop.DataAccess.DAL
             this.db = DatabaseFactory.CreateDatabase();
         }
 
-        public List<CustomerModel> CustomerGetList(CustomerViewModel vm)
+        public List<CustomerModel> CustomerGetList(CustomerViewModel vm, int ownerId, string roleName)
         {
             vm.PageNumber = vm.PageNumber <= 0 ? 1 : vm.PageNumber;
             vm.PageSize = vm.PageSize <= 0 ? 100000 : vm.PageSize;
@@ -36,6 +36,8 @@ namespace BatteryShop.DataAccess.DAL
             db.AddInParameter(cmd, "@CityId", DbType.Int32, (object)vm.CityId ?? DBNull.Value);
             db.AddInParameter(cmd, "@SortColumn", DbType.String, vm.SortColumn ?? "userId");
             db.AddInParameter(cmd, "@SortDirection", DbType.String, vm.SortDirection ?? "ASC");
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+            db.AddInParameter(cmd, "@RoleName", DbType.String, roleName);
             db.AddOutParameter(cmd, "@TotalRows", DbType.Int32, 0);
 
             try
@@ -73,12 +75,14 @@ namespace BatteryShop.DataAccess.DAL
             return list;
         }
 
-        public CustomerUpdateViewModel CustomerGetById(int userId)
+        public CustomerUpdateViewModel CustomerGetById(int userId, int ownerId, string roleName)
         {
             CustomerUpdateViewModel item = null;
 
             DbCommand cmd = db.GetStoredProcCommand("customerGetById");
             db.AddInParameter(cmd, "@UserId", DbType.Int32, userId);
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+            db.AddInParameter(cmd, "@RoleName", DbType.String, roleName);
 
             try
             {
@@ -106,12 +110,14 @@ namespace BatteryShop.DataAccess.DAL
             return item;
         }
 
-        public List<CustomerModel> CustomerSearch(string term)
+        public List<CustomerModel> CustomerSearch(string term, int ownerId, string roleName)
         {
             List<CustomerModel> list = new List<CustomerModel>();
 
             DbCommand cmd = db.GetStoredProcCommand("customerSearch");
             db.AddInParameter(cmd, "@SearchTerm", DbType.String, term ?? "");
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+            db.AddInParameter(cmd, "@RoleName", DbType.String, roleName);
 
             try
             {
@@ -140,12 +146,14 @@ namespace BatteryShop.DataAccess.DAL
             return list;
         }
 
-        public List<CustomerModel> CustomerSearchByPhone(string term)
+        public List<CustomerModel> CustomerSearchByPhone(string term, int ownerId, string roleName)
         {
             List<CustomerModel> list = new List<CustomerModel>();
 
             DbCommand cmd = db.GetStoredProcCommand("customerSearchByPhone");
             db.AddInParameter(cmd, "@SearchTerm", DbType.String, term ?? "");
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+            db.AddInParameter(cmd, "@RoleName", DbType.String, roleName);
 
             try
             {
@@ -174,13 +182,13 @@ namespace BatteryShop.DataAccess.DAL
             return list;
         }
 
-        public void CustomerAdd(CustomerUpdateViewModel vm)
+        public void CustomerAdd(CustomerUpdateViewModel vm, int ownerId)
         {
             DbCommand cmd = db.GetStoredProcCommand("customerAdd");
             db.AddInParameter(cmd, "@FullName", DbType.String, vm.UserFullName);
             db.AddInParameter(cmd, "@Phone", DbType.String, vm.UserPhone);
             db.AddInParameter(cmd, "@CityName", DbType.String, vm.CityName);
-            db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, 1);
+            db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, ownerId);
 
             try
             {
@@ -193,14 +201,14 @@ namespace BatteryShop.DataAccess.DAL
             }
         }
 
-        public void CustomerUpdate(CustomerUpdateViewModel vm)
+        public void CustomerUpdate(CustomerUpdateViewModel vm, int ownerId)
         {
             DbCommand cmd = db.GetStoredProcCommand("customerUpdate");
             db.AddInParameter(cmd, "@UserId", DbType.Int32, vm.UserId);
             db.AddInParameter(cmd, "@FullName", DbType.String, vm.UserFullName);
             db.AddInParameter(cmd, "@Phone", DbType.String, vm.UserPhone);
             db.AddInParameter(cmd, "@CityName", DbType.String, vm.CityName);
-            db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, 1);
+            db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, ownerId);
 
             try
             {
@@ -213,10 +221,12 @@ namespace BatteryShop.DataAccess.DAL
             }
         }
 
-        public void CustomerDelete(int userId)
+        public void CustomerDelete(int userId, int ownerId, string roleName)
         {
             DbCommand cmd = db.GetStoredProcCommand("customerDelete");
             db.AddInParameter(cmd, "@UserId", DbType.Int32, userId);
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+            db.AddInParameter(cmd, "@RoleName", DbType.String, roleName);
 
             try
             {

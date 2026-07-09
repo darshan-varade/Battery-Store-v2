@@ -10,7 +10,7 @@ using Serilog;
 
 namespace BatteryShop.WebApp.Controllers
 {
-    public class ItemController : Controller
+    public class ItemController : BaseController
     {
 
         private List<BrandListViewModel> GetCachedBrands()
@@ -72,7 +72,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 ItemDAL item = new ItemDAL();
-                ItemVM.ItemList = item.ItemGetList(ItemVM);
+                ItemVM.ItemList = item.ItemGetList(ItemVM, CurrentOwnerId, CurrentRoleName);
                 return PartialView("_ItemListPartial", ItemVM);
             }
             catch (Exception ex)
@@ -88,7 +88,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 ItemDAL item = new ItemDAL();
-                item.deleteItem(id);
+                item.deleteItem(id, CurrentOwnerId, CurrentRoleName);
                 return Json(new
                 {
                     success = true,
@@ -112,7 +112,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 ItemDAL item = new ItemDAL();
-                var vm = item.GetItemForUpdate(id);
+                var vm = item.GetItemForUpdate(id, CurrentOwnerId, CurrentRoleName);
 
                 if (vm == null)
                 {
@@ -152,7 +152,7 @@ namespace BatteryShop.WebApp.Controllers
             try
             {
                 ItemDAL itemDal = new ItemDAL();
-                itemDal.addItems(addItemList);
+                itemDal.addItems(addItemList, CurrentOwnerId);
                 return Json(new
                 {
                     success = true,
@@ -183,7 +183,7 @@ namespace BatteryShop.WebApp.Controllers
             {
                 ItemDAL item = new ItemDAL();
 
-                item.UpdateItem(vm);
+                item.UpdateItem(vm, CurrentOwnerId);
 
                 return Json(new
                 {
@@ -221,7 +221,7 @@ namespace BatteryShop.WebApp.Controllers
                 };
 
                 ItemDAL item = new ItemDAL();
-                item.addItems(addVm);
+                item.addItems(addVm, CurrentOwnerId);
 
                 return Json(new
                 {

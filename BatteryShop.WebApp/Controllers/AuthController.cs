@@ -7,7 +7,7 @@ using BatteryShop.DataAccess.ViewModels;
 namespace BatteryShop.WebApp.Controllers
 {
     [AllowAnonymous]
-    public class AuthController : Controller
+    public class AuthController : BaseController
     {
         [HttpGet]
         public ActionResult Login()
@@ -83,7 +83,7 @@ namespace BatteryShop.WebApp.Controllers
 
                 dal.OwnerRegister(vm.OwnerName, vm.OwnerPhone, vm.OwnerEmail, passwordHash);
 
-                TempData["info"] = "Account created successfully! Please login.";
+                TempData["info"] = "Registration submitted! An admin will review and activate your account.";
                 return RedirectToAction("Login");
             }
             catch (Exception ex)

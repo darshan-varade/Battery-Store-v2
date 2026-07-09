@@ -133,6 +133,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\AuthorizeRoleAttribute.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -140,7 +141,9 @@
     <Compile Include="Controllers\CustomerController.cs" />
     <Compile Include="Controllers\ItemController.cs" />
     <Compile Include="Controllers\BillController.cs" />
+    <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\AuthController.cs" />
+    <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -201,6 +204,7 @@
     <Content Include="Views\Shared\_BillDetailsOffcanvas.cshtml" />
     <Content Include="Views\Shared\_VehicleInfoModal.cshtml" />
     <Content Include="Views\Auth\Login.cshtml" />
+    <Content Include="Views\Admin\PendingOwners.cshtml" />
     <Content Include="Views\Auth\Signup.cshtml" />
     <Content Include="Views\Item\ItemAdd.cshtml" />
     <Content Include="Views\Shared\_ItemDetailsOffcanvas.cshtml" />
