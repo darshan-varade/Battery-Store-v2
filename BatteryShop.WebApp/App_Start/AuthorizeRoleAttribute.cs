@@ -22,8 +22,7 @@ namespace BatteryShop.WebApp
         protected override bool AuthorizeCore(HttpContextBase httpContext)
         {
             if (!base.AuthorizeCore(httpContext)) return false;
-            var roleName = httpContext.Session?["RoleName"]?.ToString();
-            return roleName == _requiredRole.ToString();
+            return httpContext.User.IsInRole(_requiredRole.ToString());
         }
 
         protected override void HandleUnauthorizedRequest(AuthorizationContext filterContext)

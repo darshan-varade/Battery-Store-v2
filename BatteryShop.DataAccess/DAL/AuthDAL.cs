@@ -154,5 +154,92 @@ namespace BatteryShop.DataAccess.DAL
                 throw;
             }
         }
+
+        public int CreateRefreshToken(int ownerId, string hash, DateTime expiresAt)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("refreshTokenCreate");
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+            db.AddInParameter(cmd, "@RefreshTokenHash", DbType.String, hash);
+            db.AddInParameter(cmd, "@ExpiresAt", DbType.DateTime, expiresAt);
+
+            try
+            {
+                object result = db.ExecuteScalar(cmd);
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in CreateRefreshToken");
+                throw;
+            }
+        }
+
+        public RefreshTokenModel GetRefreshTokenByHash(string hash)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("refreshTokenGetByHash");
+            db.AddInParameter(cmd, "@Hash", DbType.String, hash);
+
+            try
+            {
+                using (IDataReader reader = db.ExecuteReader(cmd))
+                {
+                    if (reader.Read())
+                    {
+                        return new RefreshTokenModel
+                        {
+                            RefreshTokenId = Convert.ToInt32(reader["refreshTokenId"]),
+                            OwnerId = Convert.ToInt32(reader["ownerId"]),
+                            OwnerName = reader["ownerName"].ToString(),
+                            OwnerEmail = reader["ownerEmail"].ToString(),
+                            RoleName = reader["roleName"].ToString(),
+                            ExpiresAt = Convert.ToDateTime(reader["expiresAt"])
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetRefreshTokenByHash");
+                throw;
+            }
+
+            return null;
+        }
+
+        public int RotateRefreshToken(int oldTokenId, string newHash, DateTime newExpiresAt, int ownerId)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("refreshTokenRotate");
+            db.AddInParameter(cmd, "@OldRefreshTokenId", DbType.Int32, oldTokenId);
+            db.AddInParameter(cmd, "@NewRefreshTokenHash", DbType.String, newHash);
+            db.AddInParameter(cmd, "@NewExpiresAt", DbType.DateTime, newExpiresAt);
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+
+            try
+            {
+                object result = db.ExecuteScalar(cmd);
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in RotateRefreshToken");
+                throw;
+            }
+        }
+
+        public void RevokeRefreshToken(int refreshTokenId)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("refreshTokenRevoke");
+            db.AddInParameter(cmd, "@RefreshTokenId", DbType.Int32, refreshTokenId);
+
+            try
+            {
+                db.ExecuteNonQuery(cmd);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in RevokeRefreshToken");
+                throw;
+            }
+        }
     }
 }

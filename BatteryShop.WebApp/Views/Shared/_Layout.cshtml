@@ -41,7 +41,7 @@
                     <i class="bi bi-people"></i>
                     <span>Customers</span>
                 </a>
-                @if (Session["RoleName"] != null && Session["RoleName"].ToString() == "Admin")
+                @if (User.IsInRole("Admin"))
                 {
                     <a href="@Url.Action("PendingOwners", "Admin")" class="sidebar-nav-item">
                         <i class="bi bi-person-check"></i>
@@ -65,9 +65,9 @@
             <div class="sidebar-footer">
                 <div class="sidebar-user-info">
                     <i class="bi bi-person-circle"></i>
-                    <span>@(Session["OwnerName"] ?? "Guest")</span>
+                    <span>@(User.Identity.Name ?? "Guest")</span>
                 </div>
-                @if (Session["OwnerName"] != null)
+                @if (User.Identity.IsAuthenticated)
                 {
                     <a href="@Url.Action("Logout", "Auth")" class="sidebar-logout">
                         <i class="bi bi-box-arrow-right"></i>

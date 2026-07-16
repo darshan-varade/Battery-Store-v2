@@ -35,9 +35,12 @@
                     <button class="btn btn-sm btn-primary btn-action-update" data-id="@item.BillId" title="Update">
                         <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger btn-action-delete" data-id="@item.BillId" title="Delete">
-                        <i class="bi bi-trash"></i>
-                    </button>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <button class="btn btn-sm btn-danger btn-action-delete" data-id="@item.BillId" title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    }
                 </div>
             </div>
         }

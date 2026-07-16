@@ -1,5 +1,6 @@
 ﻿using System.Web;
 using System.Web.Mvc;
+using BatteryShop.WebApp.Infrastructure;
 
 namespace BatteryShop.WebApp
 {
@@ -8,6 +9,7 @@ namespace BatteryShop.WebApp
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
             filters.Add(new HandleErrorAttribute());
+            filters.Add(new JwtAuthenticationFilter());
             filters.Add(new AuthorizeAttribute());
         }
     }

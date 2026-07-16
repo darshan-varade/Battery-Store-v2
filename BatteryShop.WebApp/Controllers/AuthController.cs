@@ -1,8 +1,9 @@
 using System;
+using System.Web;
 using System.Web.Mvc;
-using System.Web.Security;
 using BatteryShop.DataAccess.DAL;
 using BatteryShop.DataAccess.ViewModels;
+using BatteryShop.WebApp.Infrastructure;
 
 namespace BatteryShop.WebApp.Controllers
 {
@@ -36,12 +37,30 @@ namespace BatteryShop.WebApp.Controllers
                     return View(vm);
                 }
 
-                FormsAuthentication.SetAuthCookie(owner.OwnerEmail, vm.RememberMe);
+                string accessToken = JwtHelper.GenerateAccessToken(owner.OwnerId, owner.OwnerName, owner.OwnerEmail, owner.RoleName);
+                string refreshToken = JwtHelper.GenerateRefreshToken();
+                string refreshTokenHash = JwtHelper.HashRefreshToken(refreshToken);
+                DateTime refreshExpiry = DateTime.Now.AddDays(int.Parse(System.Configuration.ConfigurationManager.AppSettings["JwtRefreshTokenExpiryDays"] ?? "7"));
 
-                Session["OwnerId"] = owner.OwnerId;
-                Session["OwnerName"] = owner.OwnerName;
-                Session["OwnerEmail"] = owner.OwnerEmail;
-                Session["RoleName"] = owner.RoleName;
+                dal.CreateRefreshToken(owner.OwnerId, refreshTokenHash, refreshExpiry);
+
+                DateTime accessExpiry = JwtHelper.GetAccessTokenExpiry(vm.RememberMe);
+
+                Response.Cookies.Add(new HttpCookie("access_token", accessToken)
+                {
+                    HttpOnly = true,
+                    Secure = false,
+                    Path = "/",
+                    Expires = accessExpiry
+                });
+
+                Response.Cookies.Add(new HttpCookie("refresh_token", refreshToken)
+                {
+                    HttpOnly = true,
+                    Secure = false,
+                    Path = "/",
+                    Expires = refreshExpiry
+                });
 
                 return RedirectToAction("Index", "Home");
             }
@@ -97,8 +116,18 @@ namespace BatteryShop.WebApp.Controllers
         [HttpGet]
         public ActionResult Logout()
         {
-            FormsAuthentication.SignOut();
-            Session.Clear();
+            string refreshToken = Request.Cookies["refresh_token"]?.Value;
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                string hash = JwtHelper.HashRefreshToken(refreshToken);
+                var record = new AuthDAL().GetRefreshTokenByHash(hash);
+                if (record != null)
+                    new AuthDAL().RevokeRefreshToken(record.RefreshTokenId);
+            }
+
+            Response.Cookies.Add(new HttpCookie("access_token", "") { Expires = DateTime.Now.AddDays(-1), Path = "/" });
+            Response.Cookies.Add(new HttpCookie("refresh_token", "") { Expires = DateTime.Now.AddDays(-1), Path = "/" });
+
             return RedirectToAction("Login");
         }
     }

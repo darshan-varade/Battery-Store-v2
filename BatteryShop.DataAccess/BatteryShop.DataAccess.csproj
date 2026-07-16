@@ -75,6 +75,7 @@
     <Compile Include="DAL\BillDAL.cs" />
     <Compile Include="Models\BillModel.cs" />
     <Compile Include="Models\OwnerModel.cs" />
+    <Compile Include="Models\RefreshTokenModel.cs" />
     <Compile Include="ViewModels\BillViewModel.cs" />
     <Compile Include="ViewModels\BillAddViewModel.cs" />
     <Compile Include="ViewModels\OldItemStatusViewModel.cs" />
