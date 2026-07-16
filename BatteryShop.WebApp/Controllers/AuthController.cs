@@ -1,0 +1,134 @@
+using System;
+using System.Web;
+using System.Web.Mvc;
+using BatteryShop.DataAccess.DAL;
+using BatteryShop.DataAccess.ViewModels;
+using BatteryShop.WebApp.Infrastructure;
+
+namespace BatteryShop.WebApp.Controllers
+{
+    [AllowAnonymous]
+    public class AuthController : BaseController
+    {
+        [HttpGet]
+        public ActionResult Login()
+        {
+            if (User.Identity.IsAuthenticated)
+                return RedirectToAction("Index", "Home");
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Login(LoginViewModel vm)
+        {
+            if (!ModelState.IsValid)
+                return View(vm);
+
+            try
+            {
+                AuthDAL dal = new AuthDAL();
+                var owner = dal.OwnerLogin(vm.Email);
+
+                if (owner == null || !BCrypt.Net.BCrypt.Verify(vm.Password, owner.PasswordHash))
+                {
+                    ModelState.AddModelError("", "Invalid email or password.");
+                    return View(vm);
+                }
+
+                string accessToken = JwtHelper.GenerateAccessToken(owner.OwnerId, owner.OwnerName, owner.OwnerEmail, owner.RoleName);
+                string refreshToken = JwtHelper.GenerateRefreshToken();
+                string refreshTokenHash = JwtHelper.HashRefreshToken(refreshToken);
+                DateTime refreshExpiry = DateTime.Now.AddDays(int.Parse(System.Configuration.ConfigurationManager.AppSettings["JwtRefreshTokenExpiryDays"] ?? "7"));
+
+                dal.CreateRefreshToken(owner.OwnerId, refreshTokenHash, refreshExpiry);
+
+                DateTime accessExpiry = JwtHelper.GetAccessTokenExpiry(vm.RememberMe);
+
+                Response.Cookies.Add(new HttpCookie("access_token", accessToken)
+                {
+                    HttpOnly = true,
+                    Secure = false,
+                    Path = "/",
+                    Expires = accessExpiry
+                });
+
+                Response.Cookies.Add(new HttpCookie("refresh_token", refreshToken)
+                {
+                    HttpOnly = true,
+                    Secure = false,
+                    Path = "/",
+                    Expires = refreshExpiry
+                });
+
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "Error in Login POST");
+                ModelState.AddModelError("", "An error occurred. Please try again.");
+                return View(vm);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult Signup()
+        {
+            if (User.Identity.IsAuthenticated)
+                return RedirectToAction("Index", "Home");
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Signup(SignupViewModel vm)
+        {
+            if (!ModelState.IsValid)
+                return View(vm);
+
+            try
+            {
+                AuthDAL dal = new AuthDAL();
+
+                if (dal.OwnerCheckEmail(vm.OwnerEmail))
+                {
+                    ModelState.AddModelError("OwnerEmail", "This email is already registered.");
+                    return View(vm);
+                }
+
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password);
+
+                dal.OwnerRegister(vm.OwnerName, vm.OwnerPhone, vm.OwnerEmail, passwordHash);
+
+                TempData["info"] = "Registration submitted! An admin will review and activate your account.";
+                return RedirectToAction("Login");
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "Error in Signup POST");
+                ModelState.AddModelError("", "An error occurred. Please try again.");
+                return View(vm);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult Logout()
+        {
+            string refreshToken = Request.Cookies["refresh_token"]?.Value;
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                string hash = JwtHelper.HashRefreshToken(refreshToken);
+                var record = new AuthDAL().GetRefreshTokenByHash(hash);
+                if (record != null)
+                    new AuthDAL().RevokeRefreshToken(record.RefreshTokenId);
+            }
+
+            Response.Cookies.Add(new HttpCookie("access_token", "") { Expires = DateTime.Now.AddDays(-1), Path = "/" });
+            Response.Cookies.Add(new HttpCookie("refresh_token", "") { Expires = DateTime.Now.AddDays(-1), Path = "/" });
+
+            return RedirectToAction("Login");
+        }
+    }
+}

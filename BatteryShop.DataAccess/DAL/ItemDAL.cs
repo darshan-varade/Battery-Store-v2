@@ -19,39 +19,8 @@ namespace BatteryShop.DataAccess.DAL
         {
             this.db = DatabaseFactory.CreateDatabase();
         }
-        /*
-        public List<ItemModel> ItemGetList()
-        {
-            List<ItemModel> list = new List<ItemModel>();
 
-            DbCommand cmd = db.GetStoredProcCommand("batteryGetList");
-            db.AddInParameter(cmd, "@PageNumber", DbType.Int32, 1);
-            db.AddInParameter(cmd, "@PageSize", DbType.Int32, int.MaxValue);
-
-            using (IDataReader reader = db.ExecuteReader(cmd))
-            {
-                while (reader.Read())
-                {
-                    ItemModel item = new ItemModel
-                    {
-                        ItemId = Convert.ToInt32(reader["itemId"]),
-                        ItemSerialNumber = reader["itemSerialNumber"].ToString(),
-                        ItemBrand = reader["itemBrand"].ToString(),
-                        ItemType = reader["itemType"].ToString(),
-                        TransactionId = Convert.ToInt32(reader["transactionId"]),
-                        IsActive = Convert.ToBoolean(reader["isActive"]),
-                        CreatedAt = Convert.ToDateTime(reader["createdAt"]),
-                        CreatedBy = reader["createdBy"].ToString(),
-                        ModifiedAt = Convert.ToDateTime(reader["lastModifiedAt"]),
-                        ModifiedBy = reader["lastModifiedBy"].ToString()
-                    };
-                    list.Add(item);
-                }
-            }
-            return list;
-        }
-        */
-        public List<ItemModel> ItemGetList(ItemViewModel ItemVM)
+        public List<ItemModel> ItemGetList(ItemViewModel ItemVM, int ownerId, string roleName)
         {
             ItemVM.PageNumber = ItemVM.PageNumber <= 0 ? 1 : ItemVM.PageNumber ;
             ItemVM.PageSize = ItemVM.PageSize <= 0 ? 100000 : ItemVM.PageSize;
@@ -74,6 +43,8 @@ namespace BatteryShop.DataAccess.DAL
             db.AddInParameter(cmd, "@StatusIds", DbType.String, (object)statusIds ?? DBNull.Value);
             db.AddInParameter(cmd, "@SortColumn", DbType.String, ItemVM.SortColumn ?? "itemId");
             db.AddInParameter(cmd, "@SortDirection", DbType.String, ItemVM.SortDirection ?? "ASC");
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+            db.AddInParameter(cmd, "@RoleName", DbType.String, roleName);
             db.AddOutParameter(cmd, "@TotalRows", DbType.Int32, 0);
 
             try
@@ -161,8 +132,8 @@ namespace BatteryShop.DataAccess.DAL
                         TypeListViewModel item = new TypeListViewModel
                         {
                             TypeId = Convert.ToInt32(reader["TypeId"]),
-                            TypeName = reader["TypeName"].ToString()
-
+                            TypeName = reader["TypeName"].ToString(),
+                            BrandId = Convert.ToInt32(reader["itemBrandId"])
                         };
                         list.Add(item);
 
@@ -208,10 +179,12 @@ namespace BatteryShop.DataAccess.DAL
             return list;
         }
 
-        public void deleteItem(int id)
+        public void deleteItem(int id, int ownerId, string roleName)
         {
             DbCommand cmd = db.GetStoredProcCommand("batteryDeleteItem");
             db.AddInParameter(cmd, "@Id", DbType.Int32, id);
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+            db.AddInParameter(cmd, "@RoleName", DbType.String, roleName);
             try
             {
                 db.ExecuteNonQuery(cmd);
@@ -223,7 +196,7 @@ namespace BatteryShop.DataAccess.DAL
             }
         }
 
-        public void addItems(ItemAddViewModel addItemList)
+        public void addItems(ItemAddViewModel addItemList, int ownerId)
         {
             try
             {
@@ -233,10 +206,9 @@ namespace BatteryShop.DataAccess.DAL
 
                     db.AddInParameter(cmd, "@TransactionId",DbType.Int32, addItemList.TransactionId);
                     db.AddInParameter(cmd, "@SerialNumber",DbType.String, item.SerialNumber);
-                    db.AddInParameter(cmd, "@BrandId",DbType.Int32, item.BrandId);
                     db.AddInParameter(cmd, "@TypeId",DbType.Int32, item.TypeId);
                     db.AddInParameter(cmd, "@ItemStatusId", DbType.Int32, 1);
-                    db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, 1);
+                    db.AddInParameter(cmd, "@CreatedBy", DbType.Int32, ownerId);
                     db.ExecuteNonQuery(cmd);
                 }
             }
@@ -247,13 +219,15 @@ namespace BatteryShop.DataAccess.DAL
             }
         }
 
-        public ItemUpdateViewModel GetItemForUpdate(int itemId)
+        public ItemUpdateViewModel GetItemForUpdate(int itemId, int ownerId, string roleName)
         {
             ItemUpdateViewModel item = null;
 
             DbCommand cmd = db.GetStoredProcCommand("batteryGetItemById");
 
             db.AddInParameter(cmd,"@ItemId",DbType.Int32,itemId);
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+            db.AddInParameter(cmd, "@RoleName", DbType.String, roleName);
 
             try
             {
@@ -265,8 +239,10 @@ namespace BatteryShop.DataAccess.DAL
                         {
                             ItemId = Convert.ToInt32(reader["itemId"]),
                             SerialNumber = reader["itemSerialNumber"].ToString(),
-                            BrandId = Convert.ToInt32(reader["itemBrand"]),
-                            TypeId = Convert.ToInt32(reader["itemType"]),
+                            BrandId = Convert.ToInt32(reader["itemBrandId"]),
+                            BrandName = reader["itemBrandName"].ToString(),
+                            TypeId = Convert.ToInt32(reader["itemTypeId"]),
+                            TypeName = reader["itemTypeName"].ToString(),
                             TransactionId = Convert.ToInt32(reader["transactionId"]),
                             ItemStatusId = Convert.ToInt32(reader["itemStatusId"])
                         };
@@ -283,17 +259,16 @@ namespace BatteryShop.DataAccess.DAL
         }
 
 
-        public void UpdateItem(ItemUpdateViewModel item)
+        public void UpdateItem(ItemUpdateViewModel item, int ownerId)
         {
             DbCommand cmd = db.GetStoredProcCommand("batteryUpdateItem");
 
             db.AddInParameter(cmd, "@ItemId", DbType.Int32, item.ItemId);
             db.AddInParameter(cmd, "@TransactionId", DbType.Int32, item.TransactionId);
             db.AddInParameter(cmd, "@SerialNumber", DbType.String, item.SerialNumber);
-            db.AddInParameter(cmd, "@BrandId", DbType.Int32, item.BrandId);
             db.AddInParameter(cmd, "@TypeId", DbType.Int32, item.TypeId);
             db.AddInParameter(cmd, "@ItemStatusId", DbType.Int32, item.ItemStatusId ?? 1);
-            db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, 1);
+            db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, ownerId);
 
             try
             {

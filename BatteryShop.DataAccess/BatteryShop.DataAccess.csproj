@@ -50,21 +50,42 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DAL\CustomerDAL.cs" />
     <Compile Include="DAL\ItemDAL.cs" />
+    <Compile Include="Models\CustomerModel.cs" />
     <Compile Include="Models\ItemModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\BrandListViewModel.cs" />
+    <Compile Include="ViewModels\CityListViewModel.cs" />
+    <Compile Include="ViewModels\CustomerUpdateViewModel.cs" />
+    <Compile Include="ViewModels\CustomerViewModel.cs" />
     <Compile Include="ViewModels\ItemAddDetailsViewModel.cs" />
     <Compile Include="ViewModels\ItemAddViewModel.cs" />
     <Compile Include="ViewModels\ItemUpdateViewModel.cs" />
     <Compile Include="ViewModels\ItemViewModel.cs" />
     <Compile Include="ViewModels\TypeListViewModel.cs" />
     <Compile Include="ViewModels\StatusListViewModel.cs" />
+    <Compile Include="DAL\AuthDAL.cs" />
+    <Compile Include="DAL\BillDAL.cs" />
+    <Compile Include="Models\BillModel.cs" />
+    <Compile Include="Models\OwnerModel.cs" />
+    <Compile Include="Models\RefreshTokenModel.cs" />
+    <Compile Include="ViewModels\BillViewModel.cs" />
+    <Compile Include="ViewModels\BillAddViewModel.cs" />
+    <Compile Include="ViewModels\OldItemStatusViewModel.cs" />
+    <Compile Include="ViewModels\VehicleBrandViewModel.cs" />
+    <Compile Include="ViewModels\VehicleModelViewModel.cs" />
+    <Compile Include="ViewModels\VehicleModelInfoViewModel.cs" />
+    <Compile Include="ViewModels\BillAddRequest.cs" />
+    <Compile Include="ViewModels\LoginViewModel.cs" />
+    <Compile Include="ViewModels\PendingOwnerViewModel.cs" />
+    <Compile Include="ViewModels\SignupViewModel.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

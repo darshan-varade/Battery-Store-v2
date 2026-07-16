@@ -1,0 +1,54 @@
+@model BatteryShop.DataAccess.ViewModels.LoginViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Battery Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="~/Content/Style.css" rel="stylesheet" />
+</head>
+<body class="auth-page">
+    <div class="auth-card">
+        <div class="logo">
+            <i class="bi bi-lightning-charge"></i>
+            <h2>Battery Store</h2>
+            <p class="text-secondary" style="font-size: 0.9rem;">Sign in to your account</p>
+        </div>
+
+        @using (Html.BeginForm("Login", "Auth", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "validation-summary-errors mb-3" })
+
+            <div class="mb-3">
+                @Html.LabelFor(m => m.Email, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Enter your email" })
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger", style = "font-size: 0.8rem;" })
+            </div>
+
+            <div class="mb-3">
+                @Html.LabelFor(m => m.Password, new { @class = "form-label" })
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Enter your password" })
+                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger", style = "font-size: 0.8rem;" })
+            </div>
+
+            <div class="mb-3 form-check">
+                @Html.CheckBoxFor(m => m.RememberMe, new { @class = "form-check-input" })
+                @Html.LabelFor(m => m.RememberMe, new { @class = "form-check-label" })
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Sign In</button>
+        }
+
+        <div class="auth-footer">
+            Don't have an account? <a href="@Url.Action("Signup", "Auth")">Sign up</a>
+        </div>
+    </div>
+</body>
+</html>

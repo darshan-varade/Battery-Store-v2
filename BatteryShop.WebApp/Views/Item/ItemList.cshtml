@@ -3,13 +3,6 @@
     ViewBag.Title = "Inventory";
 }
 
-@if (TempData["info"] != null)
-{
-    <script>
-        $(function () { showToast('@TempData["info"]', 'info'); });
-    </script>
-}
-
 <form method="POST" id="searchForm">
 
     @Html.HiddenFor(m => m.PageNumber, new { id = "PageNumber" })
@@ -49,7 +42,6 @@
         <div class="filter-actions">
             <button type="button" id="searchBtn" class="btn btn-primary">Search</button>
             <button type="reset" id="resetbutton" class="btn btn-secondary">Reset</button>
-            @*<button type="button" id="addItemBtn" class="btn btn-success">Add Item</button>*@
             <button type="button" id="addItemBtn" class="btn  btn-success">Add Item</button>
         </div>
     </div>

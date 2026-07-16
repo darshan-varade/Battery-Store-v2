@@ -1,0 +1,67 @@
+@model BatteryShop.DataAccess.ViewModels.BillViewModel
+@{
+    ViewBag.Title = "Bills";
+}
+
+
+<form method="POST" id="searchForm">
+
+    @Html.HiddenFor(m => m.PageNumber, new { id = "PageNumber" })
+    @Html.HiddenFor(m => m.SortColumn, new { id = "SortColumn" })
+    @Html.HiddenFor(m => m.SortDirection, new { id = "SortDirection" })
+
+    <div class="filters-container">
+        <div class="filter-group">
+            @Html.LabelFor(m => m.PageSize, "Page Size")
+            @Html.DropDownListFor(m => m.PageSize, new SelectList(Model.PageSizeList), "--Select--", new { id = "PageSizeList", @class = "form-control" })
+        </div>
+
+        <div class="filter-group">
+            @Html.Label("Search Customer")
+            @Html.HiddenFor(m => m.SearchTerm, new { id = "SearchTerm" })
+            <select id="SearchName" class="form-control" style="width:100%;" placeholder="Search by name"></select>
+        </div>
+
+        <div class="filter-group">
+            @Html.Label("Search Phone")
+            @Html.HiddenFor(m => m.Phone, new { id = "PhoneFilter" })
+            <select id="SearchPhone" class="form-control" style="width:100%;" placeholder="Search by phone"></select>
+        </div>
+
+        <div class="filter-group">
+            @Html.Label("Date From")
+            @Html.TextBoxFor(m => m.DateFrom, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+        </div>
+
+        <div class="filter-group">
+            @Html.Label("Date To")
+            @Html.TextBoxFor(m => m.DateTo, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+        </div>
+
+        <div class="filter-actions">
+            <button type="button" id="searchBtn" class="btn btn-primary">Search</button>
+            <button type="reset" id="resetbutton" class="btn btn-secondary">Reset</button>
+        </div>
+            <a href="@Url.Action("BillAdd", "Bill")" class="btn btn-success"><i class="bi bi-plus-circle"></i> Add Bill</a>
+        
+    </div>
+
+    <div class="results-wrapper">
+        <div id="resultContainer"></div>
+    </div>
+
+    <div class="pagination-footer">
+        <span id="PageItems" class="items-info"></span>
+        <div class="pagination-buttons">
+            <button type="button" id="prevButton" class="btn btn-sm btn-secondary">Previous</button>
+            <span id="buttonlist" class="page-buttons"></span>
+            <button type="button" id="nextButton" class="btn btn-sm btn-secondary">Next</button>
+        </div>
+    </div>
+</form>
+
+<script src="~/PageScripts/BillListScript.js"></script>
+
+@section modals {
+    @Html.Partial("_BillDetailsOffcanvas", Model)
+}

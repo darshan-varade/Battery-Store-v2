@@ -1,0 +1,97 @@
+@model IEnumerable<BatteryShop.DataAccess.ViewModels.PendingOwnerViewModel>
+@{
+    ViewBag.Title = "Pending Approvals";
+}
+
+<div class="page-header">
+    <h4><i class="bi bi-person-check"></i> Pending Approvals</h4>
+    <p class="text-secondary">Review and approve new owner registrations</p>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No pending registrations.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Registered At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr data-pending-id="@item.PendingOwnerId">
+                        <td>@item.OwnerName</td>
+                        <td>@item.OwnerPhone</td>
+                        <td>@item.OwnerEmail</td>
+                        <td>@item.CreatedAt.ToString("dd-MMM-yyyy HH:mm")</td>
+                        <td>
+                            <button class="btn btn-success btn-sm btn-approve me-1" title="Approve">
+                                <i class="bi bi-check-lg"></i> Approve
+                            </button>
+                            <button class="btn btn-danger btn-sm btn-reject" title="Reject">
+                                <i class="bi bi-x-lg"></i> Reject
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@section scripts {
+    <script>
+        $(function () {
+            $('.btn-approve').click(function () {
+                var row = $(this).closest('tr');
+                var id = row.data('pending-id');
+
+                showConfirm('Approve Owner', 'Are you sure you want to approve this registration?', function () {
+                    $.post('@Url.Action("Approve", "Admin")', { id: id })
+                        .done(function (res) {
+                            if (res.success) {
+                                showToast('Owner approved successfully.', 'success');
+                                row.fadeOut(300, function () { $(this).remove(); });
+                                if ($('tbody tr').length === 0) location.reload();
+                            } else {
+                                showToast(res.message || 'Failed to approve.', 'error');
+                            }
+                        })
+                        .fail(function () {
+                            showToast('An error occurred.', 'error');
+                        });
+                });
+            });
+
+            $('.btn-reject').click(function () {
+                var row = $(this).closest('tr');
+                var id = row.data('pending-id');
+
+                showConfirm('Reject Owner', 'Are you sure you want to reject this registration?', function () {
+                    $.post('@Url.Action("Reject", "Admin")', { id: id })
+                        .done(function (res) {
+                            if (res.success) {
+                                showToast('Owner rejected.', 'info');
+                                row.fadeOut(300, function () { $(this).remove(); });
+                                if ($('tbody tr').length === 0) location.reload();
+                            } else {
+                                showToast(res.message || 'Failed to reject.', 'error');
+                            }
+                        })
+                        .fail(function () {
+                            showToast('An error occurred.', 'error');
+                        });
+                });
+            });
+        });
+    </script>
+}

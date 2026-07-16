@@ -1,0 +1,21 @@
+@model BatteryShop.DataAccess.ViewModels.BillViewModel
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="billDetailsOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">
+            <i class="bi bi-receipt"></i> Bill Details
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="offcanvas-spinner text-center py-4" id="billDetailsSpinner" style="display:none;">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading bill details...</p>
+        </div>
+        <div id="billDetailsContainer" style="display:none;">
+            <dl class="row mb-0" id="billDetailsContent"></dl>
+        </div>
+    </div>
+</div>

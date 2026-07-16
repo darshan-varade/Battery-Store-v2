@@ -1,0 +1,54 @@
+@model BatteryShop.DataAccess.ViewModels.BillViewModel
+
+<input type="hidden" id="TotalRows" value="@Model.TotalRows" />
+
+<div class="items-rows-container">
+    <div class="item-row item-row-header">
+        <div class="item-cell cell-id sortable" data-column="billId">
+            Bill ID <span class="sort-icon"></span>
+        </div>
+        <div class="item-cell cell-name">Customer</div>
+        <div class="item-cell cell-phone">Phone</div>
+        <div class="item-cell cell-date">Date</div>
+        <div class="item-cell cell-total sortable" data-column="totalAmount">
+            Total <span class="sort-icon"></span>
+        </div>
+        <div class="item-cell cell-paid">Paid</div>
+        <div class="item-cell cell-actions"></div>
+    </div>
+
+    @if (Model.BillList.Count > 0)
+    {
+        foreach (var item in Model.BillList)
+        {
+            <div class="item-row item-row-data">
+                <div class="item-cell cell-id">@item.BillId</div>
+                <div class="item-cell cell-name">@item.UserFullName</div>
+                <div class="item-cell cell-phone">@item.UserPhone</div>
+                <div class="item-cell cell-date">@item.DateOfSale.ToString("dd-MMM-yyyy")</div>
+                <div class="item-cell cell-total">@item.TotalAmount.ToString("N2")</div>
+                <div class="item-cell cell-paid">@item.PaidAmount.ToString("N2")</div>
+                <div class="item-cell cell-actions">
+                    <button class="btn btn-sm btn-info btn-action-view" data-id="@item.BillId" title="View Details">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-primary btn-action-update" data-id="@item.BillId" title="Update">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <button class="btn btn-sm btn-danger btn-action-delete" data-id="@item.BillId" title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-warning text-center mt-4">
+            <i class="bi bi-info-circle"></i> No Records Found
+        </div>
+    }
+</div>

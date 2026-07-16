@@ -1,0 +1,42 @@
+@model BatteryShop.DataAccess.ViewModels.BillAddViewModel
+
+<div class="modal fade" id="vehicleInfoModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Vehicle Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="vehTargetSerialId" value="" />
+                <div class="mb-3">
+                    <label class="form-label">Brand</label>
+                    <select id="vehBrand" class="form-control">
+                        <option value="">--Select Brand--</option>
+                        @if (Model.VehicleBrandList != null)
+                        {
+                            foreach (var b in Model.VehicleBrandList)
+                            {
+                                <option value="@b.BrandId">@b.BrandName</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Model</label>
+                    <select id="vehModel" class="form-control" disabled>
+                        <option value="">--Select Brand First--</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Registration Number</label>
+                    <input type="text" id="vehRegNumber" class="form-control" placeholder="e.g. MH-01-AB-1234" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="vehSaveBtn" class="btn btn-primary">Save Vehicle</button>
+            </div>
+        </div>
+    </div>
+</div>

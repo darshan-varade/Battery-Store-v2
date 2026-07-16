@@ -1,33 +1,28 @@
-﻿/* ===== CSS Variables - Light Theme (Default) ===== */
+
 .bgcolor{
     background-color:aliceblue;
 }
 :root {
-    /* Primary Colors */
+    
     --primary: #84CC16;
     --primary-hover: #65A30D;
-    
-    /* Sidebar */
+
     --sidebar-bg: #1E293B;
     --sidebar-hover: #334155;
-    
-    /* Background */
+
     --main-bg: #F1F5F9;
     --card-bg: #FFFFFF;
     --border: #CBD5E1;
     --table-header: #E2E8F0;
-    
-    /* Text */
+
     --text-primary: #111827;
     --text-secondary: #64748B;
-    
-    /* Status Colors */
+
     --success: #22C55E;
     --warning: #F59E0B;
     --danger: #EF4444;
 }
 
-/* ===== CSS Variables - Dark Theme ===== */
 body.dark-theme {
     --primary: #84CC16;
     --primary-hover: #65A30D;
@@ -44,7 +39,6 @@ body.dark-theme {
     --danger: #EF4444;
 }
 
-/* ===== Global Styles ===== */
 * {
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
@@ -61,13 +55,11 @@ body {
     padding: 0;
 }
 
-/* ===== Layout Container ===== */
 .layout-wrapper {
     display: flex;
     min-height: 100vh;
 }
 
-/* ===== Sidebar Styling ===== */
 .sidebar {
     background-color: var(--sidebar-bg);
     color: white;
@@ -169,7 +161,6 @@ body {
     background-color: var(--primary-hover);
 }
 
-/* ===== Main Content Area ===== */
 .main-content {
     flex: 1;
     margin-left: 250px;
@@ -284,14 +275,12 @@ body {
     color: #000;
 }
 
-/* ===== Content Area ===== */
 .content {
     flex: 1;
     padding: 2rem;
     overflow-y: auto;
 }
 
-/* ===== Offcanvas Sidebar (Mobile) ===== */
 @media (max-width: 767.98px) {
     .sidebar {
         position: fixed;
@@ -341,7 +330,6 @@ body {
     }
 }
 
-/* ===== Form Elements ===== */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -373,7 +361,6 @@ button {
     transition: all 0.3s ease;
 }
 
-/* ===== Footer ===== */
 footer {
     background-color: var(--card-bg);
     border-top: 1px solid var(--border);
@@ -382,7 +369,6 @@ footer {
     color: var(--text-secondary);
     font-size: 0.875rem;
 }
-
 
 
 

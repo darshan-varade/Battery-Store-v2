@@ -7,7 +7,8 @@ using BatteryShop.DataAccess.DAL;
 
 namespace BatteryShop.WebApp.Controllers
 {
-    public class HomeController : Controller
+    [AllowAnonymous]
+    public class HomeController : BaseController
     {
         public ActionResult Index()
         {
@@ -16,8 +17,7 @@ namespace BatteryShop.WebApp.Controllers
 
         public ActionResult About()
         {
-            ViewBag.Message = "Your application description page.";
-
+            ViewBag.Message = "This is site for battery shop owners";
             return View();
         }
 

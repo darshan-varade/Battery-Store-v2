@@ -1,0 +1,295 @@
+using System;
+using System.Linq;
+using System.Web.Mvc;
+using BatteryShop.DataAccess.DAL;
+using BatteryShop.DataAccess.ViewModels;
+using Newtonsoft.Json;
+using Serilog;
+
+namespace BatteryShop.WebApp.Controllers
+{
+    public class BillController : BaseController
+    {
+        public ActionResult BillList()
+        {
+            BillViewModel vm = new BillViewModel();
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ActionName("BillList")]
+        public ActionResult BillListPost(BillViewModel vm)
+        {
+            try
+            {
+                BillDAL dal = new BillDAL();
+                vm.BillList = dal.BillGetList(vm, CurrentOwnerId, CurrentRoleName);
+                return PartialView("_BillListPartial", vm);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in BillListPost");
+                return Content("<div class='alert alert-danger'>Error loading data: " + ex.Message + "</div>");
+            }
+        }
+
+        [HttpGet]
+        public JsonResult BillGet(int id)
+        {
+            try
+            {
+                BillDAL dal = new BillDAL();
+                var vm = dal.BillGetById(id, CurrentOwnerId, CurrentRoleName);
+
+                if (vm == null)
+                {
+                    return Json(new { success = false, message = "Bill not found." }, JsonRequestBehavior.AllowGet);
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    billId = vm.BillId,
+                    userId = vm.UserId,
+                    userFullName = vm.UserFullName,
+                    userPhone = vm.UserPhone,
+                    dateOfSale = vm.DateOfSale.ToString("yyyy-MM-dd"),
+                    totalAmount = vm.TotalAmount,
+                    paidAmount = vm.PaidAmount,
+                    dueAmount = vm.TotalAmount - vm.PaidAmount
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in BillGet");
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult BillDelete(int id)
+        {
+            try
+            {
+                BillDAL dal = new BillDAL();
+                dal.BillDelete(id, CurrentOwnerId, CurrentRoleName);
+                return Json(new { success = true, message = "Bill deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in BillDelete");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public ActionResult BillAdd()
+        {
+            try
+            {
+                return View(BuildReferenceLists());
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in BillAdd GET");
+                return Content("<div class='alert alert-danger'>Error: " + ex.Message + "</div>");
+            }
+        }
+
+        [HttpPost]
+        public JsonResult BillAdd(BillAddRequest request)
+        {
+            try
+            {
+                BillDAL dal = new BillDAL();
+                int billId = dal.BillAdd(request, CurrentOwnerId);
+                return Json(new { success = true, billId = billId });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in BillAdd POST");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetAvailableSerials(int brandId, int typeId, int count)
+        {
+            try
+            {
+                BillDAL dal = new BillDAL();
+                var list = dal.FetchAvailableSerials(brandId, typeId, count);
+                return Json(list, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetAvailableSerials");
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetAvailableCount(int brandId, int typeId)
+        {
+            try
+            {
+                BillDAL dal = new BillDAL();
+                int count = dal.GetAvailableCount(brandId, typeId);
+                return Json(new { availableCount = count }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetAvailableCount");
+                return Json(new { availableCount = 0 }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetDiscount(int itemTypeId, string oldItemDateOfSale)
+        {
+            try
+            {
+                BillDAL dal = new BillDAL();
+                DateTime dt = DateTime.Parse(oldItemDateOfSale);
+                decimal pct = dal.GetDiscountPercentage(itemTypeId, dt);
+                return Json(new { discountPercent = pct }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetDiscount");
+                return Json(new { discountPercent = 0 }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetVehicleBrands()
+        {
+            try
+            {
+                BillDAL dal = new BillDAL();
+                var list = dal.GetVehicleBrands();
+                return Json(list, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetVehicleBrands");
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetVehicleModels(int brandId)
+        {
+            try
+            {
+                BillDAL dal = new BillDAL();
+                var list = dal.GetVehicleModelsByBrand(brandId);
+                return Json(list.Select(m => new { VehicleModelId = m.VehicleModelId, VehicleModelName = m.VehicleModelName }), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetVehicleModels");
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult VehicleInfoAdd(int modelId, string regNumber)
+        {
+            try
+            {
+                BillDAL dal = new BillDAL();
+                int id = dal.AddVehicleInfo(modelId, regNumber, CurrentOwnerId);
+                return Json(new { success = true, vehicleInformationId = id });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in VehicleInfoAdd");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult CheckCustomerPhone(string phone, int excludeUserId = 0)
+        {
+            try
+            {
+                CustomerDAL dal = new CustomerDAL();
+                var list = dal.CustomerSearchByPhone(phone ?? "", CurrentOwnerId, CurrentRoleName);
+                var match = list.FirstOrDefault(c => c.UserPhone == phone && c.UserId != excludeUserId);
+                if (match != null)
+                    return Json(new { exists = true, userName = match.UserFullName, userId = match.UserId }, JsonRequestBehavior.AllowGet);
+                return Json(new { exists = false }, JsonRequestBehavior.AllowGet);
+            }
+            catch
+            {
+                return Json(new { exists = false }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult BillEdit(int id)
+        {
+            try
+            {
+                BillDAL dal = new BillDAL();
+                var bill = dal.BillGetById(id, CurrentOwnerId, CurrentRoleName);
+                if (bill == null) return HttpNotFound();
+
+                var customer = new CustomerDAL().CustomerGetById(bill.UserId, CurrentOwnerId, CurrentRoleName);
+
+                var vm = BuildReferenceLists();
+                vm.BillId = id;
+                vm.EditUserId = bill.UserId;
+                vm.EditCustomerName = bill.UserFullName;
+                vm.EditCustomerPhone = bill.UserPhone;
+                vm.EditCustomerCity = customer?.CityName ?? "";
+                vm.EditDateOfSale = bill.DateOfSale.ToString("yyyy-MM-dd");
+                vm.EditPaidAmount = bill.PaidAmount;
+                vm.EditItemsJson = JsonConvert.SerializeObject(dal.BillGetItems(id));
+
+                return View("BillAdd", vm);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in BillEdit GET");
+                return Content("<div class='alert alert-danger'>Error: " + ex.Message + "</div>");
+            }
+        }
+
+        [HttpPost]
+        public JsonResult BillEdit(BillAddRequest request)
+        {
+            try
+            {
+                BillDAL dal = new BillDAL();
+                int billId = dal.BillEdit(request, CurrentOwnerId);
+                return Json(new { success = true, billId = billId });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in BillEdit POST");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+        private BillAddViewModel BuildReferenceLists()
+        {
+            BillDAL dal = new BillDAL();
+            ItemDAL itemDal = new ItemDAL();
+            CustomerDAL custDal = new CustomerDAL();
+
+            return new BillAddViewModel
+            {
+                CityList = custDal.CustomerGetDistinctCities(),
+                BrandList = itemDal.ItemFetchBrand().Select(b => new VehicleBrandViewModel
+                {
+                    BrandId = b.BrandId,
+                    BrandName = b.BrandName
+                }).ToList(),
+                TypeList = dal.GetBillItemTypes(),
+                OldItemStatusList = dal.GetOldItemStatusList(),
+                VehicleBrandList = dal.GetVehicleBrands()
+            };
+        }
+    }
+}

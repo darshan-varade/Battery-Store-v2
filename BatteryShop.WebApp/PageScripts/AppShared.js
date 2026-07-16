@@ -34,3 +34,49 @@ function showConfirm(title, message, confirmText) {
         });
     });
 }
+
+$(function () {
+    var sidebarToggle = document.getElementById('sidebarToggle');
+    var sidebar = document.getElementById('sidebar');
+    var sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function () {
+            sidebar.classList.toggle('show');
+            sidebarOverlay.classList.toggle('show');
+        });
+    }
+
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', function () {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+    }
+
+    if (window.innerWidth < 768) {
+        document.querySelectorAll('.sidebar-nav-item').forEach(function (link) {
+            link.addEventListener('click', function () {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+        });
+    }
+
+    document.querySelectorAll('.sidebar-nav-item, .sidebar-nav-link-main').forEach(function (link) {
+        link.classList.remove('active');
+    });
+
+    document.querySelectorAll('.sidebar-nav-item, .sidebar-nav-link-main').forEach(function (link) {
+        var href = link.getAttribute('href');
+        if (href && href !== '#') {
+            var currentPath = window.location.pathname;
+            var normalizedHref = href.split('?')[0];
+            var normalizedPath = currentPath.split('?')[0];
+
+            if (normalizedPath.endsWith(normalizedHref) || normalizedPath === normalizedHref) {
+                link.classList.add('active');
+            }
+        }
+    });
+});

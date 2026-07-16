@@ -1,0 +1,100 @@
+@model BatteryShop.DataAccess.ViewModels.BillAddViewModel
+@{
+    ViewBag.Title = Model.BillId > 0 ? "Edit Bill" : "Add Bill";
+}
+
+<div class="page-header">
+    <a href="@Url.Action("BillList", "Bill")" class="btn btn-outline-secondary btn-sm">&larr; Back to List</a>
+    <h2><i class="bi bi-receipt"></i> @(Model.BillId > 0 ? "Edit Bill" : "Add Bill")</h2>
+</div>
+
+<form id="billAddForm">
+    <div class="section-card">
+        <h5><i class="bi bi-person text-primary me-2"></i>Customer & Billing Info</h5>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Customer Name</label>
+                <select id="custName" class="form-control" style="width:100%;"></select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Phone</label>
+                <input type="tel" id="custPhone" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">City</label>
+                <select id="custCity" class="form-control" style="width:100%;">
+                    <option value="">--Select City--</option>
+                    @foreach (var c in Model.CityList)
+                    {
+                        <option value="@c.CityName">@c.CityName</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label d-none d-md-block">&nbsp;</label>
+                <button type="button" id="confirmCustBtn" class="btn btn-success w-100">Confirm</button>
+            </div>
+        </div>
+        
+        <div id="dateSection" class="hidden-section mt-4 pt-3 border-top">
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label">Billing Date</label>
+                    <input type="date" id="billDate" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="custUserId" value="" />
+    </div>
+
+    <div class="section-card hidden-section" id="itemsSection">
+        <h5><i class="bi bi-box-seam text-primary me-2"></i>Items Details</h5>
+        <div id="batchesContainer"></div>
+        <button type="button" id="addBatchBtn" class="btn btn-outline-primary btn-sm mt-2"><i class="bi bi-plus-lg me-1"></i>Add Item Entry</button>
+    </div>
+
+    <div class="section-card hidden-section" id="paymentSection">
+        <h5><i class="bi bi-cash-coin text-primary me-2"></i>Payment Summary</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="payment-row"><span>Subtotal:</span><span id="paySubtotal">0.00</span></div>
+                <div class="payment-row"><span>Less Trade-in:</span><span id="payTradein">0.00</span></div>
+                <div class="payment-row"><span>Less Warranty Discount:</span><span id="payDiscount">0.00</span></div>
+                <div class="payment-row total"><span>Total Amount:</span><span id="payTotal">0.00</span></div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <label class="form-label">Paid Amount</label>
+                    <input type="number" id="payPaid" class="form-control" step="0.01" min="0" />
+                </div>
+                <div class="payment-row total"><span>Due Amount:</span><span id="payDue">0.00</span></div>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" id="saveBillBtn" class="btn btn-lg btn-success hidden-section" disabled>
+        <i class="bi bi-check-circle"></i> @(Model.BillId > 0 ? "Update Bill" : "Save Bill")
+    </button>
+</form>
+
+@section modals {
+    @Html.Partial("_VehicleInfoModal", Model)
+}
+
+<script>
+    var _modelBrandList = @Html.Raw(Json.Encode(Model.BrandList)) || [];
+    var _modelTypeList = @Html.Raw(Json.Encode(Model.TypeList)) || [];
+    var _modelOldStatusList = @Html.Raw(Json.Encode(Model.OldItemStatusList)) || [];
+    var _editMode = @(Model.BillId > 0 ? "true" : "false");
+    var _editBillId = @Model.BillId;
+    var _editCustomer = @Html.Raw(Json.Encode(new {
+        userId = Model.EditUserId,
+        userFullName = Model.EditCustomerName,
+        userPhone = Model.EditCustomerPhone,
+        cityName = Model.EditCustomerCity
+    }));
+    var _editDateOfSale = '@Model.EditDateOfSale';
+    var _editPaidAmount = @(Model.EditPaidAmount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+    var _editItems = @Html.Raw(Model.EditItemsJson);
+</script>
+<script src="~/PageScripts/BillAddScript.js"></script>

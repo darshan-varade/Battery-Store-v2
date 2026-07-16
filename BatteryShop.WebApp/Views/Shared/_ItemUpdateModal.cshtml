@@ -4,7 +4,6 @@
     var _modelTypeList = @Html.Raw(Json.Encode(Model.TypeList)) || [];
 </script>
 
-<!-- Item Add/Update Modal -->
 <div class="modal fade" id="updateModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -31,9 +30,9 @@
                                 <input type="number" id="updTransactionId" class="form-control" />
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Brand</label>
-                                <select id="updBrandId" class="form-control">
-                                    <option value="">--Select Brand--</option>
+                                <label class="form-label">Brand Filter</label>
+                                <select id="updBrandFilter" class="form-control">
+                                    <option value="">--All Brands--</option>
                                     @foreach (var brand in Model.BrandList)
                                     {
                                         <option value="@brand.BrandId">@brand.BrandName</option>
