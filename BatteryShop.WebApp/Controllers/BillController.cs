@@ -3,6 +3,7 @@ using System.Linq;
 using System.Web.Mvc;
 using BatteryShop.DataAccess.DAL;
 using BatteryShop.DataAccess.ViewModels;
+using BatteryShop.WebApp.Infrastructure;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -63,6 +64,36 @@ namespace BatteryShop.WebApp.Controllers
             {
                 Log.Error(ex, "Error in BillGet");
                 return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult DownloadPdf(int id)
+        {
+            try
+            {
+                BillDAL billDal = new BillDAL();
+                CustomerDAL customerDal = new CustomerDAL();
+                ItemDAL itemDal = new ItemDAL();
+
+                var bill = billDal.BillGetById(id, CurrentOwnerId, CurrentRoleName);
+                if (bill == null)
+                    return HttpNotFound();
+
+                var items = billDal.BillGetItems(id);
+                var customer = customerDal.CustomerGetById(bill.UserId, CurrentOwnerId, CurrentRoleName);
+                var itemTypes = billDal.GetBillItemTypes();
+                var brands = itemDal.ItemFetchBrand();
+
+                byte[] pdfBytes = PdfBillHelper.GenerateBillPdf(bill, items,
+                    customer?.CityName ?? "", itemTypes, brands);
+
+                return File(pdfBytes, "application/pdf", "Bill_" + id + "_" + DateTime.Now.ToString("yyyyMMdd") + ".pdf");
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "Error in DownloadPdf");
+                return Content("<div class='alert alert-danger'>Error generating PDF: " + ex.Message + "</div>");
             }
         }
 

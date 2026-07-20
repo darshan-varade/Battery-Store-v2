@@ -29,6 +29,9 @@
                 <div class="item-cell cell-total">@item.TotalAmount.ToString("N2")</div>
                 <div class="item-cell cell-paid">@item.PaidAmount.ToString("N2")</div>
                 <div class="item-cell cell-actions">
+                    <a class="btn btn-sm btn-success" href="@Url.Action("DownloadPdf", "Bill", new { id = item.BillId })" title="Download PDF" target="_blank">
+                        <i class="bi bi-download"></i>
+                    </a>
                     <button class="btn btn-sm btn-info btn-action-view" data-id="@item.BillId" title="View Details">
                         <i class="bi bi-eye"></i>
                     </button>

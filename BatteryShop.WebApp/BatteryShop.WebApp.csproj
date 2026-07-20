@@ -145,6 +145,14 @@
     <Reference Include="System.IdentityModel.Tokens.Jwt">
       <HintPath>..\packages\system.identitymodel.tokens.jwt.5.7.0\lib\net45\System.IdentityModel.Tokens.Jwt.dll</HintPath>
     </Reference>
+    <Reference Include="itextsharp">
+      <HintPath>..\packages\iTextSharp.5.5.13.3\lib\itextsharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="BouncyCastle.Crypto">
+      <HintPath>..\packages\BouncyCastle.1.8.9\lib\BouncyCastle.Crypto.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\AuthorizeRoleAttribute.cs" />
@@ -162,6 +170,7 @@
     <Compile Include="Infrastructure\CookieTempDataProvider.cs" />
     <Compile Include="Infrastructure\JwtAuthenticationFilter.cs" />
     <Compile Include="Infrastructure\EmailService.cs" />
+    <Compile Include="Infrastructure\PdfBillHelper.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
