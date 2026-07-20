@@ -88,6 +88,23 @@ namespace BatteryShop.DataAccess.DAL
             }
         }
 
+        public byte? GetApprovalStatus(string email)
+        {
+            DbCommand cmd = db.GetSqlStringCommand("SELECT isApproved FROM batteryCredentials WHERE ownerEmail = @Email");
+            db.AddInParameter(cmd, "@Email", DbType.String, email);
+
+            try
+            {
+                object result = db.ExecuteScalar(cmd);
+                return result != null && result != DBNull.Value ? Convert.ToByte(result) : (byte?)null;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetApprovalStatus");
+                throw;
+            }
+        }
+
         public List<OwnerListModel> GetAllOwners()
         {
             List<OwnerListModel> list = new List<OwnerListModel>();

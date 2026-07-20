@@ -33,7 +33,19 @@ namespace BatteryShop.WebApp.Controllers
 
                 if (owner == null || !BCrypt.Net.BCrypt.Verify(vm.Password, owner.PasswordHash))
                 {
-                    ModelState.AddModelError("", "Invalid email or password.");
+                    if (owner == null && dal.OwnerCheckEmail(vm.Email))
+                    {
+                        byte? status = dal.GetApprovalStatus(vm.Email);
+                        if (status == 0)
+                            ModelState.AddModelError("", "Your account has been rejected. Contact admin.");
+                        else
+                            ModelState.AddModelError("", "Your account is pending admin approval.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Invalid email or password.");
+                    }
+
                     return View(vm);
                 }
 

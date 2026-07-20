@@ -134,6 +134,16 @@
         }
     </div>
 
+    @if (TempData["info"] != null)
+    {
+        <div id="tempToast" style="position:fixed;top:20px;right:20px;z-index:9999;background:#0dcaf0;color:#000;padding:12px 20px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-size:14px;max-width:360px;">
+            @TempData["info"]
+        </div>
+        <script>
+            setTimeout(function () { var e = document.getElementById('tempToast'); if (e) e.remove(); }, 4000);
+        </script>
+    }
+
     @if (step == "otp")
     {
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
