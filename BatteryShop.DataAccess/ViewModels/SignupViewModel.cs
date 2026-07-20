@@ -27,5 +27,14 @@ namespace BatteryShop.DataAccess.ViewModels
         [Display(Name = "Confirm Password")]
         [Compare("Password", ErrorMessage = "Passwords do not match.")]
         public string ConfirmPassword { get; set; }
+
+        public string SignupStep { get; set; }
+
+        [StringLength(6, MinimumLength = 6, ErrorMessage = "OTP must be 6 digits.")]
+        public string OtpCode { get; set; }
+
+        public string OtpEmail { get; set; }
+
+        public string PasswordHash { get; set; }
     }
 }

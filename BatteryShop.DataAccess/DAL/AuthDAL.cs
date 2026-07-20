@@ -217,6 +217,76 @@ namespace BatteryShop.DataAccess.DAL
             }
         }
 
+        public void MarkOtpUsed(int otpId)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("otpMarkUsed");
+            db.AddInParameter(cmd, "@OtpId", DbType.Int32, otpId);
+
+            try
+            {
+                db.ExecuteNonQuery(cmd);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in MarkOtpUsed");
+                throw;
+            }
+        }
+
+        public int CreateOtpByEmail(string email, string otpCode, DateTime expiresAt)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("otpCreateByEmail");
+            db.AddInParameter(cmd, "@OtpEmail", DbType.String, email);
+            db.AddInParameter(cmd, "@OtpCode", DbType.String, otpCode);
+            db.AddInParameter(cmd, "@ExpiresAt", DbType.DateTime, expiresAt);
+
+            try
+            {
+                object result = db.ExecuteScalar(cmd);
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in CreateOtpByEmail");
+                throw;
+            }
+        }
+
+        public int? ValidateOtpByEmail(string email, string otpCode)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("otpValidateByEmail");
+            db.AddInParameter(cmd, "@OtpEmail", DbType.String, email);
+            db.AddInParameter(cmd, "@OtpCode", DbType.String, otpCode);
+
+            try
+            {
+                object result = db.ExecuteScalar(cmd);
+                return result != null ? Convert.ToInt32(result) : (int?)null;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in ValidateOtpByEmail");
+                throw;
+            }
+        }
+
+        public DateTime? GetLatestOtpTimeByEmail(string email)
+        {
+            DbCommand cmd = db.GetSqlStringCommand("SELECT MAX(createdAt) FROM batteryOtp WHERE otpEmail = @Email");
+            db.AddInParameter(cmd, "@Email", DbType.String, email);
+
+            try
+            {
+                object result = db.ExecuteScalar(cmd);
+                return result != null && result != DBNull.Value ? (DateTime?)Convert.ToDateTime(result) : null;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetLatestOtpTimeByEmail");
+                throw;
+            }
+        }
+
         public void RevokeRefreshToken(int refreshTokenId)
         {
             DbCommand cmd = db.GetStoredProcCommand("refreshTokenRevoke");

@@ -161,6 +161,7 @@
     <Compile Include="Infrastructure\JwtHelper.cs" />
     <Compile Include="Infrastructure\CookieTempDataProvider.cs" />
     <Compile Include="Infrastructure\JwtAuthenticationFilter.cs" />
+    <Compile Include="Infrastructure\EmailService.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -175,6 +176,7 @@
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="PageScripts\AppShared.js" />
+    <Content Include="PageScripts\SignupScript.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
@@ -221,7 +223,7 @@
     <Content Include="Views\Shared\_BillDetailsOffcanvas.cshtml" />
     <Content Include="Views\Shared\_VehicleInfoModal.cshtml" />
     <Content Include="Views\Auth\Login.cshtml" />
-    <Content Include="Views\Admin\PendingOwners.cshtml" />
+    <Content Include="Views\Admin\ManageOwners.cshtml" />
     <Content Include="Views\Auth\Signup.cshtml" />
     <Content Include="Views\Item\ItemAdd.cshtml" />
     <Content Include="Views\Shared\_ItemDetailsOffcanvas.cshtml" />

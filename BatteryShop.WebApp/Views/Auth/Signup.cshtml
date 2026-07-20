@@ -1,6 +1,7 @@
 @model BatteryShop.DataAccess.ViewModels.SignupViewModel
 @{
     Layout = null;
+    string step = Model?.SignupStep;
 }
 
 <!DOCTYPE html>
@@ -12,55 +13,131 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="~/Content/Style.css" rel="stylesheet" />
+    <style>
+        .otp-digit {
+            width: 48px;
+            height: 56px;
+            text-align: center;
+            font-size: 1.4rem;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .otp-digit:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 2px rgba(13,110,253,0.15);
+        }
+    </style>
 </head>
 <body class="auth-page">
     <div class="auth-card">
         <div class="logo">
             <i class="bi bi-lightning-charge"></i>
             <h2>Create Account</h2>
-            <p class="text-secondary" style="font-size: 0.9rem;">Register a new owner account</p>
+            <p class="text-secondary" style="font-size: 0.9rem;">
+                @(step == "otp" ? "Verify your email" : "Register a new owner account")
+            </p>
         </div>
 
         @using (Html.BeginForm("Signup", "Auth", FormMethod.Post))
         {
             @Html.AntiForgeryToken()
 
-            <div class="mb-3">
-                @Html.LabelFor(m => m.OwnerName, new { @class = "form-label" })
-                @Html.TextBoxFor(m => m.OwnerName, new { @class = "form-control", placeholder = "Full name" })
-                @Html.ValidationMessageFor(m => m.OwnerName)
-            </div>
+            if (step == "otp")
+            {
+                @Html.HiddenFor(m => m.SignupStep)
+                @Html.HiddenFor(m => m.OtpEmail)
+                @Html.HiddenFor(m => m.PasswordHash)
+                @Html.HiddenFor(m => m.OwnerName)
+                @Html.HiddenFor(m => m.OwnerPhone)
+                @Html.HiddenFor(m => m.OwnerEmail)
+                @Html.HiddenFor(m => m.Password)
+                @Html.HiddenFor(m => m.ConfirmPassword)
 
-            <div class="mb-3">
-                @Html.LabelFor(m => m.OwnerPhone, new { @class = "form-label" })
-                @Html.TextBoxFor(m => m.OwnerPhone, new { @class = "form-control", placeholder = "Phone number" })
-                @Html.ValidationMessageFor(m => m.OwnerPhone)
-            </div>
+                <div class="text-center mb-4">
+                    <i class="bi bi-envelope-check" style="font-size: 2.5rem; color: #0d6efd;"></i>
+                    <p class="mt-2 mb-0" style="font-size: 0.9rem;">Code sent to</p>
+                    <strong style="font-size: 0.95rem;">@Model.OtpEmail</strong>
+                </div>
 
-            <div class="mb-3">
-                @Html.LabelFor(m => m.OwnerEmail, new { @class = "form-label" })
-                @Html.TextBoxFor(m => m.OwnerEmail, new { @class = "form-control", placeholder = "Email address" })
-                @Html.ValidationMessageFor(m => m.OwnerEmail)
-            </div>
+                <div class="otp-inputs d-flex justify-content-center gap-2 mb-3" id="otpContainer">
+                    <input type="text" class="form-control otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" data-index="0" />
+                    <input type="text" class="form-control otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" data-index="1" />
+                    <input type="text" class="form-control otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" data-index="2" />
+                    <input type="text" class="form-control otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" data-index="3" />
+                    <input type="text" class="form-control otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" data-index="4" />
+                    <input type="text" class="form-control otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" data-index="5" />
+                </div>
+                @Html.HiddenFor(m => m.OtpCode, new { id = "otpCodeHidden" })
 
-            <div class="mb-3">
-                @Html.LabelFor(m => m.Password, new { @class = "form-label" })
-                @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Min 6 characters" })
-                @Html.ValidationMessageFor(m => m.Password)
-            </div>
+                <div class="text-danger text-center mb-3" style="font-size: 0.8rem; min-height: 1.2em;">
+                    @Html.ValidationMessage("OtpCode")
+                    @Html.ValidationMessage("")
+                </div>
 
-            <div class="mb-3">
-                @Html.LabelFor(m => m.ConfirmPassword, new { @class = "form-label" })
-                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", placeholder = "Re-enter password" })
-                @Html.ValidationMessageFor(m => m.ConfirmPassword)
-            </div>
+                <button type="submit" class="btn btn-primary w-100">Verify OTP</button>
 
-            <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+                <div class="text-center mt-3" style="font-size: 0.85rem;">
+                    <span id="resendTimer">Resend in 60s</span>
+                    <button type="button" id="resendBtn" class="btn btn-link btn-sm p-0 ms-1" disabled style="text-decoration:none; vertical-align:baseline;">Resend</button>
+                </div>
+            }
+            else
+            {
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.OwnerName, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.OwnerName, new { @class = "form-control", placeholder = "Full name" })
+                    @Html.ValidationMessageFor(m => m.OwnerName)
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.OwnerPhone, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.OwnerPhone, new { @class = "form-control", placeholder = "Phone number" })
+                    @Html.ValidationMessageFor(m => m.OwnerPhone)
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.OwnerEmail, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.OwnerEmail, new { @class = "form-control", placeholder = "Email address" })
+                    @Html.ValidationMessageFor(m => m.OwnerEmail)
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Password, new { @class = "form-label" })
+                    @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Min 6 characters" })
+                    @Html.ValidationMessageFor(m => m.Password)
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.ConfirmPassword, new { @class = "form-label" })
+                    @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", placeholder = "Re-enter password" })
+                    @Html.ValidationMessageFor(m => m.ConfirmPassword)
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+            }
         }
 
-        <div class="auth-footer">
-            Already have an account? <a href="@Url.Action("Login", "Auth")">Sign in</a>
-        </div>
+        @if (step != "otp")
+        {
+            <div class="auth-footer">
+                Already have an account? <a href="@Url.Action("Login", "Auth")">Sign in</a>
+            </div>
+        }
+
+        @if (step == "otp")
+        {
+            <div class="auth-footer mt-3">
+                <a href="@Url.Action("Signup", "Auth")" style="font-size:0.85rem;">&larr; Use a different email</a>
+            </div>
+        }
     </div>
+
+    @if (step == "otp")
+    {
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="~/PageScripts/SignupScript.js"></script>
+    }
 </body>
 </html>

@@ -85,13 +85,50 @@ namespace BatteryShop.WebApp.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Signup(SignupViewModel vm)
         {
+            AuthDAL dal = new AuthDAL();
+
+            if (vm.SignupStep == "otp")
+            {
+                ModelState.Remove("OwnerName");
+                ModelState.Remove("OwnerPhone");
+                ModelState.Remove("OwnerEmail");
+                ModelState.Remove("Password");
+                ModelState.Remove("ConfirmPassword");
+
+                if (string.IsNullOrEmpty(vm.OtpCode) || vm.OtpCode.Length != 6)
+                {
+                    ModelState.AddModelError("OtpCode", "Enter the 6-digit code.");
+                    return View(vm);
+                }
+
+                try
+                {
+                    int? otpId = dal.ValidateOtpByEmail(vm.OtpEmail, vm.OtpCode);
+                    if (otpId == null)
+                    {
+                        ModelState.AddModelError("OtpCode", "Invalid or expired code.");
+                        return View(vm);
+                    }
+
+                    dal.MarkOtpUsed(otpId.Value);
+                    dal.OwnerRegister(vm.OwnerName, vm.OwnerPhone, vm.OwnerEmail, vm.PasswordHash);
+
+                    TempData["info"] = "Account created! An admin will review and activate your account.";
+                    return RedirectToAction("Login");
+                }
+                catch (Exception ex)
+                {
+                    Serilog.Log.Error(ex, "Error in Signup OTP verification");
+                    ModelState.AddModelError("", "An error occurred. Please try again.");
+                    return View(vm);
+                }
+            }
+
             if (!ModelState.IsValid)
                 return View(vm);
 
             try
             {
-                AuthDAL dal = new AuthDAL();
-
                 if (dal.OwnerCheckEmail(vm.OwnerEmail))
                 {
                     ModelState.AddModelError("OwnerEmail", "This email is already registered.");
@@ -99,17 +136,55 @@ namespace BatteryShop.WebApp.Controllers
                 }
 
                 string passwordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password);
+                string otpCode = new Random().Next(100000, 999999).ToString();
+                DateTime otpExpiresAt = DateTime.Now.AddMinutes(int.Parse(System.Configuration.ConfigurationManager.AppSettings["OtpExpiryMinutes"] ?? "5"));
 
-                dal.OwnerRegister(vm.OwnerName, vm.OwnerPhone, vm.OwnerEmail, passwordHash);
+                dal.CreateOtpByEmail(vm.OwnerEmail, otpCode, otpExpiresAt);
+                EmailService.SendOtp(vm.OwnerEmail, otpCode);
 
-                TempData["info"] = "Registration submitted! An admin will review and activate your account.";
-                return RedirectToAction("Login");
+                vm.PasswordHash = passwordHash;
+                vm.OtpEmail = vm.OwnerEmail;
+                vm.SignupStep = "otp";
+                vm.Password = null;
+                vm.ConfirmPassword = null;
+                ModelState.Clear();
+
+                return View(vm);
             }
             catch (Exception ex)
             {
                 Serilog.Log.Error(ex, "Error in Signup POST");
                 ModelState.AddModelError("", "An error occurred. Please try again.");
                 return View(vm);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult ResendOtp(string email)
+        {
+            try
+            {
+                AuthDAL dal = new AuthDAL();
+
+                DateTime? lastOtp = dal.GetLatestOtpTimeByEmail(email);
+                if (lastOtp.HasValue && (DateTime.Now - lastOtp.Value).TotalSeconds < 60)
+                {
+                    return Json(new { success = false, error = "Please wait 60 seconds before requesting a new code." });
+                }
+
+                string otpCode = new Random().Next(100000, 999999).ToString();
+                DateTime otpExpiresAt = DateTime.Now.AddMinutes(int.Parse(System.Configuration.ConfigurationManager.AppSettings["OtpExpiryMinutes"] ?? "5"));
+
+                dal.CreateOtpByEmail(email, otpCode, otpExpiresAt);
+                EmailService.SendOtp(email, otpCode);
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "Error in ResendOtp");
+                return Json(new { success = false, error = "An error occurred. Please try again." });
             }
         }
 
