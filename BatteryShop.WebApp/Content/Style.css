@@ -2077,6 +2077,33 @@ body.auth-page {
     margin-top: 8px;
     color: #1e293b;
 }
+/* ====== Manage Owners responsive ====== */
+@@media (max-width: 640px) {
+    .owners-table thead { display: none; }
+    .owners-table, .owners-table tbody, .owners-table tr, .owners-table td {
+        display: block;
+        width: 100%;
+    }
+    .owners-table tbody tr {
+        border-bottom: 8px solid var(--canvas);
+        padding: 10px 0;
+    }
+    .owners-table tbody td {
+        border-bottom: none;
+        padding: 6px 16px;
+    }
+    .owners-table tbody td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+        margin-bottom: 2px;
+    }
+}
+
 .auth-card .form-label {
     font-weight: 600;
     font-size: 0.85rem;

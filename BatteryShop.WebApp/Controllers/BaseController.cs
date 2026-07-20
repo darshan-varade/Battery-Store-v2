@@ -1,11 +1,16 @@
 using System;
 using System.Security.Claims;
 using System.Web.Mvc;
+using BatteryShop.WebApp.Infrastructure;
 
 namespace BatteryShop.WebApp.Controllers
 {
     public class BaseController : Controller
     {
+        public BaseController()
+        {
+            TempDataProvider = new CookieTempDataProvider();
+        }
         protected int CurrentOwnerId
         {
             get

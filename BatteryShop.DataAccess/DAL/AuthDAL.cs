@@ -4,7 +4,6 @@ using System.Data;
 using System.Data.Common;
 using Microsoft.Practices.EnterpriseLibrary.Data;
 using BatteryShop.DataAccess.Models;
-using BatteryShop.DataAccess.ViewModels;
 using Serilog;
 
 namespace BatteryShop.DataAccess.DAL
@@ -89,11 +88,11 @@ namespace BatteryShop.DataAccess.DAL
             }
         }
 
-        public List<PendingOwnerViewModel> GetPendingOwners()
+        public List<OwnerListModel> GetAllOwners()
         {
-            List<PendingOwnerViewModel> list = new List<PendingOwnerViewModel>();
+            List<OwnerListModel> list = new List<OwnerListModel>();
 
-            DbCommand cmd = db.GetStoredProcCommand("pendingOwnerGetList");
+            DbCommand cmd = db.GetStoredProcCommand("ownerGetAllList");
 
             try
             {
@@ -101,12 +100,15 @@ namespace BatteryShop.DataAccess.DAL
                 {
                     while (reader.Read())
                     {
-                        list.Add(new PendingOwnerViewModel
+                        list.Add(new OwnerListModel
                         {
-                            PendingOwnerId = Convert.ToInt32(reader["pendingOwnerId"]),
+                            OwnerId = Convert.ToInt32(reader["ownerId"]),
                             OwnerName = reader["ownerName"].ToString(),
                             OwnerPhone = reader["ownerPhone"].ToString(),
                             OwnerEmail = reader["ownerEmail"].ToString(),
+                            RoleName = reader["roleName"].ToString(),
+                            IsApproved = reader["isApproved"] != DBNull.Value ? Convert.ToByte(reader["isApproved"]) : (byte?)null,
+                            LastLogin = reader["lastLogin"] != DBNull.Value ? Convert.ToDateTime(reader["lastLogin"]) : (DateTime?)null,
                             CreatedAt = Convert.ToDateTime(reader["createdAt"])
                         });
                     }
@@ -114,35 +116,24 @@ namespace BatteryShop.DataAccess.DAL
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error in GetPendingOwners");
+                Log.Error(ex, "Error in GetAllOwners");
                 throw;
             }
 
             return list;
         }
 
-        public int ApprovePendingOwner(int pendingOwnerId, int approvedBy)
+        public void SetApprovalStatus(int ownerId, byte? isApproved, int modifiedBy)
         {
-            DbCommand cmd = db.GetStoredProcCommand("pendingOwnerApprove");
-            db.AddInParameter(cmd, "@PendingOwnerId", DbType.Int32, pendingOwnerId);
-            db.AddInParameter(cmd, "@ApprovedBy", DbType.Int32, approvedBy);
+            DbCommand cmd = db.GetStoredProcCommand("ownerSetApprovalStatus");
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
 
-            try
-            {
-                object result = db.ExecuteScalar(cmd);
-                return result != null ? Convert.ToInt32(result) : 0;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in ApprovePendingOwner");
-                throw;
-            }
-        }
+            if (isApproved.HasValue)
+                db.AddInParameter(cmd, "@IsApproved", DbType.Byte, isApproved.Value);
+            else
+                db.AddInParameter(cmd, "@IsApproved", DbType.Byte, DBNull.Value);
 
-        public void RejectPendingOwner(int pendingOwnerId)
-        {
-            DbCommand cmd = db.GetStoredProcCommand("pendingOwnerReject");
-            db.AddInParameter(cmd, "@PendingOwnerId", DbType.Int32, pendingOwnerId);
+            db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, modifiedBy);
 
             try
             {
@@ -150,7 +141,7 @@ namespace BatteryShop.DataAccess.DAL
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error in RejectPendingOwner");
+                Log.Error(ex, "Error in SetApprovalStatus");
                 throw;
             }
         }

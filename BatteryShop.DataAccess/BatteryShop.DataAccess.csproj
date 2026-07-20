@@ -75,6 +75,7 @@
     <Compile Include="DAL\BillDAL.cs" />
     <Compile Include="Models\BillModel.cs" />
     <Compile Include="Models\OwnerModel.cs" />
+    <Compile Include="Models\OwnerListModel.cs" />
     <Compile Include="Models\RefreshTokenModel.cs" />
     <Compile Include="ViewModels\BillViewModel.cs" />
     <Compile Include="ViewModels\BillAddViewModel.cs" />
@@ -84,7 +85,6 @@
     <Compile Include="ViewModels\VehicleModelInfoViewModel.cs" />
     <Compile Include="ViewModels\BillAddRequest.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
-    <Compile Include="ViewModels\PendingOwnerViewModel.cs" />
     <Compile Include="ViewModels\SignupViewModel.cs" />
   </ItemGroup>
   <ItemGroup />

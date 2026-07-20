@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -43,9 +43,9 @@
                 </a>
                 @if (User.IsInRole("Admin"))
                 {
-                    <a href="@Url.Action("PendingOwners", "Admin")" class="sidebar-nav-item">
-                        <i class="bi bi-person-check"></i>
-                        <span>Pending Approvals</span>
+                    <a href="@Url.Action("ManageOwners", "Admin")" class="sidebar-nav-item">
+                        <i class="bi bi-people"></i>
+                        <span>Manage Owners</span>
                     </a>
                 }
                 
