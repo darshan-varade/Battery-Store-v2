@@ -238,6 +238,7 @@
     <Content Include="Views\Shared\_ItemDetailsOffcanvas.cshtml" />
     <Content Include="Views\Shared\_ItemUpdateModal.cshtml" />
     <Content Include="Views\Shared\_ItemUpdateOffcanvas.cshtml" />
+    <Content Include="EmailTemplates\OtpEmail.html" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
