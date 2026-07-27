@@ -3,225 +3,6 @@
     ViewBag.Title = "Manage Owners";
 }
 
-<style>
-    :root {
-        --ink: #1c2530;
-        --muted: #6b7785;
-        --line: #e7eaee;
-        --surface: #ffffff;
-        --canvas: #f6f8fa;
-        --accent: #2f6fed;
-    }
-
-    .owners-header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-bottom: 20px;
-    }
-    .owners-header h4 {
-        font-weight: 700;
-        color: var(--ink);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 4px;
-    }
-    .owners-header h4 i {
-        color: var(--accent);
-        font-size: 1.05rem;
-    }
-    .owners-header p {
-        color: var(--muted);
-        margin: 0;
-        font-size: 0.92rem;
-    }
-    .owners-count {
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        padding: 8px 16px;
-        text-align: center;
-        min-width: 84px;
-    }
-    .owners-count .num {
-        display: block;
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: var(--ink);
-        line-height: 1.1;
-    }
-    .owners-count .lbl {
-        font-size: 0.7rem;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-    }
-
-    .owners-card {
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: 14px;
-        overflow: hidden;
-        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
-    }
-
-    .owners-table {
-        margin-bottom: 0;
-        border-collapse: separate;
-    }
-    .owners-table thead th {
-        background: var(--canvas);
-        color: var(--muted);
-        font-size: 0.72rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        border-bottom: 1px solid var(--line);
-        border-top: none;
-        padding: 12px 16px;
-        white-space: nowrap;
-    }
-    .owners-table tbody td {
-        padding: 13px 16px;
-        border-bottom: 1px solid var(--line);
-        border-top: none;
-        color: var(--ink);
-        font-size: 0.9rem;
-    }
-    .owners-table tbody tr:last-child td { border-bottom: none; }
-    .owners-table tbody tr {
-        transition: background 0.15s ease;
-    }
-    .owners-table tbody tr:hover {
-        background: #fafbfc;
-    }
-
-    .owner-identity {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .owner-avatar {
-        flex-shrink: 0;
-        width: 34px;
-        height: 34px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #2f6fed, #6a9bff);
-        color: #fff;
-        font-size: 0.78rem;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        letter-spacing: 0.02em;
-    }
-    .owner-name {
-        font-weight: 600;
-        color: var(--ink);
-        line-height: 1.2;
-    }
-
-    .contact-line {
-        color: var(--ink);
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        white-space: nowrap;
-    }
-    .contact-line i {
-        color: var(--muted);
-        font-size: 0.85rem;
-    }
-
-    .registered-cell {
-        color: var(--muted);
-        font-size: 0.85rem;
-        white-space: nowrap;
-    }
-
-    /* Approval toggle */
-    .approval-toggle {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .toggle-track {
-        position: relative;
-        width: 72px;
-        height: 24px;
-        background: #e9ecef;
-        border-radius: 12px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 6px;
-        box-sizing: content-box;
-    }
-    .toggle-opt {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: rgba(0,0,0,0.12);
-        z-index: 2;
-        cursor: pointer;
-        position: relative;
-    }
-    .toggle-opt.active {
-        width: 18px;
-        height: 18px;
-        z-index: 3;
-        position: absolute;
-        transition: left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-    }
-    .toggle-opt.active.rejected { background: #dc3545; left: 3px; }
-    .toggle-opt.active.awaiting { background: #ffc107; left: 27px; }
-    .toggle-opt.active.accepted { background: #198754; left: 51px; }
-    .toggle-label {
-        font-size: 0.8rem;
-        font-weight: 600;
-        min-width: 64px;
-        transition: color 0.3s ease;
-        white-space: nowrap;
-    }
-    .toggle-label.rejected { color: #dc3545; }
-    .toggle-label.awaiting { color: #b8860b; }
-    .toggle-label.accepted { color: #198754; }
-
-    .status-badge {
-        display: inline-block;
-        padding: 2px 10px;
-        border-radius: 10px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-    .status-badge.rejected { background: #fce4e4; color: #dc3545; }
-    .status-badge.awaiting { background: #fff8e1; color: #b8860b; }
-    .status-badge.accepted { background: #e8f5e9; color: #198754; }
-
-    .owners-empty {
-        text-align: center;
-        padding: 56px 24px;
-        color: var(--muted);
-    }
-    .owners-empty i {
-        font-size: 2rem;
-        color: #c8cfd8;
-        margin-bottom: 10px;
-        display: block;
-    }
-    .owners-empty p {
-        margin: 0;
-        font-size: 0.95rem;
-    }
-
-
-</style>
-
 <div class="owners-header">
     <div>
         <h4><i class="bi bi-people"></i>Manage Owners</h4>
@@ -238,7 +19,7 @@
 
 @if (!Model.Any())
 {
-    <div class="owners-card">
+    <div class="owners-card" data-action-url="@Url.Action("SetApprovalStatus", "Admin")">
         <div class="owners-empty">
             <i class="bi bi-person-x"></i>
             <p>No owners registered yet.</p>
@@ -247,7 +28,7 @@
 }
 else
 {
-    <div class="owners-card">
+    <div class="owners-card" data-action-url="@Url.Action("SetApprovalStatus", "Admin")">
         <div class="table-responsive">
             <table class="table owners-table align-middle">
                 <thead>
@@ -292,7 +73,14 @@ else
                         <tr data-owner-id="@item.OwnerId">
                             <td data-label="Name">
                                 <div class="owner-identity">
-                                    <div class="owner-avatar">@initials</div>
+                                    @if (!string.IsNullOrEmpty(item.ProfileImage))
+                                    {
+                                        <img src="@Url.Content(BatteryShop.WebApp.Infrastructure.ImagePathHelper.GetProfileUrl(item.ProfileImage))" alt="@item.OwnerName" class="owner-avatar" style="object-fit:cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="owner-avatar">@initials</div>
+                                    }
                                     <span class="owner-name">@item.OwnerName</span>
                                 </div>
                             </td>
@@ -323,46 +111,5 @@ else
 }
 
 @section scripts {
-    <script>
-        function handleToggleClick(e, track) {
-            var opt = e.target;
-            if (!opt.classList.contains('toggle-opt') || opt.classList.contains('active')) return;
-
-            var row = $(track).closest('tr');
-            var ownerId = row.data('owner-id');
-            var value = opt.getAttribute('data-value');
-
-            var thumb = track.querySelector('.toggle-opt.active');
-            var label = track.parentElement.querySelector('.toggle-label');
-
-            var leftPx, newClass, statusText;
-            if (value === '0') {
-                leftPx = 3; newClass = 'rejected'; statusText = 'Rejected';
-            } else if (value === '1') {
-                leftPx = 51; newClass = 'accepted'; statusText = 'Accepted';
-            } else {
-                leftPx = 27; newClass = 'awaiting'; statusText = 'Awaiting';
-            }
-
-            thumb.style.left = leftPx + 'px';
-            thumb.className = 'toggle-opt active ' + newClass;
-            thumb.setAttribute('data-value', value);
-            label.className = 'toggle-label ' + newClass;
-            label.textContent = statusText;
-
-            var postData = { id: ownerId };
-            if (value !== '') postData.status = value;
-            $.post('@Url.Action("SetApprovalStatus", "Admin")', postData)
-                .done(function (res) {
-                    if (res.success) {
-                        showToast('Owner ' + statusText.toLowerCase() + '.', 'success');
-                    } else {
-                        showToast(res.message || 'Failed to update status.', 'error');
-                    }
-                })
-                .fail(function () {
-                    showToast('An error occurred.', 'error');
-                });
-        }
-    </script>
+    <script src="~/PageScripts/ManageOwnersScript.js"></script>
 }

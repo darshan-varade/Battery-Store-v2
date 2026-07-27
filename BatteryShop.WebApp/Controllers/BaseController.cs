@@ -31,6 +31,42 @@ namespace BatteryShop.WebApp.Controllers
 
         protected bool IsAdmin => User.IsInRole("Admin");
 
+        protected string CurrentOwnerName
+        {
+            get
+            {
+                var claim = ((ClaimsPrincipal)User).FindFirst(ClaimTypes.Name);
+                return claim?.Value;
+            }
+        }
+
+        protected string CurrentOwnerEmail
+        {
+            get
+            {
+                var claim = ((ClaimsPrincipal)User).FindFirst(ClaimTypes.Email);
+                return claim?.Value;
+            }
+        }
+
+        protected string CurrentOwnerPhone
+        {
+            get
+            {
+                var claim = ((ClaimsPrincipal)User).FindFirst("Phone");
+                return claim?.Value;
+            }
+        }
+
+        protected string CurrentProfileImage
+        {
+            get
+            {
+                var claim = ((ClaimsPrincipal)User).FindFirst("ProfileImage");
+                return claim?.Value;
+            }
+        }
+
         protected ActionResult RequireAdmin()
         {
             if (!IsAdmin) return RedirectToAction("Index", "Home");

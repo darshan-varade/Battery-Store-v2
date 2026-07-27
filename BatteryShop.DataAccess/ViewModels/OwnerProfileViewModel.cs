@@ -1,16 +1,11 @@
-using System;
-
-namespace BatteryShop.DataAccess.Models
+namespace BatteryShop.DataAccess.ViewModels
 {
-    public class RefreshTokenModel
+    public class OwnerProfileViewModel
     {
-        public int RefreshTokenId { get; set; }
         public int OwnerId { get; set; }
         public string OwnerName { get; set; }
         public string OwnerPhone { get; set; }
         public string OwnerEmail { get; set; }
-        public string RoleName { get; set; }
-        public DateTime ExpiresAt { get; set; }
         public string ProfileImage { get; set; }
     }
 }

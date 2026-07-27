@@ -64,11 +64,26 @@
 
             <div class="sidebar-footer">
                 <div class="sidebar-user-info">
-                    <i class="bi bi-person-circle"></i>
+                    @{
+                        var profileClaim = ((System.Security.Claims.ClaimsPrincipal)User).FindFirst("ProfileImage");
+                        var profileImage = profileClaim != null ? profileClaim.Value : null;
+                    }
+                    @if (!string.IsNullOrEmpty(profileImage))
+                    {
+                        <img src="@Url.Content(BatteryShop.WebApp.Infrastructure.ImagePathHelper.GetProfileUrl(profileImage))" alt="Profile" class="sidebar-avatar" />
+                    }
+                    else
+                    {
+                        <i class="bi bi-person-circle"></i>
+                    }
                     <span>@(User.Identity.Name ?? "Guest")</span>
                 </div>
                 @if (User.Identity.IsAuthenticated)
                 {
+                    <a href="@Url.Action("Index", "Profile")" class="sidebar-nav-item" style="padding:8px 12px;font-size:0.85rem;color:rgba(255,255,255,0.8);">
+                        <i class="bi bi-person-gear"></i>
+                        <span>My Profile</span>
+                    </a>
                     <a href="@Url.Action("Logout", "Auth")" class="sidebar-logout">
                         <i class="bi bi-box-arrow-right"></i>
                         <span>Logout</span>

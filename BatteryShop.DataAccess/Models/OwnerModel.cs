@@ -6,9 +6,11 @@ namespace BatteryShop.DataAccess.Models
     {
         public int OwnerId { get; set; }
         public string OwnerName { get; set; }
+        public string OwnerPhone { get; set; }
         public string OwnerEmail { get; set; }
         public string PasswordHash { get; set; }
         public int RoleId { get; set; }
         public string RoleName { get; set; }
+        public string ProfileImage { get; set; }
     }
 }

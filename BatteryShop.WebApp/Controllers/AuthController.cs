@@ -1,4 +1,6 @@
 using System;
+using System.Configuration;
+using System.IO;
 using System.Web;
 using System.Web.Mvc;
 using BatteryShop.DataAccess.DAL;
@@ -49,10 +51,10 @@ namespace BatteryShop.WebApp.Controllers
                     return View(vm);
                 }
 
-                string accessToken = JwtHelper.GenerateAccessToken(owner.OwnerId, owner.OwnerName, owner.OwnerEmail, owner.RoleName);
+                string accessToken = JwtHelper.GenerateAccessToken(owner.OwnerId, owner.OwnerName, owner.OwnerEmail, owner.RoleName, owner.ProfileImage, owner.OwnerPhone);
                 string refreshToken = JwtHelper.GenerateRefreshToken();
                 string refreshTokenHash = JwtHelper.HashRefreshToken(refreshToken);
-                DateTime refreshExpiry = DateTime.Now.AddDays(int.Parse(System.Configuration.ConfigurationManager.AppSettings["JwtRefreshTokenExpiryDays"] ?? "7"));
+                DateTime refreshExpiry = DateTime.Now.AddDays(int.Parse(ConfigurationManager.AppSettings["JwtRefreshTokenExpiryDays"] ?? "7"));
 
                 dal.CreateRefreshToken(owner.OwnerId, refreshTokenHash, refreshExpiry);
 
@@ -123,7 +125,31 @@ namespace BatteryShop.WebApp.Controllers
                     }
 
                     dal.MarkOtpUsed(otpId.Value);
-                    dal.OwnerRegister(vm.OwnerName, vm.OwnerPhone, vm.OwnerEmail, vm.PasswordHash);
+                    int ownerId = dal.OwnerRegister(vm.OwnerName, vm.OwnerPhone, vm.OwnerEmail, vm.PasswordHash);
+
+                    if (!string.IsNullOrEmpty(vm.ProfileImage) && ownerId > 0)
+                    {
+                        try
+                        {
+                            string tempPhysicalPath = ImagePathHelper.GetTempProfilePhysicalPath(vm.ProfileImage);
+                            if (System.IO.File.Exists(tempPhysicalPath))
+                            {
+                                string profilesDir = Server.MapPath(ConfigurationManager.AppSettings["ProfileImagePath"]);
+                                if (!Directory.Exists(profilesDir))
+                                    Directory.CreateDirectory(profilesDir);
+
+                                string finalFileName = Guid.NewGuid().ToString("N") + ".jpg";
+                                string finalPath = Path.Combine(profilesDir, finalFileName);
+                                System.IO.File.Move(tempPhysicalPath, finalPath);
+
+                                dal.UpdateProfile(ownerId, vm.OwnerName, vm.OwnerPhone, vm.OwnerEmail, finalFileName);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Serilog.Log.Error(ex, "Error moving profile image during signup");
+                        }
+                    }
 
                     TempData["info"] = "Account created! An admin will review and activate your account.";
                     return RedirectToAction("Login");
@@ -149,7 +175,28 @@ namespace BatteryShop.WebApp.Controllers
 
                 string passwordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password);
                 string otpCode = new Random().Next(100000, 999999).ToString();
-                DateTime otpExpiresAt = DateTime.Now.AddMinutes(int.Parse(System.Configuration.ConfigurationManager.AppSettings["OtpExpiryMinutes"] ?? "5"));
+                DateTime otpExpiresAt = DateTime.Now.AddMinutes(int.Parse(ConfigurationManager.AppSettings["OtpExpiryMinutes"] ?? "5"));
+
+                string tempProfileImage = null;
+                if (Request.Files.Count > 0)
+                {
+                    var file = Request.Files[0];
+                    if (file != null && file.ContentLength > 0)
+                    {
+                        string ext = Path.GetExtension(file.FileName).ToLower();
+                        if (ext == ".jpg" || ext == ".jpeg" || ext == ".png")
+                        {
+                            string tempDir = Server.MapPath(ConfigurationManager.AppSettings["ProfileImageTempPath"]);
+                            if (!Directory.Exists(tempDir))
+                                Directory.CreateDirectory(tempDir);
+
+                            string tempFileName = Guid.NewGuid().ToString("N") + ext;
+                            string tempPath = Path.Combine(tempDir, tempFileName);
+                            file.SaveAs(tempPath);
+                            tempProfileImage = tempFileName;
+                        }
+                    }
+                }
 
                 dal.CreateOtpByEmail(vm.OwnerEmail, otpCode, otpExpiresAt);
                 EmailService.SendOtp(vm.OwnerEmail, otpCode);
@@ -157,6 +204,7 @@ namespace BatteryShop.WebApp.Controllers
                 vm.PasswordHash = passwordHash;
                 vm.OtpEmail = vm.OwnerEmail;
                 vm.SignupStep = "otp";
+                vm.ProfileImage = tempProfileImage;
                 vm.Password = null;
                 vm.ConfirmPassword = null;
                 ModelState.Clear();
@@ -186,7 +234,7 @@ namespace BatteryShop.WebApp.Controllers
                 }
 
                 string otpCode = new Random().Next(100000, 999999).ToString();
-                DateTime otpExpiresAt = DateTime.Now.AddMinutes(int.Parse(System.Configuration.ConfigurationManager.AppSettings["OtpExpiryMinutes"] ?? "5"));
+                DateTime otpExpiresAt = DateTime.Now.AddMinutes(int.Parse(ConfigurationManager.AppSettings["OtpExpiryMinutes"] ?? "5"));
 
                 dal.CreateOtpByEmail(email, otpCode, otpExpiresAt);
                 EmailService.SendOtp(email, otpCode);

@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using Microsoft.Practices.EnterpriseLibrary.Data;
 using BatteryShop.DataAccess.Models;
+using BatteryShop.DataAccess.ViewModels;
 using Serilog;
 
 namespace BatteryShop.DataAccess.DAL
@@ -54,10 +55,12 @@ namespace BatteryShop.DataAccess.DAL
                         {
                             OwnerId = Convert.ToInt32(reader["ownerId"]),
                             OwnerName = reader["ownerName"].ToString(),
+                            OwnerPhone = reader["ownerPhone"] != DBNull.Value ? reader["ownerPhone"].ToString() : null,
                             OwnerEmail = reader["ownerEmail"].ToString(),
                             PasswordHash = reader["passwordHash"].ToString(),
                             RoleId = Convert.ToInt32(reader["roleId"]),
-                            RoleName = reader["roleName"].ToString()
+                            RoleName = reader["roleName"].ToString(),
+                            ProfileImage = reader["profileImage"] != DBNull.Value ? reader["profileImage"].ToString() : null
                         };
                     }
                 }
@@ -126,7 +129,8 @@ namespace BatteryShop.DataAccess.DAL
                             RoleName = reader["roleName"].ToString(),
                             IsApproved = reader["isApproved"] != DBNull.Value ? Convert.ToByte(reader["isApproved"]) : (byte?)null,
                             LastLogin = reader["lastLogin"] != DBNull.Value ? Convert.ToDateTime(reader["lastLogin"]) : (DateTime?)null,
-                            CreatedAt = Convert.ToDateTime(reader["createdAt"])
+                            CreatedAt = Convert.ToDateTime(reader["createdAt"]),
+                            ProfileImage = reader["profileImage"] != DBNull.Value ? reader["profileImage"].ToString() : null
                         });
                     }
                 }
@@ -198,9 +202,11 @@ namespace BatteryShop.DataAccess.DAL
                             RefreshTokenId = Convert.ToInt32(reader["refreshTokenId"]),
                             OwnerId = Convert.ToInt32(reader["ownerId"]),
                             OwnerName = reader["ownerName"].ToString(),
+                            OwnerPhone = reader["ownerPhone"] != DBNull.Value ? reader["ownerPhone"].ToString() : null,
                             OwnerEmail = reader["ownerEmail"].ToString(),
                             RoleName = reader["roleName"].ToString(),
-                            ExpiresAt = Convert.ToDateTime(reader["expiresAt"])
+                            ExpiresAt = Convert.ToDateTime(reader["expiresAt"]),
+                            ProfileImage = reader["profileImage"] != DBNull.Value ? reader["profileImage"].ToString() : null
                         };
                     }
                 }
@@ -316,6 +322,63 @@ namespace BatteryShop.DataAccess.DAL
             catch (Exception ex)
             {
                 Log.Error(ex, "Error in RevokeRefreshToken");
+                throw;
+            }
+        }
+
+        public OwnerModel GetOwnerById(int ownerId)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("ownerGetById");
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+
+            try
+            {
+                using (IDataReader reader = db.ExecuteReader(cmd))
+                {
+                    if (reader.Read())
+                    {
+                        return new OwnerModel
+                        {
+                            OwnerId = Convert.ToInt32(reader["ownerId"]),
+                            OwnerName = reader["ownerName"].ToString(),
+                            OwnerPhone = reader["ownerPhone"] != DBNull.Value ? reader["ownerPhone"].ToString() : null,
+                            OwnerEmail = reader["ownerEmail"].ToString(),
+                            RoleId = Convert.ToInt32(reader["roleId"]),
+                            RoleName = reader["roleName"].ToString(),
+                            ProfileImage = reader["profileImage"] != DBNull.Value ? reader["profileImage"].ToString() : null
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetOwnerById");
+                throw;
+            }
+
+            return null;
+        }
+
+        public void UpdateProfile(int ownerId, string ownerName, string ownerPhone, string ownerEmail, string profileImage)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("ownerUpdateProfile");
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+            db.AddInParameter(cmd, "@OwnerName", DbType.String, ownerName);
+            db.AddInParameter(cmd, "@OwnerPhone", DbType.String, ownerPhone);
+            db.AddInParameter(cmd, "@OwnerEmail", DbType.String, ownerEmail);
+
+            if (!string.IsNullOrEmpty(profileImage))
+                db.AddInParameter(cmd, "@ProfileImage", DbType.String, profileImage);
+            else
+                db.AddInParameter(cmd, "@ProfileImage", DbType.String, DBNull.Value);
+
+            try
+            {
+                db.ExecuteNonQuery(cmd);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in UpdateProfile");
                 throw;
             }
         }

@@ -36,5 +36,7 @@ namespace BatteryShop.DataAccess.ViewModels
         public string OtpEmail { get; set; }
 
         public string PasswordHash { get; set; }
+
+        public string ProfileImage { get; set; }
     }
 }

@@ -20,7 +20,7 @@ namespace BatteryShop.WebApp.Infrastructure
             return new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Secret));
         }
 
-        public static string GenerateAccessToken(int ownerId, string ownerName, string email, string roleName)
+        public static string GenerateAccessToken(int ownerId, string ownerName, string email, string roleName, string profileImage, string phone)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = GetSecurityKey();
@@ -29,7 +29,9 @@ namespace BatteryShop.WebApp.Infrastructure
                 new Claim(ClaimTypes.NameIdentifier, ownerId.ToString()),
                 new Claim(ClaimTypes.Name, ownerName ?? ""),
                 new Claim(ClaimTypes.Email, email ?? ""),
-                new Claim(ClaimTypes.Role, roleName ?? "Owner")
+                new Claim(ClaimTypes.Role, roleName ?? "Owner"),
+                new Claim("ProfileImage", profileImage ?? ""),
+                new Claim("Phone", phone ?? "")
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -97,7 +99,7 @@ namespace BatteryShop.WebApp.Infrastructure
             if (record == null)
                 return null;
 
-            string newAccessToken = GenerateAccessToken(record.OwnerId, record.OwnerName, record.OwnerEmail, record.RoleName);
+            string newAccessToken = GenerateAccessToken(record.OwnerId, record.OwnerName, record.OwnerEmail, record.RoleName, record.ProfileImage, record.OwnerPhone);
             string newRefreshToken = GenerateRefreshToken();
             string newRefreshHash = HashRefreshToken(newRefreshToken);
 

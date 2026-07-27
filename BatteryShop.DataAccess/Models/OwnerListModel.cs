@@ -12,5 +12,6 @@ namespace BatteryShop.DataAccess.Models
         public byte? IsApproved { get; set; }
         public DateTime? LastLogin { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string ProfileImage { get; set; }
     }
 }
