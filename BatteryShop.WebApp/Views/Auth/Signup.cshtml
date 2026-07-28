@@ -1,6 +1,7 @@
 @model BatteryShop.DataAccess.ViewModels.SignupViewModel
 @{
     Layout = null;
+    string step = Model?.SignupStep;
 }
 
 <!DOCTYPE html>
@@ -18,49 +19,125 @@
         <div class="logo">
             <i class="bi bi-lightning-charge"></i>
             <h2>Create Account</h2>
-            <p class="text-secondary" style="font-size: 0.9rem;">Register a new owner account</p>
+            <p class="text-secondary" style="font-size: 0.9rem;">
+                @(step == "otp" ? "Verify your email" : "Register a new owner account")
+            </p>
         </div>
 
-        @using (Html.BeginForm("Signup", "Auth", FormMethod.Post))
+        @using (Html.BeginForm("Signup", "Auth", FormMethod.Post, new { enctype = "multipart/form-data" }))
         {
             @Html.AntiForgeryToken()
 
-            <div class="mb-3">
-                @Html.LabelFor(m => m.OwnerName, new { @class = "form-label" })
-                @Html.TextBoxFor(m => m.OwnerName, new { @class = "form-control", placeholder = "Full name" })
-                @Html.ValidationMessageFor(m => m.OwnerName)
-            </div>
+            if (step == "otp")
+            {
+                @Html.HiddenFor(m => m.SignupStep)
+                @Html.HiddenFor(m => m.OtpEmail)
+                @Html.HiddenFor(m => m.PasswordHash)
+                @Html.HiddenFor(m => m.OwnerName)
+                @Html.HiddenFor(m => m.OwnerPhone)
+                @Html.HiddenFor(m => m.OwnerEmail)
+                @Html.HiddenFor(m => m.Password)
+                @Html.HiddenFor(m => m.ConfirmPassword)
+                @Html.HiddenFor(m => m.ProfileImage)
 
-            <div class="mb-3">
-                @Html.LabelFor(m => m.OwnerPhone, new { @class = "form-label" })
-                @Html.TextBoxFor(m => m.OwnerPhone, new { @class = "form-control", placeholder = "Phone number" })
-                @Html.ValidationMessageFor(m => m.OwnerPhone)
-            </div>
+                <div class="text-center mb-4">
+                    <i class="bi bi-envelope-check" style="font-size: 2.5rem; color: #0d6efd;"></i>
+                    <p class="mt-2 mb-0" style="font-size: 0.9rem;">Code sent to</p>
+                    <strong style="font-size: 0.95rem;">@Model.OtpEmail</strong>
+                </div>
 
-            <div class="mb-3">
-                @Html.LabelFor(m => m.OwnerEmail, new { @class = "form-label" })
-                @Html.TextBoxFor(m => m.OwnerEmail, new { @class = "form-control", placeholder = "Email address" })
-                @Html.ValidationMessageFor(m => m.OwnerEmail)
-            </div>
+                <div class="otp-inputs d-flex justify-content-center gap-2 mb-3" id="otpContainer">
+                    <input type="text" class="form-control otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" data-index="0" />
+                    <input type="text" class="form-control otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" data-index="1" />
+                    <input type="text" class="form-control otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" data-index="2" />
+                    <input type="text" class="form-control otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" data-index="3" />
+                    <input type="text" class="form-control otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" data-index="4" />
+                    <input type="text" class="form-control otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off" data-index="5" />
+                </div>
+                @Html.HiddenFor(m => m.OtpCode, new { id = "otpCodeHidden" })
 
-            <div class="mb-3">
-                @Html.LabelFor(m => m.Password, new { @class = "form-label" })
-                @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Min 6 characters" })
-                @Html.ValidationMessageFor(m => m.Password)
-            </div>
+                <div class="text-danger text-center mb-3" style="font-size: 0.8rem; min-height: 1.2em;">
+                    @Html.ValidationMessage("OtpCode")
+                    @Html.ValidationMessage("")
+                </div>
 
-            <div class="mb-3">
-                @Html.LabelFor(m => m.ConfirmPassword, new { @class = "form-label" })
-                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", placeholder = "Re-enter password" })
-                @Html.ValidationMessageFor(m => m.ConfirmPassword)
-            </div>
+                <button type="submit" class="btn btn-primary w-100">Verify OTP</button>
 
-            <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+                <div class="text-center mt-3" style="font-size: 0.85rem;">
+                    <span id="resendTimer">Resend in 60s</span>
+                    <button type="button" id="resendBtn" class="btn btn-link btn-sm p-0 ms-1" disabled style="text-decoration:none; vertical-align:baseline;">Resend</button>
+                </div>
+            }
+            else
+            {
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.OwnerName, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.OwnerName, new { @class = "form-control", placeholder = "Full name" })
+                    @Html.ValidationMessageFor(m => m.OwnerName)
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.OwnerPhone, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.OwnerPhone, new { @class = "form-control", placeholder = "Phone number" })
+                    @Html.ValidationMessageFor(m => m.OwnerPhone)
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.OwnerEmail, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.OwnerEmail, new { @class = "form-control", placeholder = "Email address" })
+                    @Html.ValidationMessageFor(m => m.OwnerEmail)
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Password, new { @class = "form-label" })
+                    @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Min 6 characters" })
+                    @Html.ValidationMessageFor(m => m.Password)
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.ConfirmPassword, new { @class = "form-label" })
+                    @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", placeholder = "Re-enter password" })
+                    @Html.ValidationMessageFor(m => m.ConfirmPassword)
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Profile Photo (optional)</label>
+                    <input type="file" name="profileImageFile" accept="image/*" class="form-control" style="padding:8px;" />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+            }
         }
 
-        <div class="auth-footer">
-            Already have an account? <a href="@Url.Action("Login", "Auth")">Sign in</a>
-        </div>
+        @if (step != "otp")
+        {
+            <div class="auth-footer">
+                Already have an account? <a href="@Url.Action("Login", "Auth")">Sign in</a>
+            </div>
+        }
+
+        @if (step == "otp")
+        {
+            <div class="auth-footer mt-3">
+                <a href="@Url.Action("Signup", "Auth")" style="font-size:0.85rem;">&larr; Use a different email</a>
+            </div>
+        }
     </div>
+
+    @if (TempData["info"] != null)
+    {
+        <div id="tempToast" style="position:fixed;top:20px;right:20px;z-index:9999;background:#0dcaf0;color:#000;padding:12px 20px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-size:14px;max-width:360px;">
+            @TempData["info"]
+        </div>
+        <script>
+            setTimeout(function () { var e = document.getElementById('tempToast'); if (e) e.remove(); }, 4000);
+        </script>
+    }
+
+    @if (step == "otp")
+    {
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="~/PageScripts/SignupScript.js"></script>
+    }
 </body>
 </html>

@@ -55,10 +55,12 @@ namespace BatteryShop.DataAccess.DAL
                         {
                             OwnerId = Convert.ToInt32(reader["ownerId"]),
                             OwnerName = reader["ownerName"].ToString(),
+                            OwnerPhone = reader["ownerPhone"] != DBNull.Value ? reader["ownerPhone"].ToString() : null,
                             OwnerEmail = reader["ownerEmail"].ToString(),
                             PasswordHash = reader["passwordHash"].ToString(),
                             RoleId = Convert.ToInt32(reader["roleId"]),
-                            RoleName = reader["roleName"].ToString()
+                            RoleName = reader["roleName"].ToString(),
+                            ProfileImage = reader["profileImage"] != DBNull.Value ? reader["profileImage"].ToString() : null
                         };
                     }
                 }
@@ -89,11 +91,28 @@ namespace BatteryShop.DataAccess.DAL
             }
         }
 
-        public List<PendingOwnerViewModel> GetPendingOwners()
+        public byte? GetApprovalStatus(string email)
         {
-            List<PendingOwnerViewModel> list = new List<PendingOwnerViewModel>();
+            DbCommand cmd = db.GetSqlStringCommand("SELECT isApproved FROM batteryCredentials WHERE ownerEmail = @Email");
+            db.AddInParameter(cmd, "@Email", DbType.String, email);
 
-            DbCommand cmd = db.GetStoredProcCommand("pendingOwnerGetList");
+            try
+            {
+                object result = db.ExecuteScalar(cmd);
+                return result != null && result != DBNull.Value ? Convert.ToByte(result) : (byte?)null;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetApprovalStatus");
+                throw;
+            }
+        }
+
+        public List<OwnerListModel> GetAllOwners()
+        {
+            List<OwnerListModel> list = new List<OwnerListModel>();
+
+            DbCommand cmd = db.GetStoredProcCommand("ownerGetAllList");
 
             try
             {
@@ -101,48 +120,41 @@ namespace BatteryShop.DataAccess.DAL
                 {
                     while (reader.Read())
                     {
-                        list.Add(new PendingOwnerViewModel
+                        list.Add(new OwnerListModel
                         {
-                            PendingOwnerId = Convert.ToInt32(reader["pendingOwnerId"]),
+                            OwnerId = Convert.ToInt32(reader["ownerId"]),
                             OwnerName = reader["ownerName"].ToString(),
                             OwnerPhone = reader["ownerPhone"].ToString(),
                             OwnerEmail = reader["ownerEmail"].ToString(),
-                            CreatedAt = Convert.ToDateTime(reader["createdAt"])
+                            RoleName = reader["roleName"].ToString(),
+                            IsApproved = reader["isApproved"] != DBNull.Value ? Convert.ToByte(reader["isApproved"]) : (byte?)null,
+                            LastLogin = reader["lastLogin"] != DBNull.Value ? Convert.ToDateTime(reader["lastLogin"]) : (DateTime?)null,
+                            CreatedAt = Convert.ToDateTime(reader["createdAt"]),
+                            ProfileImage = reader["profileImage"] != DBNull.Value ? reader["profileImage"].ToString() : null
                         });
                     }
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error in GetPendingOwners");
+                Log.Error(ex, "Error in GetAllOwners");
                 throw;
             }
 
             return list;
         }
 
-        public int ApprovePendingOwner(int pendingOwnerId, int approvedBy)
+        public void SetApprovalStatus(int ownerId, byte? isApproved, int modifiedBy)
         {
-            DbCommand cmd = db.GetStoredProcCommand("pendingOwnerApprove");
-            db.AddInParameter(cmd, "@PendingOwnerId", DbType.Int32, pendingOwnerId);
-            db.AddInParameter(cmd, "@ApprovedBy", DbType.Int32, approvedBy);
+            DbCommand cmd = db.GetStoredProcCommand("ownerSetApprovalStatus");
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
 
-            try
-            {
-                object result = db.ExecuteScalar(cmd);
-                return result != null ? Convert.ToInt32(result) : 0;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in ApprovePendingOwner");
-                throw;
-            }
-        }
+            if (isApproved.HasValue)
+                db.AddInParameter(cmd, "@IsApproved", DbType.Byte, isApproved.Value);
+            else
+                db.AddInParameter(cmd, "@IsApproved", DbType.Byte, DBNull.Value);
 
-        public void RejectPendingOwner(int pendingOwnerId)
-        {
-            DbCommand cmd = db.GetStoredProcCommand("pendingOwnerReject");
-            db.AddInParameter(cmd, "@PendingOwnerId", DbType.Int32, pendingOwnerId);
+            db.AddInParameter(cmd, "@ModifiedBy", DbType.Int32, modifiedBy);
 
             try
             {
@@ -150,7 +162,7 @@ namespace BatteryShop.DataAccess.DAL
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error in RejectPendingOwner");
+                Log.Error(ex, "Error in SetApprovalStatus");
                 throw;
             }
         }
@@ -190,9 +202,11 @@ namespace BatteryShop.DataAccess.DAL
                             RefreshTokenId = Convert.ToInt32(reader["refreshTokenId"]),
                             OwnerId = Convert.ToInt32(reader["ownerId"]),
                             OwnerName = reader["ownerName"].ToString(),
+                            OwnerPhone = reader["ownerPhone"] != DBNull.Value ? reader["ownerPhone"].ToString() : null,
                             OwnerEmail = reader["ownerEmail"].ToString(),
                             RoleName = reader["roleName"].ToString(),
-                            ExpiresAt = Convert.ToDateTime(reader["expiresAt"])
+                            ExpiresAt = Convert.ToDateTime(reader["expiresAt"]),
+                            ProfileImage = reader["profileImage"] != DBNull.Value ? reader["profileImage"].ToString() : null
                         };
                     }
                 }
@@ -226,6 +240,76 @@ namespace BatteryShop.DataAccess.DAL
             }
         }
 
+        public void MarkOtpUsed(int otpId)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("otpMarkUsed");
+            db.AddInParameter(cmd, "@OtpId", DbType.Int32, otpId);
+
+            try
+            {
+                db.ExecuteNonQuery(cmd);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in MarkOtpUsed");
+                throw;
+            }
+        }
+
+        public int CreateOtpByEmail(string email, string otpCode, DateTime expiresAt)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("otpCreateByEmail");
+            db.AddInParameter(cmd, "@OtpEmail", DbType.String, email);
+            db.AddInParameter(cmd, "@OtpCode", DbType.String, otpCode);
+            db.AddInParameter(cmd, "@ExpiresAt", DbType.DateTime, expiresAt);
+
+            try
+            {
+                object result = db.ExecuteScalar(cmd);
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in CreateOtpByEmail");
+                throw;
+            }
+        }
+
+        public int? ValidateOtpByEmail(string email, string otpCode)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("otpValidateByEmail");
+            db.AddInParameter(cmd, "@OtpEmail", DbType.String, email);
+            db.AddInParameter(cmd, "@OtpCode", DbType.String, otpCode);
+
+            try
+            {
+                object result = db.ExecuteScalar(cmd);
+                return result != null ? Convert.ToInt32(result) : (int?)null;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in ValidateOtpByEmail");
+                throw;
+            }
+        }
+
+        public DateTime? GetLatestOtpTimeByEmail(string email)
+        {
+            DbCommand cmd = db.GetSqlStringCommand("SELECT MAX(createdAt) FROM batteryOtp WHERE otpEmail = @Email");
+            db.AddInParameter(cmd, "@Email", DbType.String, email);
+
+            try
+            {
+                object result = db.ExecuteScalar(cmd);
+                return result != null && result != DBNull.Value ? (DateTime?)Convert.ToDateTime(result) : null;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetLatestOtpTimeByEmail");
+                throw;
+            }
+        }
+
         public void RevokeRefreshToken(int refreshTokenId)
         {
             DbCommand cmd = db.GetStoredProcCommand("refreshTokenRevoke");
@@ -238,6 +322,63 @@ namespace BatteryShop.DataAccess.DAL
             catch (Exception ex)
             {
                 Log.Error(ex, "Error in RevokeRefreshToken");
+                throw;
+            }
+        }
+
+        public OwnerModel GetOwnerById(int ownerId)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("ownerGetById");
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+
+            try
+            {
+                using (IDataReader reader = db.ExecuteReader(cmd))
+                {
+                    if (reader.Read())
+                    {
+                        return new OwnerModel
+                        {
+                            OwnerId = Convert.ToInt32(reader["ownerId"]),
+                            OwnerName = reader["ownerName"].ToString(),
+                            OwnerPhone = reader["ownerPhone"] != DBNull.Value ? reader["ownerPhone"].ToString() : null,
+                            OwnerEmail = reader["ownerEmail"].ToString(),
+                            RoleId = Convert.ToInt32(reader["roleId"]),
+                            RoleName = reader["roleName"].ToString(),
+                            ProfileImage = reader["profileImage"] != DBNull.Value ? reader["profileImage"].ToString() : null
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in GetOwnerById");
+                throw;
+            }
+
+            return null;
+        }
+
+        public void UpdateProfile(int ownerId, string ownerName, string ownerPhone, string ownerEmail, string profileImage)
+        {
+            DbCommand cmd = db.GetStoredProcCommand("ownerUpdateProfile");
+            db.AddInParameter(cmd, "@OwnerId", DbType.Int32, ownerId);
+            db.AddInParameter(cmd, "@OwnerName", DbType.String, ownerName);
+            db.AddInParameter(cmd, "@OwnerPhone", DbType.String, ownerPhone);
+            db.AddInParameter(cmd, "@OwnerEmail", DbType.String, ownerEmail);
+
+            if (!string.IsNullOrEmpty(profileImage))
+                db.AddInParameter(cmd, "@ProfileImage", DbType.String, profileImage);
+            else
+                db.AddInParameter(cmd, "@ProfileImage", DbType.String, DBNull.Value);
+
+            try
+            {
+                db.ExecuteNonQuery(cmd);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in UpdateProfile");
                 throw;
             }
         }

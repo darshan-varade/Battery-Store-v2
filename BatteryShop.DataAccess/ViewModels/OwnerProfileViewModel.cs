@@ -1,13 +1,11 @@
-using System;
-
 namespace BatteryShop.DataAccess.ViewModels
 {
-    public class PendingOwnerViewModel
+    public class OwnerProfileViewModel
     {
-        public int PendingOwnerId { get; set; }
+        public int OwnerId { get; set; }
         public string OwnerName { get; set; }
         public string OwnerPhone { get; set; }
         public string OwnerEmail { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public string ProfileImage { get; set; }
     }
 }

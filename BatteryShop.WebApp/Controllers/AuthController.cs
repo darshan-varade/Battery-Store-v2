@@ -1,4 +1,6 @@
 using System;
+using System.Configuration;
+using System.IO;
 using System.Web;
 using System.Web.Mvc;
 using BatteryShop.DataAccess.DAL;
@@ -33,14 +35,26 @@ namespace BatteryShop.WebApp.Controllers
 
                 if (owner == null || !BCrypt.Net.BCrypt.Verify(vm.Password, owner.PasswordHash))
                 {
-                    ModelState.AddModelError("", "Invalid email or password.");
+                    if (owner == null && dal.OwnerCheckEmail(vm.Email))
+                    {
+                        byte? status = dal.GetApprovalStatus(vm.Email);
+                        if (status == 0)
+                            ModelState.AddModelError("", "Your account has been rejected. Contact admin.");
+                        else
+                            ModelState.AddModelError("", "Your account is pending admin approval.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Invalid email or password.");
+                    }
+
                     return View(vm);
                 }
 
-                string accessToken = JwtHelper.GenerateAccessToken(owner.OwnerId, owner.OwnerName, owner.OwnerEmail, owner.RoleName);
+                string accessToken = JwtHelper.GenerateAccessToken(owner.OwnerId, owner.OwnerName, owner.OwnerEmail, owner.RoleName, owner.ProfileImage, owner.OwnerPhone);
                 string refreshToken = JwtHelper.GenerateRefreshToken();
                 string refreshTokenHash = JwtHelper.HashRefreshToken(refreshToken);
-                DateTime refreshExpiry = DateTime.Now.AddDays(int.Parse(System.Configuration.ConfigurationManager.AppSettings["JwtRefreshTokenExpiryDays"] ?? "7"));
+                DateTime refreshExpiry = DateTime.Now.AddDays(int.Parse(ConfigurationManager.AppSettings["JwtRefreshTokenExpiryDays"] ?? "7"));
 
                 dal.CreateRefreshToken(owner.OwnerId, refreshTokenHash, refreshExpiry);
 
@@ -85,13 +99,74 @@ namespace BatteryShop.WebApp.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Signup(SignupViewModel vm)
         {
+            AuthDAL dal = new AuthDAL();
+
+            if (vm.SignupStep == "otp")
+            {
+                ModelState.Remove("OwnerName");
+                ModelState.Remove("OwnerPhone");
+                ModelState.Remove("OwnerEmail");
+                ModelState.Remove("Password");
+                ModelState.Remove("ConfirmPassword");
+
+                if (string.IsNullOrEmpty(vm.OtpCode) || vm.OtpCode.Length != 6)
+                {
+                    ModelState.AddModelError("OtpCode", "Enter the 6-digit code.");
+                    return View(vm);
+                }
+
+                try
+                {
+                    int? otpId = dal.ValidateOtpByEmail(vm.OtpEmail, vm.OtpCode);
+                    if (otpId == null)
+                    {
+                        ModelState.AddModelError("OtpCode", "Invalid or expired code.");
+                        return View(vm);
+                    }
+
+                    dal.MarkOtpUsed(otpId.Value);
+                    int ownerId = dal.OwnerRegister(vm.OwnerName, vm.OwnerPhone, vm.OwnerEmail, vm.PasswordHash);
+
+                    if (!string.IsNullOrEmpty(vm.ProfileImage) && ownerId > 0)
+                    {
+                        try
+                        {
+                            string tempPhysicalPath = ImagePathHelper.GetTempProfilePhysicalPath(vm.ProfileImage);
+                            if (System.IO.File.Exists(tempPhysicalPath))
+                            {
+                                string profilesDir = Server.MapPath(ConfigurationManager.AppSettings["ProfileImagePath"]);
+                                if (!Directory.Exists(profilesDir))
+                                    Directory.CreateDirectory(profilesDir);
+
+                                string finalFileName = Guid.NewGuid().ToString("N") + ".jpg";
+                                string finalPath = Path.Combine(profilesDir, finalFileName);
+                                System.IO.File.Move(tempPhysicalPath, finalPath);
+
+                                dal.UpdateProfile(ownerId, vm.OwnerName, vm.OwnerPhone, vm.OwnerEmail, finalFileName);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Serilog.Log.Error(ex, "Error moving profile image during signup");
+                        }
+                    }
+
+                    TempData["info"] = "Account created! An admin will review and activate your account.";
+                    return RedirectToAction("Login");
+                }
+                catch (Exception ex)
+                {
+                    Serilog.Log.Error(ex, "Error in Signup OTP verification");
+                    ModelState.AddModelError("", "An error occurred. Please try again.");
+                    return View(vm);
+                }
+            }
+
             if (!ModelState.IsValid)
                 return View(vm);
 
             try
             {
-                AuthDAL dal = new AuthDAL();
-
                 if (dal.OwnerCheckEmail(vm.OwnerEmail))
                 {
                     ModelState.AddModelError("OwnerEmail", "This email is already registered.");
@@ -99,17 +174,77 @@ namespace BatteryShop.WebApp.Controllers
                 }
 
                 string passwordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password);
+                string otpCode = new Random().Next(100000, 999999).ToString();
+                DateTime otpExpiresAt = DateTime.Now.AddMinutes(int.Parse(ConfigurationManager.AppSettings["OtpExpiryMinutes"] ?? "5"));
 
-                dal.OwnerRegister(vm.OwnerName, vm.OwnerPhone, vm.OwnerEmail, passwordHash);
+                string tempProfileImage = null;
+                if (Request.Files.Count > 0)
+                {
+                    var file = Request.Files[0];
+                    if (file != null && file.ContentLength > 0)
+                    {
+                        string ext = Path.GetExtension(file.FileName).ToLower();
+                        if (ext == ".jpg" || ext == ".jpeg" || ext == ".png")
+                        {
+                            string tempDir = Server.MapPath(ConfigurationManager.AppSettings["ProfileImageTempPath"]);
+                            if (!Directory.Exists(tempDir))
+                                Directory.CreateDirectory(tempDir);
 
-                TempData["info"] = "Registration submitted! An admin will review and activate your account.";
-                return RedirectToAction("Login");
+                            string tempFileName = Guid.NewGuid().ToString("N") + ext;
+                            string tempPath = Path.Combine(tempDir, tempFileName);
+                            file.SaveAs(tempPath);
+                            tempProfileImage = tempFileName;
+                        }
+                    }
+                }
+
+                dal.CreateOtpByEmail(vm.OwnerEmail, otpCode, otpExpiresAt);
+                EmailService.SendOtp(vm.OwnerEmail, otpCode);
+
+                vm.PasswordHash = passwordHash;
+                vm.OtpEmail = vm.OwnerEmail;
+                vm.SignupStep = "otp";
+                vm.ProfileImage = tempProfileImage;
+                vm.Password = null;
+                vm.ConfirmPassword = null;
+                ModelState.Clear();
+
+                return View(vm);
             }
             catch (Exception ex)
             {
                 Serilog.Log.Error(ex, "Error in Signup POST");
                 ModelState.AddModelError("", "An error occurred. Please try again.");
                 return View(vm);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult ResendOtp(string email)
+        {
+            try
+            {
+                AuthDAL dal = new AuthDAL();
+
+                DateTime? lastOtp = dal.GetLatestOtpTimeByEmail(email);
+                if (lastOtp.HasValue && (DateTime.Now - lastOtp.Value).TotalSeconds < 60)
+                {
+                    return Json(new { success = false, error = "Please wait 60 seconds before requesting a new code." });
+                }
+
+                string otpCode = new Random().Next(100000, 999999).ToString();
+                DateTime otpExpiresAt = DateTime.Now.AddMinutes(int.Parse(ConfigurationManager.AppSettings["OtpExpiryMinutes"] ?? "5"));
+
+                dal.CreateOtpByEmail(email, otpCode, otpExpiresAt);
+                EmailService.SendOtp(email, otpCode);
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "Error in ResendOtp");
+                return Json(new { success = false, error = "An error occurred. Please try again." });
             }
         }
 

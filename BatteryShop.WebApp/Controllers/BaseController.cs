@@ -1,11 +1,16 @@
 using System;
 using System.Security.Claims;
 using System.Web.Mvc;
+using BatteryShop.WebApp.Infrastructure;
 
 namespace BatteryShop.WebApp.Controllers
 {
     public class BaseController : Controller
     {
+        public BaseController()
+        {
+            TempDataProvider = new CookieTempDataProvider();
+        }
         protected int CurrentOwnerId
         {
             get
@@ -25,6 +30,42 @@ namespace BatteryShop.WebApp.Controllers
         }
 
         protected bool IsAdmin => User.IsInRole("Admin");
+
+        protected string CurrentOwnerName
+        {
+            get
+            {
+                var claim = ((ClaimsPrincipal)User).FindFirst(ClaimTypes.Name);
+                return claim?.Value;
+            }
+        }
+
+        protected string CurrentOwnerEmail
+        {
+            get
+            {
+                var claim = ((ClaimsPrincipal)User).FindFirst(ClaimTypes.Email);
+                return claim?.Value;
+            }
+        }
+
+        protected string CurrentOwnerPhone
+        {
+            get
+            {
+                var claim = ((ClaimsPrincipal)User).FindFirst("Phone");
+                return claim?.Value;
+            }
+        }
+
+        protected string CurrentProfileImage
+        {
+            get
+            {
+                var claim = ((ClaimsPrincipal)User).FindFirst("ProfileImage");
+                return claim?.Value;
+            }
+        }
 
         protected ActionResult RequireAdmin()
         {

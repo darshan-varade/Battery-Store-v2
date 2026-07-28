@@ -145,6 +145,14 @@
     <Reference Include="System.IdentityModel.Tokens.Jwt">
       <HintPath>..\packages\system.identitymodel.tokens.jwt.5.7.0\lib\net45\System.IdentityModel.Tokens.Jwt.dll</HintPath>
     </Reference>
+    <Reference Include="itextsharp">
+      <HintPath>..\packages\iTextSharp.5.5.13.3\lib\itextsharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="BouncyCastle.Crypto">
+      <HintPath>..\packages\BouncyCastle.1.8.9\lib\BouncyCastle.Crypto.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\AuthorizeRoleAttribute.cs" />
@@ -158,8 +166,13 @@
     <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\AuthController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="Controllers\ProfileController.cs" />
     <Compile Include="Infrastructure\JwtHelper.cs" />
+    <Compile Include="Infrastructure\CookieTempDataProvider.cs" />
     <Compile Include="Infrastructure\JwtAuthenticationFilter.cs" />
+    <Compile Include="Infrastructure\EmailService.cs" />
+    <Compile Include="Infrastructure\PdfBillHelper.cs" />
+    <Compile Include="Infrastructure\ImagePathHelper.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -174,6 +187,7 @@
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="PageScripts\AppShared.js" />
+    <Content Include="PageScripts\SignupScript.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
@@ -182,6 +196,8 @@
     <Content Include="PageScripts\ItemListScript.js" />
     <Content Include="PageScripts\BillListScript.js" />
     <Content Include="PageScripts\BillAddScript.js" />
+    <Content Include="PageScripts\ManageOwnersScript.js" />
+    <Content Include="PageScripts\ProfileScript.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
@@ -220,12 +236,15 @@
     <Content Include="Views\Shared\_BillDetailsOffcanvas.cshtml" />
     <Content Include="Views\Shared\_VehicleInfoModal.cshtml" />
     <Content Include="Views\Auth\Login.cshtml" />
-    <Content Include="Views\Admin\PendingOwners.cshtml" />
+    <Content Include="Views\Admin\ManageOwners.cshtml" />
     <Content Include="Views\Auth\Signup.cshtml" />
+    <Content Include="Views\Profile\Index.cshtml" />
     <Content Include="Views\Item\ItemAdd.cshtml" />
     <Content Include="Views\Shared\_ItemDetailsOffcanvas.cshtml" />
     <Content Include="Views\Shared\_ItemUpdateModal.cshtml" />
     <Content Include="Views\Shared\_ItemUpdateOffcanvas.cshtml" />
+    <Content Include="EmailTemplates\OtpEmail.html" />
+    <Content Include="Content\Uploads\Temp\Web.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

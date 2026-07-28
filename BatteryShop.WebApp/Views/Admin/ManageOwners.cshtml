@@ -1,0 +1,115 @@
+@model IEnumerable<BatteryShop.DataAccess.Models.OwnerListModel>
+@{
+    ViewBag.Title = "Manage Owners";
+}
+
+<div class="owners-header">
+    <div>
+        <h4><i class="bi bi-people"></i>Manage Owners</h4>
+        <p>View all owners and manage their approval status</p>
+    </div>
+    @if (Model.Any())
+    {
+        <div class="owners-count">
+            <span class="num">@Model.Count()</span>
+            <span class="lbl">Total</span>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="owners-card" data-action-url="@Url.Action("SetApprovalStatus", "Admin")">
+        <div class="owners-empty">
+            <i class="bi bi-person-x"></i>
+            <p>No owners registered yet.</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="owners-card" data-action-url="@Url.Action("SetApprovalStatus", "Admin")">
+        <div class="table-responsive">
+            <table class="table owners-table align-middle">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Registered</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        string statusClass;
+                        string statusText;
+                        int leftPx;
+
+                        if (item.IsApproved == 1)
+                        {
+                            statusClass = "accepted";
+                            statusText = "Accepted";
+                            leftPx = 51;
+                        }
+                        else if (item.IsApproved == 0)
+                        {
+                            statusClass = "rejected";
+                            statusText = "Rejected";
+                            leftPx = 3;
+                        }
+                        else
+                        {
+                            statusClass = "awaiting";
+                            statusText = "Awaiting";
+                            leftPx = 27;
+                        }
+
+                        var nameParts = (item.OwnerName ?? "").Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        var initials = nameParts.Length == 0 ? "?" :
+                            string.Join("", nameParts.Take(2).Select(p => char.ToUpper(p[0])));
+
+                        <tr data-owner-id="@item.OwnerId">
+                            <td data-label="Name">
+                                <div class="owner-identity">
+                                    @if (!string.IsNullOrEmpty(item.ProfileImage))
+                                    {
+                                        <img src="@Url.Content(BatteryShop.WebApp.Infrastructure.ImagePathHelper.GetProfileUrl(item.ProfileImage))" alt="@item.OwnerName" class="owner-avatar" style="object-fit:cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="owner-avatar">@initials</div>
+                                    }
+                                    <span class="owner-name">@item.OwnerName</span>
+                                </div>
+                            </td>
+                            <td data-label="Phone">
+                                <span class="contact-line"><i class="bi bi-telephone"></i>@item.OwnerPhone</span>
+                            </td>
+                            <td data-label="Email">
+                                <span class="contact-line"><i class="bi bi-envelope"></i>@item.OwnerEmail</span>
+                            </td>
+                            <td data-label="Status">
+                                <div class="approval-toggle">
+                                    <div class="toggle-track" onclick="handleToggleClick(event, this)">
+                                        <span class="toggle-opt" data-value="0"></span>
+                                        <span class="toggle-opt" data-value=""></span>
+                                        <span class="toggle-opt" data-value="1"></span>
+                                        <span class="toggle-opt active @statusClass" data-value="@(item.IsApproved?.ToString() ?? "")" style="left: @(leftPx)px"></span>
+                                    </div>
+                                    <span class="toggle-label @statusClass">@statusText</span>
+                                </div>
+                            </td>
+                            <td data-label="Registered" class="registered-cell">@item.CreatedAt.ToString("dd-MMM-yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@section scripts {
+    <script src="~/PageScripts/ManageOwnersScript.js"></script>
+}
