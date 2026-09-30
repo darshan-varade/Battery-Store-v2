@@ -5,6 +5,7 @@ using System.Web.Http;
 using BatteryShop.DataAccess.DAL;
 using BatteryShop.DataAccess.Models;
 using BatteryShop.DataAccess.ViewModels;
+using BatteryShop.WebApp.Infrastructure;
 using Serilog;
 
 namespace BatteryShop.WebApp.Controllers
