@@ -6,6 +6,8 @@ using System.Web.Helpers;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using System.Web.Http;
+using BatteryShop.WebApp.App_Start;
 using Serilog;
 using Serilog.Sinks.MSSqlServer;
 
@@ -16,18 +18,26 @@ namespace BatteryShop.WebApp
         protected void Application_Start()
         {
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.File(@"D:\Logs\battery-store-.log", rollingInterval: RollingInterval.Day)
+                .WriteTo.File(
+                    @"D:\Logs\battery-store-.log",
+                    rollingInterval: RollingInterval.Day)
                 .WriteTo.MSSqlServer(
                     ConfigurationManager.ConnectionStrings["constr"].ConnectionString,
-                    sinkOptions: new MSSqlServerSinkOptions { TableName = "LogEvents", AutoCreateSqlTable = true })
+                    sinkOptions: new MSSqlServerSinkOptions
+                    {
+                        TableName = "LogEvents",
+                        AutoCreateSqlTable = true
+                    })
                 .CreateLogger();
 
             AreaRegistration.RegisterAllAreas();
+            GlobalConfiguration.Configure(WebApiConfig.Register);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            AntiForgeryConfig.UniqueClaimTypeIdentifier = ClaimTypes.NameIdentifier;
+            AntiForgeryConfig.UniqueClaimTypeIdentifier =
+                ClaimTypes.NameIdentifier;
         }
 
         protected void Application_End()
